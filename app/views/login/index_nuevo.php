@@ -5,23 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/login.css" rel="stylesheet">
 </head>
 <body class="bg-light">
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card shadow p-4" style="min-width:350px;">
-            <h2 class="mb-4 text-center">Iniciar Sesión</h2>
+            <h2 class="mb-4 text-center">ZIGMA - Iniciar Sesión</h2>
+            
             <?php if (!empty($data['error'])): ?>
-                <div class="alert alert-danger"><?php echo $data['error']; ?></div>
+                <div class="alert alert-danger"><?php echo htmlspecialchars($data['error']); ?></div>
             <?php endif; ?>
+            
             <form method="POST" action="">
                 <div class="mb-3">
                     <label for="username" class="form-label">Usuario</label>
                     <input type="text" class="form-control" id="username" name="username" required autofocus>
+                    <small class="text-muted">admin, rrhh o empleado</small>
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
                     <input type="password" class="form-control" id="password" name="password" required>
+                    <small class="text-muted">admin123, rrhh123 o empleado123</small>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Ingresar</button>
             </form>
