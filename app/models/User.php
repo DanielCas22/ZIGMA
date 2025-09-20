@@ -7,7 +7,7 @@ class User extends Model {
             WHERE u.num_doc = :username');
         $stmt->execute(['username' => $username]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && (password_verify($password, $user['password']) || $password === $user['password'])) {
             unset($user['password']);
             return $user;
         }

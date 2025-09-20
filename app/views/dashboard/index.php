@@ -12,7 +12,7 @@
     <a class="navbar-brand" href="#">ZIGMA</a>
     <div class="d-flex">
       <span class="navbar-text me-3">Bienvenido, <?php echo htmlspecialchars($data['user']['rol']); ?></span>
-      <a href="/login/logout" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
+      <a href="logout.php" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
     </div>
   </div>
 </nav>

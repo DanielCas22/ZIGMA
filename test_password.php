@@ -2,14 +2,14 @@
 // Script para verificar el hash de una contraseña y generar uno nuevo
 
 $password_admin = 'admin123';
-$password_coord = 'coord123';
+$password_rrhh = 'rrhh123';
 
 // Generar hash
 $hash_admin = password_hash($password_admin, PASSWORD_DEFAULT);
-$hash_coord = password_hash($password_coord, PASSWORD_DEFAULT);
+$hash_rrhh = password_hash($password_rrhh, PASSWORD_DEFAULT);
 
 echo "Hash admin123: $hash_admin<br>";
-echo "Hash coord123: $hash_coord<br>";
+echo "Hash rrhh123: $hash_rrhh<br>";
 
 // Verificar hash (ejemplo)
 $hash_ejemplo = '$2y$10$Q9QwQwQwQwQwQwQwQwQwQOQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQwQw'; // Reemplaza por el hash real de tu base de datos
