@@ -11,7 +11,9 @@ class LoginController_nuevo extends Controller {
             $user = $userModel->login($username, $password);
             
             if ($user) {
-                session_start();
+                if (session_status() == PHP_SESSION_NONE) {
+                    session_start();
+                }
                 $_SESSION['user'] = $user;
                 header('Location: /ZIGMA/public_nuevo/index.php?url=dashboard');
                 exit;
@@ -26,7 +28,9 @@ class LoginController_nuevo extends Controller {
     }
     
     public function logout() {
-        session_start();
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
         session_destroy();
         header('Location: /ZIGMA/public_nuevo/index.php');
         exit;
