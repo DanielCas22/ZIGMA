@@ -11,6 +11,11 @@ class DashboardController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
-        $this->view('dashboard/index', ['user' => $_SESSION['user']]);
+        $empleadoModel = $this->model('Empleado');
+        $empleados = $empleadoModel->getAll();
+        $this->view('dashboard/index', [
+            'user' => $_SESSION['user'],
+            'empleados' => $empleados
+        ]);
     }
 }
