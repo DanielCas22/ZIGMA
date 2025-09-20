@@ -12,8 +12,8 @@ class HorasExtras extends Model {
     protected $table = 'horas_extras';
 
     public function getAllWithEmpleado() {
-        $sql = 'SELECT he.*, e.id_empleados, e.nombre, e.apellidos FROM empleados e 
-                LEFT JOIN horas_extras he ON he.empleado_id = e.id_empleados';
+        $sql = 'SELECT he.*, e.id_empleados, e.nombre, e.apellido FROM horas_extras he
+                JOIN empleados e ON he.empleado_id = e.id_empleados';
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

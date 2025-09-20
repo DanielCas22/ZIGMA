@@ -26,7 +26,7 @@ class EmpleadoController extends Controller {
 
             $empleado = new Empleado();
             $empleado->nombre = $nombre;
-            $empleado->apellidos = $apellidos;
+            $empleado->apellido = $apellidos;
             $empleado->save();
 
             // Redirigir al dashboard de empleados

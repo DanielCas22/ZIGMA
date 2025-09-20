@@ -77,7 +77,7 @@
                                         <tr>
                                             <td><?= $emp['id_empleados'] ?></td>
                                             <td><?= $emp['nombre'] ?></td>
-                                            <td><?= $emp['apellidos'] ?></td>
+                                            <td><?= $emp['apellido'] ?></td>
                                             <td><?= isset($emp['rol']) && $emp['rol'] !== '' ? $emp['rol'] : 'Sin rol' ?></td>
                                         </tr>
                                     <?php endforeach; ?>
