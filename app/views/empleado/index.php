@@ -134,6 +134,7 @@
                                         <tr>
                                             <td><?= $emp['id_empleados'] ?></td>
                                             <td><?= $emp['nombre'] ?></td>
+<<<<<<< HEAD
                                             <td><?= $emp['apellidos'] ?></td>
                                             <td>
                                                 <strong class="text-success">
@@ -198,6 +199,10 @@
                                                     </a>
                                                 </div>
                                             </td>
+=======
+                                            <td><?= $emp['apellido'] ?></td>
+                                            <td><?= isset($emp['rol']) && $emp['rol'] !== '' ? $emp['rol'] : 'Sin rol' ?></td>
+>>>>>>> b0a855acd50c315b25d869c7085857d8076febc4
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
