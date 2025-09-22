@@ -1,0 +1,17 @@
+/* style.css básico para el login y dashboard */
+body {
+    background-color: #f8f9fa;
+}
+.card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+nav.bg-dark {
+    min-height: 100vh;
+}
+nav h4 {
+    color: #fff;
+}
+nav .nav-link.active, nav .nav-link:hover {
+    background: #495057;
+    color: #fff !important;
+}
