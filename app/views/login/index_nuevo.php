@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
 </head>
-<body class="bg-light">
+<body class="bg-body-tertiary">
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card shadow p-4" style="min-width:350px;">
+            <div class="text-center mb-3">
+                <img src="/ZIGMA/public_nuevo/img/logo.png" alt="ZIGMA" height="72" class="logo-glow"/>
+            </div>
             <h2 class="mb-4 text-center">ZIGMA - Iniciar Sesión</h2>
             
             <?php if (!empty($data['error'])): ?>

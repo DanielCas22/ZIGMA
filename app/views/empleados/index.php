@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Empleados - ZIGMA</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
-<body class="bg-light">
+<body class="bg-body-tertiary">
   <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h3>Empleados</h3>
@@ -18,7 +19,7 @@
 
     <div class="card shadow-sm">
       <div class="table-responsive">
-        <table class="table table-striped table-hover mb-0">
+  <table class="table table-striped table-hover align-middle mb-0">
           <thead>
             <tr>
               <th>ID</th>

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Desprendible de Nómina</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
 </head>
-<body class="bg-light">
+<body class="bg-body-tertiary">
   <div class="container py-4">
     <h3>Desprendible de Nómina</h3>
     <div class="mb-3">
@@ -61,6 +62,7 @@
     <div class="mt-3">
       <a href="/ZIGMA/public_nuevo/index.php?url=nomina/calcular" class="btn btn-secondary">Volver</a>
       <button class="btn btn-outline-primary" onclick="window.print()">Imprimir/PDF</button>
+      <a href="/ZIGMA/public_nuevo/index.php?url=desprendible/pdf" class="btn btn-success ms-2">Descargar PDF</a>
     </div>
   </div>
 </body>

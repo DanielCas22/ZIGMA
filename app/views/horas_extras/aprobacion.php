@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Aprobación de Horas Extras</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
 </head>
-<body class="bg-light">
+<body class="bg-body-tertiary">
   <div class="container py-4">
     <h3>Horas Extras Pendientes</h3>
     <div class="mb-3">
@@ -13,7 +14,7 @@
     </div>
     <div class="card shadow-sm">
       <div class="table-responsive">
-        <table class="table table-striped table-hover mb-0">
+  <table class="table table-striped table-hover align-middle mb-0">
           <thead>
             <tr>
               <th>ID</th>

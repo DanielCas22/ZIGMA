@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Parámetros del Sistema</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
 </head>
-<body class="bg-light">
+<body class="bg-body-tertiary">
   <div class="container py-4">
     <h3>Parámetros del Sistema</h3>
   <?php if (session_status() == PHP_SESSION_NONE) session_start(); ?>

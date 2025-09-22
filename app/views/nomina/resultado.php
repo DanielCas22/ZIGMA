@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>Resultado Nómina</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  
 </head>
-<body class="bg-light">
+<body class="bg-body-tertiary">
   <div class="container py-4">
     <h3>Resultado Nómina</h3>
     <div class="mb-3">
