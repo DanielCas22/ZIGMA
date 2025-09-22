@@ -40,10 +40,15 @@ class HorasExtras extends Model {
     }
 
     public function getAllWithEmpleado() {
+<<<<<<< HEAD
         $sql = 'SELECT e.id_empleados, e.nombre, e.apellidos 
                 FROM empleados e 
                 WHERE e.es_usuario_sistema = FALSE 
                 ORDER BY e.nombre';
+=======
+        $sql = 'SELECT he.*, e.id_empleados, e.nombre, e.apellido FROM horas_extras he
+                JOIN empleados e ON he.empleado_id = e.id_empleados';
+>>>>>>> b0a855acd50c315b25d869c7085857d8076febc4
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

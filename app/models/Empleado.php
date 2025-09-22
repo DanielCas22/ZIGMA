@@ -3,6 +3,11 @@ require_once __DIR__ . '/SalarioPorRol.php';
 
 class Empleado extends Model {
     protected $table = 'empleados';
+    public $nombre;
+    public $apellido;
+    public $usuario;
+    public $contrasena;
+    public $sueldo_actual;
 
     public function getAll() {
         $sql = 'SELECT * FROM empleados WHERE es_usuario_sistema = FALSE ORDER BY nombre';

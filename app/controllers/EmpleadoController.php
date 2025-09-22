@@ -53,6 +53,7 @@ class EmpleadoController extends Controller {
             $rol_especifico = $_POST['rol'] ?? 'empleado';
             $salario_manual = isset($_POST['salario']) && !empty($_POST['salario']) ? floatval($_POST['salario']) : null;
 
+<<<<<<< HEAD
             // Determinar el salario a usar
             $salario_final = $salario_manual;
             
@@ -66,6 +67,12 @@ class EmpleadoController extends Controller {
                     $salario_final = $salarioModel->getSalarioByRol('empleado');
                 }
             }
+=======
+            $empleado = new Empleado();
+            $empleado->nombre = $nombre;
+            $empleado->apellido = $apellidos;
+            $empleado->save();
+>>>>>>> b0a855acd50c315b25d869c7085857d8076febc4
 
             $empleadoModel = $this->model('Empleado');
             $data = [
