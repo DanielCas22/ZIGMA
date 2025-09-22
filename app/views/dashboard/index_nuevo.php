@@ -28,12 +28,19 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="#">Dashboard</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Empleados</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Nómina</a>
-                    </li>
+                    <?php $rol = strtolower($data['user']['rol_nombre'] ?? ''); ?>
+                    <?php if (in_array($rol, ['admin','rrhh'])): ?>
+                    <li class="nav-item"><a class="nav-link" href="/ZIGMA/public_nuevo/index.php?url=empleado">Empleados</a></li>
+                    <?php endif; ?>
+                    <li class="nav-item"><a class="nav-link" href="/ZIGMA/public_nuevo/index.php?url=nomina/calcular">Nómina</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/ZIGMA/public_nuevo/index.php?url=horaextra/registro">Horas Extras</a></li>
+                    <?php if (in_array($rol, ['admin','rrhh'])): ?>
+                    <li class="nav-item"><a class="nav-link" href="/ZIGMA/public_nuevo/index.php?url=horaextra/aprobacion">Aprobar Horas</a></li>
+                    <?php endif; ?>
+                    <li class="nav-item"><a class="nav-link" href="/ZIGMA/public_nuevo/index.php?url=desprendible">Desprendible</a></li>
+                    <?php if (in_array($rol, ['admin','rrhh'])): ?>
+                    <li class="nav-item"><a class="nav-link" href="/ZIGMA/public_nuevo/index.php?url=parametro">Parámetros</a></li>
+                    <?php endif; ?>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Reportes</a>
                     </li>

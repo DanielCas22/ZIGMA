@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Lint PHP files",
+			"type": "shell",
+			"command": "C:\\xampp\\php\\php.exe",
+			"args": [
+				"-l",
+				"$(file)"
+			],
+			"group": "build"
+		}
+	]
+}

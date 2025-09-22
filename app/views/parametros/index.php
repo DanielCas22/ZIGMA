@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Parámetros del Sistema</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h3>Parámetros del Sistema</h3>
+  <?php if (session_status() == PHP_SESSION_NONE) session_start(); ?>
+  <?php if (!empty($_SESSION['flash']['error'])): ?><div class="alert alert-danger"><?php echo nl2br(htmlspecialchars($_SESSION['flash']['error'])); unset($_SESSION['flash']['error']); ?></div><?php endif; ?>
+  <?php if (!empty($_SESSION['flash']['success'])): ?><div class="alert alert-success"><?php echo htmlspecialchars($_SESSION['flash']['success']); unset($_SESSION['flash']['success']); ?></div><?php endif; ?>
+    <div class="mb-3">
+      <a href="/ZIGMA/public_nuevo/index.php?url=dashboard" class="btn btn-outline-warning" onclick="return confirm('¿Volver al dashboard? Se perderán los cambios no guardados.');">Volver al Dashboard</a>
+    </div>
+    <form method="POST" action="/ZIGMA/public_nuevo/index.php?url=parametro/guardar" class="card p-3 shadow-sm">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">SMLV</label>
+          <input type="number" name="SMLV" class="form-control" value="<?php echo (int)($data['p']['SMLV'] ?? 0); ?>" required />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Auxilio Transporte</label>
+          <input type="number" name="AUXILIO_TRANSPORTE" class="form-control" value="<?php echo (int)($data['p']['AUXILIO_TRANSPORTE'] ?? 0); ?>" required />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">UVT</label>
+          <input type="number" name="UVT" class="form-control" value="<?php echo (int)($data['p']['UVT'] ?? 0); ?>" required />
+        </div>
+      </div>
+      <div class="mt-3">
+        <a href="/ZIGMA/public_nuevo/index.php?url=dashboard" class="btn btn-secondary">Volver</a>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>
