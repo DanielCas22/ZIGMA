@@ -39,6 +39,7 @@
                     <?php $rol = strtolower($data['user']['rol_nombre'] ?? ''); ?>
                     <?php if (in_array($rol, ['admin','rrhh'])): ?>
                     <li class="nav-item"><a class="nav-link link-light" href="/ZIGMA/public_nuevo/index.php?url=empleado">Empleados</a></li>
+                    <li class="nav-item"><a class="nav-link link-light" href="/ZIGMA/public_nuevo/index.php?url=usuario">Usuarios</a></li>
                     <?php endif; ?>
                     <li class="nav-item"><a class="nav-link link-light" href="/ZIGMA/public_nuevo/index.php?url=nomina/calcular">Nómina</a></li>
                     <li class="nav-item"><a class="nav-link link-light" href="/ZIGMA/public_nuevo/index.php?url=horaextra/registro">Horas Extras</a></li>
@@ -66,7 +67,7 @@
                                 <i class="bi bi-people-fill" style="font-size: 2rem; color: #0d6efd;"></i>
                                 <h5 class="card-title mt-2">Gestión de Empleados</h5>
                                 <p class="card-text">Administrar información de empleados</p>
-                                <a href="#" class="btn btn-primary">Acceder</a>
+                                <a href="/ZIGMA/public_nuevo/index.php?url=empleado" class="btn btn-primary">Acceder</a>
                             </div>
                         </div>
                     </div>
@@ -77,7 +78,7 @@
                                 <i class="bi bi-calculator-fill" style="font-size: 2rem; color: #198754;"></i>
                                 <h5 class="card-title mt-2">Cálculo de Nómina</h5>
                                 <p class="card-text">Procesar y calcular nóminas</p>
-                                <a href="#" class="btn btn-success">Acceder</a>
+                                <a href="/ZIGMA/public_nuevo/index.php?url=nomina/calcular" class="btn btn-success">Acceder</a>
                             </div>
                         </div>
                     </div>
@@ -88,7 +89,7 @@
                                 <i class="bi bi-file-earmark-text-fill" style="font-size: 2rem; color: #fd7e14;"></i>
                                 <h5 class="card-title mt-2">Reportes</h5>
                                 <p class="card-text">Generar reportes y estadísticas</p>
-                                <a href="#" class="btn btn-warning">Acceder</a>
+                                <a href="/ZIGMA/public_nuevo/index.php?url=desprendible" class="btn btn-warning">Acceder</a>
                             </div>
                         </div>
                     </div>
