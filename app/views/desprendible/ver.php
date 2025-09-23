@@ -12,6 +12,11 @@
     <div class="mb-3">
       <a href="/ZIGMA/public_nuevo/index.php?url=dashboard" class="btn btn-outline-warning" onclick="return confirm('¿Volver al dashboard? Se perderán los cambios no guardados.');">Volver al Dashboard</a>
     </div>
+
+    <?php if (empty($data['nomina'])): ?>
+      <div class="alert alert-info">No se encontró una nómina para los filtros seleccionados.</div>
+      <a href="/ZIGMA/public_nuevo/index.php?url=desprendible" class="btn btn-secondary">Volver a filtros</a>
+    <?php else: ?>
     <div class="card p-3 shadow-sm">
       <div class="row">
         <div class="col-md-6">
@@ -60,10 +65,11 @@
       </div>
     </div>
     <div class="mt-3">
-      <a href="/ZIGMA/public_nuevo/index.php?url=nomina/calcular" class="btn btn-secondary">Volver</a>
+      <a href="/ZIGMA/public_nuevo/index.php?url=nomina" class="btn btn-secondary">Volver</a>
       <button class="btn btn-outline-primary" onclick="window.print()">Imprimir/PDF</button>
       <a href="/ZIGMA/public_nuevo/index.php?url=desprendible/pdf" class="btn btn-success ms-2">Descargar PDF</a>
     </div>
+    <?php endif; ?>
   </div>
 </body>
 </html>
