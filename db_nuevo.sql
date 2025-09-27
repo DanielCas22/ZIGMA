@@ -296,6 +296,21 @@ CREATE TABLE desprendible_nomina (
   FOREIGN KEY (nomina_id) REFERENCES nomina(id_nomina)
 );
 
+-- Tabla de retención mínima mensual ART. 384
+CREATE TABLE IF NOT EXISTS tabla_retencion_minima (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  desde_uvt DECIMAL(10,2) NOT NULL,
+  hasta_uvt DECIMAL(10,2) NULL,
+  valor_retencion_uvt DECIMAL(10,2) NOT NULL
+);
+
+-- Datos de ejemplo 2025 (valores referenciales, ajustar según Excel oficial)
+INSERT INTO tabla_retencion_minima (desde_uvt, hasta_uvt, valor_retencion_uvt) VALUES
+(0.00, 95.00, 0.00),
+(95.01, 150.00, 10.00),
+(150.01, 360.00, 50.00),
+(360.01, NULL, 120.00);
+
 -- Insertar roles
 INSERT INTO rol (nombre) VALUES 
 ('admin'), 
