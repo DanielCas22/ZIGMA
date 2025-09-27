@@ -145,7 +145,7 @@
                                     <tr>
                                         <td>
                                             <i class="fas fa-calendar me-2"></i>
-                                            <?= str_pad($he['dia'], 2, '0', STR_PAD_LEFT) ?>/<?= str_pad($he['mes'], 2, '0', STR_PAD_LEFT) ?>/<?= $he['año'] ?>
+                                            <?= str_pad($he['dia'], 2, '0', STR_PAD_LEFT) ?>/<?= str_pad($he['mes'], 2, '0', STR_PAD_LEFT) ?>/<?= $he['anio'] ?>
                                         </td>
                                         <td>
                                             <?php

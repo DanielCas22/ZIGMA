@@ -10,7 +10,7 @@ class Empleado extends Model {
     public $sueldo_actual;
 
     public function getAll() {
-        $sql = 'SELECT * FROM empleados WHERE es_usuario_sistema = FALSE ORDER BY nombre';
+        $sql = 'SELECT * FROM empleados ORDER BY nombre';
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -73,32 +73,32 @@ class Empleado extends Model {
     }
 
     public function create($data) {
-        $sql = 'INSERT INTO empleados (nombre, apellidos, salario, es_usuario_sistema) VALUES (?, ?, ?, ?)';
+        $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual, es_usuario_sistema) VALUES (?, ?, ?, ?)';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             $data['nombre'],
-            $data['apellidos'],
-            isset($data['salario']) ? floatval($data['salario']) : 0.00,
+            $data['apellido'],
+            isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00,
             isset($data['es_usuario_sistema']) ? (bool)$data['es_usuario_sistema'] : false
         ]);
     }
 
     public function update($id, $data) {
-        $sql = 'UPDATE empleados SET nombre=?, apellidos=?, salario=? WHERE id_empleados=?';
+        $sql = 'UPDATE empleados SET nombre=?, apellido=?, sueldo_actual=? WHERE id_empleados=?';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             $data['nombre'],
-            $data['apellidos'],
-            isset($data['salario']) ? floatval($data['salario']) : 0.00,
+            $data['apellido'],
+            isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00,
             $id
         ]);
     }
 
-    public function updateSalario($id, $salario) {
-        $sql = 'UPDATE empleados SET salario=? WHERE id_empleados=?';
+    public function updateSalario($id, $sueldo_actual) {
+        $sql = 'UPDATE empleados SET sueldo_actual=? WHERE id_empleados=?';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            floatval($salario),
+            floatval($sueldo_actual),
             $id
         ]);
     }
@@ -226,8 +226,7 @@ class Empleado extends Model {
                     LEFT JOIN user u ON e.id_empleados = u.empleado_id
                     LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id 
                     LEFT JOIN rol r ON rhu.rol_id = r.id_rol
-                    WHERE e.es_usuario_sistema = FALSE
-                    GROUP BY e.id_empleados, e.nombre, e.apellidos
+                    GROUP BY e.id_empleados, e.nombre, e.apellido
                     ORDER BY e.nombre';
             $stmt = $this->db->prepare($sql);
             $stmt->execute();

@@ -19,43 +19,37 @@ class HorasExtras extends Model {
         $tarifaModel = new TarifaHora();
         $tarifaVigente = $tarifaModel->getTarifaVigente($fecha);
         
-        if (!$tarifaVigente) {
-            return null; // Error si no hay tarifa
+        $valor_hora = isset($tarifaVigente['valor_hora']) ? $tarifaVigente['valor_hora'] : 0;
+        if (!$valor_hora) {
+            return null; // Error si no hay tarifa válida
         }
 
         // Usar TipoHoraExtra para obtener el porcentaje
         $tipoModel = new TipoHoraExtra();
         $tipoData = $tipoModel->getTipoPorcentaje($tipo);
-        
-        if (!$tipoData) {
-            return null; // Error si no hay tipo
+        $porcentaje = isset($tipoData['porcentaje']) ? $tipoData['porcentaje'] : 0;
+        if (!$porcentaje) {
+            return null; // Error si no hay tipo válido
         }
 
         // Calcular valor automáticamente
         return $tarifaModel->calcularValorHorasExtras(
-            $tarifaVigente['valor_hora'], 
+            $valor_hora, 
             $cantidad, 
-            $tipoData['porcentaje']
+            $porcentaje
         );
     }
 
     public function getAllWithEmpleado() {
-<<<<<<< HEAD
-        $sql = 'SELECT e.id_empleados, e.nombre, e.apellidos 
-                FROM empleados e 
-                WHERE e.es_usuario_sistema = FALSE 
-                ORDER BY e.nombre';
-=======
         $sql = 'SELECT he.*, e.id_empleados, e.nombre, e.apellido FROM horas_extras he
                 JOIN empleados e ON he.empleado_id = e.id_empleados';
->>>>>>> b0a855acd50c315b25d869c7085857d8076febc4
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getHorasExtrasByEmpleado($empleado_id) {
-        $sql = 'SELECT * FROM horas_extras WHERE empleado_id = ? ORDER BY año DESC, mes DESC, dia DESC';
+        $sql = 'SELECT * FROM horas_extras WHERE empleado_id = ? ORDER BY anio DESC, mes DESC, dia DESC';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$empleado_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -64,7 +58,7 @@ class HorasExtras extends Model {
     public function create($data) {
         // Calcular valor automáticamente si no se proporciona
         if (!isset($data['valor']) || empty($data['valor'])) {
-            $fecha = $data['año'] . '-' . str_pad($data['mes'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($data['dia'], 2, '0', STR_PAD_LEFT);
+            $fecha = $data['anio'] . '-' . str_pad($data['mes'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($data['dia'], 2, '0', STR_PAD_LEFT);
             $data['valor'] = $this->calcularValorAutomatico($data['tipo'], $data['cantidad'], $fecha);
         }
 
@@ -72,10 +66,10 @@ class HorasExtras extends Model {
         if (!isset($data['porcentaje']) || empty($data['porcentaje'])) {
             $tipoModel = new TipoHoraExtra();
             $tipoData = $tipoModel->getTipoPorcentaje($data['tipo']);
-            $data['porcentaje'] = $tipoData ? $tipoData['porcentaje'] : 0;
+            $data['porcentaje'] = isset($tipoData['porcentaje']) ? $tipoData['porcentaje'] : 0;
         }
 
-        $sql = 'INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, año) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        $sql = 'INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             $data['empleado_id'],
@@ -85,7 +79,7 @@ class HorasExtras extends Model {
             $data['porcentaje'],
             $data['dia'],
             $data['mes'],
-            $data['año']
+            $data['anio']
         ]);
     }
 
@@ -99,7 +93,7 @@ class HorasExtras extends Model {
     public function update($id, $data) {
         // Recalcular valor automáticamente si es necesario
         if (!isset($data['valor']) || empty($data['valor'])) {
-            $fecha = $data['año'] . '-' . str_pad($data['mes'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($data['dia'], 2, '0', STR_PAD_LEFT);
+            $fecha = $data['anio'] . '-' . str_pad($data['mes'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($data['dia'], 2, '0', STR_PAD_LEFT);
             $data['valor'] = $this->calcularValorAutomatico($data['tipo'], $data['cantidad'], $fecha);
         }
 
@@ -107,10 +101,10 @@ class HorasExtras extends Model {
         if (!isset($data['porcentaje']) || empty($data['porcentaje'])) {
             $tipoModel = new TipoHoraExtra();
             $tipoData = $tipoModel->getTipoPorcentaje($data['tipo']);
-            $data['porcentaje'] = $tipoData ? $tipoData['porcentaje'] : 0;
+            $data['porcentaje'] = isset($tipoData['porcentaje']) ? $tipoData['porcentaje'] : 0;
         }
 
-        $sql = 'UPDATE horas_extras SET empleado_id=?, valor=?, cantidad=?, tipo=?, porcentaje=?, dia=?, mes=?, año=? WHERE id_extras=?';
+        $sql = 'UPDATE horas_extras SET empleado_id=?, valor=?, cantidad=?, tipo=?, porcentaje=?, dia=?, mes=?, anio=? WHERE id_extras=?';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             $data['empleado_id'],
@@ -120,7 +114,7 @@ class HorasExtras extends Model {
             $data['porcentaje'],
             $data['dia'],
             $data['mes'],
-            $data['año'],
+            $data['anio'],
             $id
         ]);
     }

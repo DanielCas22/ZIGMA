@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -88,8 +87,8 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Año</label>
-                                <input type="number" name="año" class="form-control" min="2020" max="2030" 
-                                       value="<?= htmlspecialchars($hora['año']) ?>" required>
+                                <input type="number" name="anio" class="form-control" min="2020" max="2030" 
+                                       value="<?= htmlspecialchars($hora['anio']) ?>" required>
                             </div>
                         </div>
                         

@@ -43,6 +43,19 @@ CREATE TABLE rol_has_user (
   FOREIGN KEY (rol_id) REFERENCES rol(id_rol)
 );
 
+-- Tabla de salarios por rol
+CREATE TABLE salarios_por_rol (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  rol VARCHAR(45) NOT NULL,
+  salario INT NOT NULL
+);
+
+-- Datos de ejemplo para salarios por rol
+INSERT INTO salarios_por_rol (rol, salario) VALUES
+('empleado', 2500000),
+('rrhh', 4000000),
+('admin', 6000000);
+
 -- Tabla de total devengado
 CREATE TABLE total_devengado (
   id_total_devengado INT PRIMARY KEY AUTO_INCREMENT,

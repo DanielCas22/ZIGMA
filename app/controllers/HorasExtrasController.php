@@ -124,7 +124,7 @@ class HorasExtrasController extends Controller {
                     'tipo' => $_POST['tipo'],
                     'dia' => $_POST['dia'],
                     'mes' => $_POST['mes'],
-                    'año' => $_POST['año']
+                    'anio' => $_POST['anio']
                     // valor y porcentaje se calculan automáticamente en el modelo
                 ];
                 
@@ -170,7 +170,7 @@ class HorasExtrasController extends Controller {
                 'tipo' => $_POST['tipo'],
                 'dia' => $_POST['dia'],
                 'mes' => $_POST['mes'],
-                'año' => $_POST['año']
+                'anio' => $_POST['anio']
                 // valor y porcentaje se calculan automáticamente en el modelo
             ];
             $horasExtrasModel->update($id, $data);

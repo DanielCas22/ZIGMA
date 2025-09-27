@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Empleado.php';
@@ -49,11 +48,10 @@ class EmpleadoController extends Controller {
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre = $_POST['nombres'] ?? '';
-            $apellidos = $_POST['apellidos'] ?? '';
+            $apellido = $_POST['apellido'] ?? '';
             $rol_especifico = $_POST['rol'] ?? 'empleado';
-            $salario_manual = isset($_POST['salario']) && !empty($_POST['salario']) ? floatval($_POST['salario']) : null;
+            $salario_manual = isset($_POST['sueldo_actual']) && !empty($_POST['sueldo_actual']) ? floatval($_POST['sueldo_actual']) : null;
 
-<<<<<<< HEAD
             // Determinar el salario a usar
             $salario_final = $salario_manual;
             
@@ -67,18 +65,12 @@ class EmpleadoController extends Controller {
                     $salario_final = $salarioModel->getSalarioByRol('empleado');
                 }
             }
-=======
-            $empleado = new Empleado();
-            $empleado->nombre = $nombre;
-            $empleado->apellido = $apellidos;
-            $empleado->save();
->>>>>>> b0a855acd50c315b25d869c7085857d8076febc4
 
             $empleadoModel = $this->model('Empleado');
             $data = [
                 'nombre' => $nombre,
-                'apellidos' => $apellidos,
-                'salario' => $salario_final
+                'apellido' => $apellido,
+                'sueldo_actual' => $salario_final
             ];
             $resultado = $empleadoModel->create($data);
 
@@ -119,6 +111,7 @@ class EmpleadoController extends Controller {
             }
         }
     }
+
     public function edit() {
         if (!isset($_SESSION['user'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
@@ -162,9 +155,9 @@ class EmpleadoController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id']);
             $nombre = $_POST['nombres'] ?? '';
-            $apellidos = $_POST['apellidos'] ?? '';
+            $apellido = $_POST['apellido'] ?? '';
             $rol_especifico = $_POST['rol'] ?? 'empleado';
-            $salario_manual = isset($_POST['salario']) && !empty($_POST['salario']) ? floatval($_POST['salario']) : null;
+            $salario_manual = isset($_POST['sueldo_actual']) && !empty($_POST['sueldo_actual']) ? floatval($_POST['sueldo_actual']) : null;
 
             // Determinar el salario a usar
             $salario_final = $salario_manual;
@@ -183,8 +176,8 @@ class EmpleadoController extends Controller {
             $empleadoModel = $this->model('Empleado');
             $data = [
                 'nombre' => $nombre,
-                'apellidos' => $apellidos,
-                'salario' => $salario_final
+                'apellido' => $apellido,
+                'sueldo_actual' => $salario_final
             ];
             
             $resultado = $empleadoModel->update($id, $data);
@@ -243,10 +236,10 @@ class EmpleadoController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $empleado_id = intval($_POST['empleado_id']);
-                $nuevo_salario = floatval($_POST['salario']);
+                $nuevo_sueldo = floatval($_POST['sueldo_actual']);
                 
                 $empleadoModel = $this->model('Empleado');
-                $resultado = $empleadoModel->updateSalario($empleado_id, $nuevo_salario);
+                $resultado = $empleadoModel->updateSalario($empleado_id, $nuevo_sueldo);
                 
                 if ($resultado) {
                     // Redirigir con mensaje de éxito

@@ -134,14 +134,13 @@
                                         <tr>
                                             <td><?= $emp['id_empleados'] ?></td>
                                             <td><?= $emp['nombre'] ?></td>
-<<<<<<< HEAD
-                                            <td><?= $emp['apellidos'] ?></td>
+                                            <td><?= htmlspecialchars($emp['apellido']) ?></td>
                                             <td>
                                                 <strong class="text-success">
-                                                    $<?= number_format(isset($emp['salario']) ? floatval($emp['salario']) : 0, 0, ',', '.') ?>
+                                                    $<?= number_format(isset($emp['sueldo_actual']) ? floatval($emp['sueldo_actual']) : 0, 0, ',', '.') ?>
                                                 </strong>
-                                                <a href="#" onclick="editarSalario(<?= $emp['id_empleados'] ?>, '<?= htmlspecialchars($emp['nombre'] . ' ' . $emp['apellidos']) ?>', <?= isset($emp['salario']) ? floatval($emp['salario']) : 0 ?>)" 
-                                                   class="btn btn-sm btn-outline-primary ms-2" title="Editar salario">
+                                                <a href="#" onclick="editarSueldo(<?= $emp['id_empleados'] ?>, '<?= htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) ?>', <?= isset($emp['sueldo_actual']) ? floatval($emp['sueldo_actual']) : 0 ?>)" 
+                                                   class="btn btn-sm btn-outline-primary ms-2" title="Editar sueldo">
                                                     <i class="fas fa-edit fa-xs"></i>
                                                 </a>
                                             </td>
@@ -199,10 +198,6 @@
                                                     </a>
                                                 </div>
                                             </td>
-=======
-                                            <td><?= $emp['apellido'] ?></td>
-                                            <td><?= isset($emp['rol']) && $emp['rol'] !== '' ? $emp['rol'] : 'Sin rol' ?></td>
->>>>>>> b0a855acd50c315b25d869c7085857d8076febc4
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>

@@ -71,7 +71,7 @@
                 <div class="col-md-3">
                     <div class="card text-center shadow border-info border-2">
                         <div class="card-body">
-                            <h5 class="card-title">Año Actual</h5>
+                            <h5 class="card-title">Anio Actual</h5>
                             <p class="display-6 fw-bold">
                                 <?= date('Y') ?>
                             </p>
