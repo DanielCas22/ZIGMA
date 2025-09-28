@@ -40,7 +40,9 @@
                                 <?php 
                                 $selectedEmpleado = isset($_GET['empleado_id']) ? $_GET['empleado_id'] : (isset($_POST['empleado_id']) ? $_POST['empleado_id'] : '');
                                 foreach ($empleados as $emp): ?>
-                                    <option value="<?= $emp['id_empleados'] ?>" <?= ($selectedEmpleado == $emp['id_empleados']) ? 'selected' : '' ?>><?= $emp['nombre'] ?> <?= isset($emp['apellidos']) ? $emp['apellidos'] : '' ?></option>
+                                    <option value="<?= $emp['id_empleados'] ?>" <?= ($selectedEmpleado == $emp['id_empleados']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) ?>
+                                    </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

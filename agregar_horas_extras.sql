@@ -1,35 +1,41 @@
--- Script para agregar horas extras variadas a cada empleado
--- Fecha: Septiembre 2025
+-- Script compatible con esquema actual (horas_extras)
+-- Ejecutar después de db_nuevo.sql y sql_tarifas.sql
+USE zigmaog;
 
--- Para Laura Ospina (ID: 19) - Empleado regular
-INSERT INTO horas_extras (empleado_id, tipo_hora_extra_id, cantidad_horas, fecha, descripcion) VALUES
-(19, 1, 3.5, '2025-09-20', 'Finalización de proyecto urgente - horas diurnas'),
-(19, 2, 2.0, '2025-09-18', 'Soporte nocturno sistema crítico'),
-(19, 1, 1.5, '2025-09-15', 'Reunión extendida con cliente');
+-- Notas:
+-- - Tabla horas_extras actual: (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio)
+-- - Porcentajes según tipos: Extra diurna 25, Extra nocturna 75, Extra diurna dominical/festiva 105, Extra nocturna dominical/festiva 155
+-- - Para septiembre 2025 se usa valor_hora 6470 (referencial)
 
--- Para Carlos Mendoza (ID: 20) - Empleado regular  
-INSERT INTO horas_extras (empleado_id, tipo_hora_extra_id, cantidad_horas, fecha, descripcion) VALUES
-(20, 2, 4.0, '2025-09-19', 'Mantenimiento nocturno de servidores'),
-(20, 3, 6.0, '2025-09-22', 'Trabajo dominical - implementación nueva funcionalidad'),
-(20, 1, 2.5, '2025-09-16', 'Capacitación extendida equipo'),
-(20, 4, 3.0, '2025-09-08', 'Soporte crítico domingo en la noche');
+-- Juan Pérez (ID: 4)
+INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio) VALUES
+(4, 28306, 3.5, 'Extra diurna', 25, '20', '09', '2025'),
+(4, 22645, 2.0, 'Extra nocturna', 75, '18', '09', '2025'),
+(4, 12131, 1.5, 'Extra diurna', 25, '15', '09', '2025');
 
--- Para María González (ID: 21) - Empleado regular
-INSERT INTO horas_extras (empleado_id, tipo_hora_extra_id, cantidad_horas, fecha, descripcion) VALUES
-(21, 1, 5.0, '2025-09-21', 'Procesamiento masivo de datos - horas extra diurnas'),
-(21, 3, 4.5, '2025-09-15', 'Trabajo festivo - Independencia de Colombia'),
-(21, 2, 1.5, '2025-09-17', 'Respaldo nocturno de base de datos');
+-- Carlos Ramírez (ID: 6)
+INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio) VALUES
+(6, 45290, 4.0, 'Extra nocturna', 75, '19', '09', '2025'),
+(6, 79581, 6.0, 'Extra diurna dominical/festiva', 105, '22', '09', '2025'),
+(6, 20219, 2.5, 'Extra diurna', 25, '16', '09', '2025'),
+(6, 49496, 3.0, 'Extra nocturna dominical/festiva', 155, '08', '09', '2025');
 
--- Para Juan David Martínez (ID: 22) - Admin (salario alto)
-INSERT INTO horas_extras (empleado_id, tipo_hora_extra_id, cantidad_horas, fecha, descripcion) VALUES
-(22, 4, 5.0, '2025-09-22', 'Supervisión crítica domingo nocturno'),
-(22, 3, 3.0, '2025-09-15', 'Coordinación equipos día festivo'),
-(22, 2, 2.5, '2025-09-20', 'Reuniones estratégicas nocturnas'),
-(22, 1, 4.0, '2025-09-18', 'Planificación y supervisión extendida');
+-- María Gómez (ID: 5)
+INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio) VALUES
+(5, 40438, 5.0, 'Extra diurna', 25, '21', '09', '2025'),
+(5, 59686, 4.5, 'Extra diurna dominical/festiva', 105, '15', '09', '2025'),
+(5, 16984, 1.5, 'Extra nocturna', 75, '17', '09', '2025');
 
--- Para Romero Quiñones (ID: 24) - RRHH (salario medio)
-INSERT INTO horas_extras (empleado_id, tipo_hora_extra_id, cantidad_horas, fecha, descripcion) VALUES
-(24, 1, 3.0, '2025-09-19', 'Procesos de selección extendidos'),
-(24, 2, 2.0, '2025-09-21', 'Atención emergencias laborales nocturnas'),
-(24, 3, 7.0, '2025-09-22', 'Capacitaciones dominicales equipo completo'),
-(24, 1, 1.0, '2025-09-14', 'Entrevistas adicionales candidatos');
+-- Administrador del Sistema (ID: 1)
+INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio) VALUES
+(1, 82493, 5.0, 'Extra nocturna dominical/festiva', 155, '22', '09', '2025'),
+(1, 39791, 3.0, 'Extra diurna dominical/festiva', 105, '15', '09', '2025'),
+(1, 28306, 2.5, 'Extra nocturna', 75, '20', '09', '2025'),
+(1, 32350, 4.0, 'Extra diurna', 25, '18', '09', '2025');
+
+-- Coordinador RRHH (ID: 2)
+INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio) VALUES
+(2, 24263, 3.0, 'Extra diurna', 25, '19', '09', '2025'),
+(2, 22645, 2.0, 'Extra nocturna', 75, '21', '09', '2025'),
+(2, 92845, 7.0, 'Extra diurna dominical/festiva', 105, '22', '09', '2025'),
+(2, 8088, 1.0, 'Extra diurna', 25, '14', '09', '2025');

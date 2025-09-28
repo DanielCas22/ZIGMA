@@ -96,7 +96,17 @@
                     </div>
                     <form class="row g-2 align-items-center mb-3" method="get" action="/ZIGMA/public/index.php">
                         <input type="hidden" name="url" value="HorasExtras">
-                        <div class="col-md-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" name="buscar_empleado" class="form-control" 
+                                       placeholder="Buscar por nombre del empleado..." 
+                                       value="<?= isset($_GET['buscar_empleado']) ? htmlspecialchars($_GET['buscar_empleado']) : '' ?>">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
                             <select name="filtro_rol" class="form-select">
                                 <option value="">Filtrar por Rol</option>
                                 <option value="admin" <?= (isset($filtro_rol) && $filtro_rol == 'admin') ? 'selected' : '' ?>>Admin</option>
@@ -104,19 +114,19 @@
                                 <option value="rrhh" <?= (isset($filtro_rol) && $filtro_rol == 'rrhh') ? 'selected' : '' ?>>RRHH</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <select name="filtro_horas" class="form-select">
-                                <option value="">Filtrar por Cantidad de Horas</option>
-                                <option value="0" <?= (isset($_GET['filtro_horas']) && $_GET['filtro_horas'] == '0') ? 'selected' : '' ?>>Sin horas extras</option>
+                                <option value="">Filtrar por Horas</option>
+                                <option value="0" <?= (isset($_GET['filtro_horas']) && $_GET['filtro_horas'] == '0') ? 'selected' : '' ?>>Sin horas</option>
                                 <option value="1-10" <?= (isset($_GET['filtro_horas']) && $_GET['filtro_horas'] == '1-10') ? 'selected' : '' ?>>1-10 horas</option>
                                 <option value="11-20" <?= (isset($_GET['filtro_horas']) && $_GET['filtro_horas'] == '11-20') ? 'selected' : '' ?>>11-20 horas</option>
                                 <option value="21-40" <?= (isset($_GET['filtro_horas']) && $_GET['filtro_horas'] == '21-40') ? 'selected' : '' ?>>21-40 horas</option>
-                                <option value="40+" <?= (isset($_GET['filtro_horas']) && $_GET['filtro_horas'] == '40+') ? 'selected' : '' ?>>Más de 40 horas</option>
+                                <option value="40+" <?= (isset($_GET['filtro_horas']) && $_GET['filtro_horas'] == '40+') ? 'selected' : '' ?>>Más de 40</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <select name="filtro_tipo" class="form-select">
-                                <option value="">Filtrar por Tipo de Horas</option>
+                                <option value="">Filtrar por Tipo</option>
                                 <?php if (!empty($tipos_disponibles)): ?>
                                     <?php foreach ($tipos_disponibles as $tipo): ?>
                                         <option value="<?= htmlspecialchars($tipo) ?>" <?= (isset($_GET['filtro_tipo']) && $_GET['filtro_tipo'] == $tipo) ? 'selected' : '' ?>><?= htmlspecialchars(ucfirst($tipo)) ?></option>
@@ -125,10 +135,14 @@
                             </select>
                         </div>
                         <div class="col-auto">
-                            <button type="submit" class="btn btn-primary">Filtrar</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Filtrar
+                            </button>
                         </div>
                         <div class="col-auto">
-                            <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn btn-secondary">Limpiar</a>
+                            <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
                         </div>
                     </form>
                     <div class="table-responsive">
@@ -153,16 +167,17 @@
                                 if (isset($empleados) && is_array($empleados) && !empty($empleados)): ?>
                                     <?php foreach ($empleados as $emp): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($emp['id_empleados']) ?></td>
-                                            <td><?= htmlspecialchars($emp['nombre']) ?></td>
-                                            <td><?= htmlspecialchars($emp['apellidos']) ?></td>
+                                            <td><?= htmlspecialchars($emp['id_empleados'] ?? '') ?></td>
+                                            <td><?= htmlspecialchars($emp['nombre'] ?? '') ?></td>
+                                            <td><?= htmlspecialchars(($emp['apellidos'] ?? null) !== null ? $emp['apellidos'] : ($emp['apellido'] ?? '')) ?></td>
                                             <td>
                                                 <?php 
                                                 $rol_badge_class = '';
                                                 $rol_display = '';
                                                 $todos_roles = isset($emp['todos_los_roles']) ? $emp['todos_los_roles'] : '';
+                                                $emp_rol = $emp['rol'] ?? '';
                                                 
-                                                switch($emp['rol']) {
+                                                switch($emp_rol) {
                                                     case 'admin': 
                                                         $rol_badge_class = 'bg-danger'; 
                                                         $rol_display = 'Admin';
@@ -195,8 +210,8 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <?php if ($emp['total_horas'] > 0): ?>
-                                                    <span class="badge bg-success"><?= $emp['total_horas'] ?> horas</span>
+                                                <?php if ((float)($emp['total_horas'] ?? 0) > 0): ?>
+                                                    <span class="badge bg-success"><?= htmlspecialchars($emp['total_horas']) ?> horas</span>
                                                 <?php else: ?>
                                                     <span class="badge bg-secondary">0 horas</span>
                                                 <?php endif; ?>
@@ -211,19 +226,21 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <?php if ($emp['tipo_frecuente'] != 'N/A'): ?>
-                                                    <span class="badge bg-info"><?= htmlspecialchars($emp['tipo_frecuente']) ?></span>
+                                                <?php $tipo_frec = $emp['tipo_frecuente'] ?? 'N/A'; ?>
+                                                <?php if ($tipo_frec !== 'N/A'): ?>
+                                                    <span class="badge bg-info"><?= htmlspecialchars($tipo_frec) ?></span>
                                                 <?php else: ?>
                                                     <span class="badge bg-secondary">Sin tipo</span>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
+                                                <?php $emp_id = $emp['id_empleados'] ?? ''; ?>
                                                 <div class="btn-group" role="group">
-                                                    <a href="/ZIGMA/public/index.php?url=HorasExtras/detalle/<?= $emp['id_empleados'] ?>" 
+                                                    <a href="/ZIGMA/public/index.php?url=HorasExtras/detalle/<?= urlencode($emp_id) ?>" 
                                                        class="btn btn-primary btn-sm" title="Ver detalle de horas extras">
                                                         <i class="fa fa-eye"></i> Ver Detalle
                                                     </a>
-                                                    <a href="/ZIGMA/public/index.php?url=HorasExtras/create&empleado_id=<?= $emp['id_empleados'] ?>" 
+                                                    <a href="/ZIGMA/public/index.php?url=HorasExtras/create&empleado_id=<?= urlencode($emp_id) ?>" 
                                                        class="btn btn-success btn-sm" title="Agregar nuevas horas extras">
                                                         <i class="fa fa-plus"></i> Agregar
                                                     </a>

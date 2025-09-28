@@ -192,7 +192,7 @@ class EmpleadoController extends Controller {
                 $usuario = $userModel->getByEmpleadoId($id);
                 
                 if ($usuario) {
-                    $user_id = $usuario['id_usuario'];
+                    $user_id = $usuario['id_doc'];
                     
                     // Eliminar roles actuales
                     $rolHasUserModel->removeAllByUserId($user_id);

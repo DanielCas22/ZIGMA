@@ -9,8 +9,49 @@ class Empleado extends Model {
     public $contrasena;
     public $sueldo_actual;
 
+    // Verifica si una columna existe en la tabla empleados
+    private function hasColumn($column) {
+        try {
+            $stmt = $this->db->prepare('SHOW COLUMNS FROM empleados LIKE ?');
+            $stmt->execute([$column]);
+            return (bool)$stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
     public function getAll() {
-        $sql = 'SELECT * FROM empleados ORDER BY nombre';
+        $filterBySystem = $this->hasColumn('es_usuario_sistema');
+        $sql = 'SELECT * FROM empleados e';
+        $conditions = [];
+        if ($filterBySystem) {
+            $conditions[] = '(e.es_usuario_sistema IS NULL OR e.es_usuario_sistema = 0)';
+        }
+        // Excluir placeholders/roles por nombre (usa solo nombre y apellido existentes)
+        $conditions[] = "NOT (
+            UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
+            OR UPPER(TRIM(e.nombre)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
+            OR UPPER(TRIM(e.apellido)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
+            OR (
+                UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%COORD%' AND (
+                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RRHH%' OR
+                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RH%' OR
+                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RECURSOS%HUMANOS%'
+                )
+            )
+            OR (
+                UPPER(TRIM(e.nombre)) LIKE '%COORD%' AND (
+                    UPPER(TRIM(e.nombre)) LIKE '%RRHH%' OR
+                    UPPER(TRIM(e.nombre)) LIKE '%RH%' OR
+                    UPPER(TRIM(e.nombre)) LIKE '%RECURSOS%HUMANOS%'
+                )
+            )
+        )";
+        
+        if (!empty($conditions)) {
+            $sql .= ' WHERE ' . implode(' AND ', $conditions);
+        }
+        $sql .= ' ORDER BY e.nombre';
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -30,6 +71,9 @@ class Empleado extends Model {
      * Obtener solo usuarios del sistema
      */
     public function getSystemUsers() {
+        if (!$this->hasColumn('es_usuario_sistema')) {
+            return [];
+        }
         $sql = 'SELECT * FROM empleados WHERE es_usuario_sistema = TRUE ORDER BY nombre';
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -55,16 +99,16 @@ class Empleado extends Model {
         $sql = 'SELECT e.*, 
                        GROUP_CONCAT(r.nombre SEPARATOR ", ") as todos_los_roles,
                        (SELECT r2.nombre FROM user u2 
-                        LEFT JOIN rol_has_user rhu2 ON u2.id_usuario = rhu2.usuario_id_usuario 
-                        LEFT JOIN roles r2 ON rhu2.rol_id_rol = r2.id_rol 
+                        LEFT JOIN rol_has_user rhu2 ON u2.id_doc = rhu2.user_id 
+                        LEFT JOIN rol r2 ON rhu2.rol_id = r2.id_rol 
                         WHERE u2.empleado_id = e.id_empleados 
                         AND r2.nombre IN ("admin", "rrhh", "empleado") 
                         ORDER BY FIELD(r2.nombre, "admin", "rrhh", "empleado") 
                         LIMIT 1) as rol_principal
                 FROM empleados e 
                 LEFT JOIN user u ON e.id_empleados = u.empleado_id 
-                LEFT JOIN rol_has_user rhu ON u.id_usuario = rhu.usuario_id_usuario 
-                LEFT JOIN roles r ON rhu.rol_id_rol = r.id_rol 
+                LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id 
+                LEFT JOIN rol r ON rhu.rol_id = r.id_rol 
                 WHERE e.id_empleados = ? 
                 GROUP BY e.id_empleados';
         $stmt = $this->db->prepare($sql);
@@ -73,14 +117,25 @@ class Empleado extends Model {
     }
 
     public function create($data) {
-        $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual, es_usuario_sistema) VALUES (?, ?, ?, ?)';
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            $data['nombre'],
-            $data['apellido'],
-            isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00,
-            isset($data['es_usuario_sistema']) ? (bool)$data['es_usuario_sistema'] : false
-        ]);
+        $hasFlag = $this->hasColumn('es_usuario_sistema');
+        if ($hasFlag) {
+            $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual, es_usuario_sistema) VALUES (?, ?, ?, ?)';
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                $data['nombre'],
+                $data['apellido'],
+                isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00,
+                isset($data['es_usuario_sistema']) ? (bool)$data['es_usuario_sistema'] : false
+            ]);
+        } else {
+            $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual) VALUES (?, ?, ?)';
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                $data['nombre'],
+                $data['apellido'],
+                isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00
+            ]);
+        }
     }
 
     public function update($id, $data) {
@@ -209,6 +264,7 @@ class Empleado extends Model {
 
     public function getAllWithRoles() {
         try {
+            $filterBySystem = $this->hasColumn('es_usuario_sistema');
             $sql = 'SELECT e.*, 
                            GROUP_CONCAT(DISTINCT r.nombre ORDER BY 
                                CASE r.nombre 
@@ -225,9 +281,35 @@ class Empleado extends Model {
                     FROM empleados e
                     LEFT JOIN user u ON e.id_empleados = u.empleado_id
                     LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id 
-                    LEFT JOIN rol r ON rhu.rol_id = r.id_rol
-                    GROUP BY e.id_empleados, e.nombre, e.apellido
-                    ORDER BY e.nombre';
+                    LEFT JOIN rol r ON rhu.rol_id = r.id_rol';
+            $conditions = [];
+            if ($filterBySystem) {
+                $conditions[] = '(e.es_usuario_sistema IS NULL OR e.es_usuario_sistema = 0)';
+            }
+            // Excluir placeholders/roles por nombre (usa solo nombre y apellido existentes)
+            $conditions[] = "NOT (
+                UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
+                OR UPPER(TRIM(e.nombre)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
+                OR UPPER(TRIM(e.apellido)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
+                OR (
+                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%COORD%' AND (
+                        UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RRHH%' OR
+                        UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RH%' OR
+                        UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RECURSOS%HUMANOS%'
+                    )
+                )
+                OR (
+                    UPPER(TRIM(e.nombre)) LIKE '%COORD%' AND (
+                        UPPER(TRIM(e.nombre)) LIKE '%RRHH%' OR
+                        UPPER(TRIM(e.nombre)) LIKE '%RH%' OR
+                        UPPER(TRIM(e.nombre)) LIKE '%RECURSOS%HUMANOS%'
+                    )
+                )
+            )";
+            if (!empty($conditions)) {
+                $sql .= ' WHERE ' . implode(' AND ', $conditions);
+            }
+            $sql .= ' GROUP BY e.id_empleados, e.nombre, e.apellido ORDER BY e.nombre';
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -246,5 +328,20 @@ class Empleado extends Model {
 
     public function getLastInsertId() {
         return $this->db->lastInsertId();
+    }
+
+    /**
+     * Calcula el auxilio de transporte según el sueldo actual
+     * Si el sueldo es menor o igual a dos salarios mínimos, retorna 200000; si es mayor, retorna 0.
+     * Un salario mínimo: 1.423.000
+     * Auxilio de transporte: 200.000
+     */
+    public function getAuxilioTransporte($sueldo_actual) {
+        $salario_minimo = 1423000;
+        $auxilio_transporte = 200000;
+        if ($sueldo_actual <= 2 * $salario_minimo) {
+            return $auxilio_transporte;
+        }
+        return 0;
     }
 }

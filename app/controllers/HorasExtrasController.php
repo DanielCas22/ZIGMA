@@ -59,9 +59,19 @@ class HorasExtrasController extends Controller {
         $filtro_rol = isset($_GET['filtro_rol']) ? $_GET['filtro_rol'] : '';
         $filtro_horas = isset($_GET['filtro_horas']) ? $_GET['filtro_horas'] : '';
         $filtro_tipo = isset($_GET['filtro_tipo']) ? $_GET['filtro_tipo'] : '';
+        $buscar_empleado = isset($_GET['buscar_empleado']) ? trim($_GET['buscar_empleado']) : '';
         
         // Filtrar empleados según los criterios
         $empleados_filtrados = $empleados;
+        
+        // Filtrar por nombre de empleado (búsqueda)
+        if ($buscar_empleado) {
+            $empleados_filtrados = array_filter($empleados_filtrados, function($emp) use ($buscar_empleado) {
+                $nombre_completo = strtolower($emp['nombre'] . ' ' . $emp['apellido']);
+                $busqueda = strtolower($buscar_empleado);
+                return strpos($nombre_completo, $busqueda) !== false;
+            });
+        }
         
         if ($filtro_rol) {
             $empleados_filtrados = array_filter($empleados_filtrados, function($emp) use ($filtro_rol) {

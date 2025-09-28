@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle Horas Extras - <?= htmlspecialchars($empleado['nombre'] . ' ' . $empleado['apellidos']) ?></title>
+    <title>Detalle Horas Extras - <?= htmlspecialchars(($empleado['nombre'] ?? '') . ' ' . (($empleado['apellidos'] ?? null) !== null ? $empleado['apellidos'] : ($empleado['apellido'] ?? ''))) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -70,14 +70,14 @@
             <div class="card-header">
                 <h4 class="mb-0">
                     <i class="fas fa-user me-2"></i>
-                    Detalle de Horas Extras - <?= htmlspecialchars($empleado['nombre'] . ' ' . $empleado['apellidos']) ?>
+                    Detalle de Horas Extras - <?= htmlspecialchars(($empleado['nombre'] ?? '') . ' ' . (($empleado['apellidos'] ?? null) !== null ? $empleado['apellidos'] : ($empleado['apellido'] ?? ''))) ?>
                 </h4>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>ID Empleado:</strong> <?= htmlspecialchars($empleado['id_empleados']) ?></p>
-                        <p><strong>Nombre Completo:</strong> <?= htmlspecialchars($empleado['nombre'] . ' ' . $empleado['apellidos']) ?></p>
+                        <p><strong>ID Empleado:</strong> <?= htmlspecialchars($empleado['id_empleados'] ?? '') ?></p>
+                        <p><strong>Nombre Completo:</strong> <?= htmlspecialchars(($empleado['nombre'] ?? '') . ' ' . (($empleado['apellidos'] ?? null) !== null ? $empleado['apellidos'] : ($empleado['apellido'] ?? ''))) ?></p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>Documento:</strong> 
@@ -114,7 +114,7 @@
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-list me-2"></i>
-                    Registro de Horas Extras (<?= count($horasExtras) ?> registros)
+                    Registro de Horas Extras (<?= isset($horasExtras) && is_array($horasExtras) ? count($horasExtras) : 0 ?> registros)
                 </h5>
             </div>
             <div class="card-body">
@@ -145,12 +145,13 @@
                                     <tr>
                                         <td>
                                             <i class="fas fa-calendar me-2"></i>
-                                            <?= str_pad($he['dia'], 2, '0', STR_PAD_LEFT) ?>/<?= str_pad($he['mes'], 2, '0', STR_PAD_LEFT) ?>/<?= $he['anio'] ?>
+                                            <?= str_pad((string)($he['dia'] ?? ''), 2, '0', STR_PAD_LEFT) ?>/<?= str_pad((string)($he['mes'] ?? ''), 2, '0', STR_PAD_LEFT) ?>/<?= htmlspecialchars((string)($he['anio'] ?? '')) ?>
                                         </td>
                                         <td>
                                             <?php
                                             $badge_class = '';
-                                            switch ($he['tipo']) {
+                                            $tipo_he = $he['tipo'] ?? '';
+                                            switch ($tipo_he) {
                                                 case 'Extra diurna':
                                                     $badge_class = 'bg-primary';
                                                     break;
@@ -168,30 +169,30 @@
                                             }
                                             ?>
                                             <span class="badge <?= $badge_class ?> badge-tipo">
-                                                <?= htmlspecialchars($he['tipo']) ?>
+                                                <?= htmlspecialchars($tipo_he ?: 'N/A') ?>
                                             </span>
                                         </td>
                                         <td>
-                                            <strong><?= number_format($he['cantidad'], 1) ?></strong> hrs
+                                            <strong><?= number_format((float)($he['cantidad'] ?? 0), 1) ?></strong> hrs
                                         </td>
                                         <td>
                                             <span class="badge bg-info">
-                                                <?= $he['porcentaje'] ?>%
+                                                <?= (float)($he['porcentaje'] ?? 0) ?>%
                                             </span>
                                         </td>
                                         <td>
                                             <strong class="text-success">
-                                                $<?= number_format($he['valor'], 0, ',', '.') ?>
+                                                $<?= number_format((float)($he['valor'] ?? 0), 0, ',', '.') ?>
                                             </strong>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="/ZIGMA/public/index.php?url=HorasExtras/edit/<?= $he['id_extras'] ?>" 
+                                                <a href="/ZIGMA/public/index.php?url=HorasExtras/edit/<?= urlencode((string)($he['id_extras'] ?? '')) ?>" 
                                                    class="btn btn-sm btn-outline-primary" 
                                                    title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="/ZIGMA/public/index.php?url=HorasExtras/delete/<?= $he['id_extras'] ?>" 
+                                                <a href="/ZIGMA/public/index.php?url=HorasExtras/delete/<?= urlencode((string)($he['id_extras'] ?? '')) ?>" 
                                                    class="btn btn-sm btn-outline-danger" 
                                                    onclick="return confirm('¿Está seguro de eliminar este registro?')"
                                                    title="Eliminar">

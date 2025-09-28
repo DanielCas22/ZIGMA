@@ -1,0 +1,178 @@
+<?php
+class PrestacionesSocialesController extends Controller {
+    
+    private function baseUrl() {
+        $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
+        $base = exploded('/public', $scriptName)[0];
+        return $base;
+    }
+    
+    public function index() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        try {
+            $prestacionesModel = $this->model('PrestacionesSocialesModel');
+            $diasTrabajados = isset($_GET['dias_trabajados']) ? intval($_GET['dias_trabajados']) : 360;
+            
+            // Calcular prestaciones para todos los empleados
+            $calculoCompleto = $prestacionesModel->calcularPrestacionesTodosEmpleados($diasTrabajados);
+            
+            $this->view('prestaciones_sociales/index', [
+                'title' => 'Prestaciones Sociales',
+                'calculos_empleados' => $calculoCompleto['empleados'],
+                'totales_empresa' => $calculoCompleto['totales_empresa'],
+                'promedios' => $calculoCompleto['promedios'],
+                'total_empleados' => $calculoCompleto['total_empleados'],
+                'dias_trabajados' => $diasTrabajados
+            ]);
+            
+        } catch (Exception $e) {
+            $this->view('prestaciones_sociales/index', [
+                'title' => 'Prestaciones Sociales',
+                'error' => 'Error al calcular prestaciones sociales: ' . $e->getMessage(),
+                'calculos_empleados' => [],
+                'totales_empresa' => [],
+                'promedios' => [],
+                'total_empleados' => 0,
+                'dias_trabajados' => 360
+            ]);
+        }
+    }
+    
+    public function detalle($idEmpleado) {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        try {
+            $prestacionesModel = $this->model('PrestacionesSocialesModel');
+            $diasTrabajados = isset($_POST['dias_trabajados']) ? intval($_POST['dias_trabajados']) : 360;
+            
+            $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado, $diasTrabajados);
+            
+            $this->view('prestaciones_sociales/detalle', [
+                'title' => 'Detalle de Prestaciones Sociales',
+                'calculo' => $calculo,
+                'success' => 'Cálculo realizado correctamente'
+            ]);
+            
+        } catch (Exception $e) {
+            $this->view('prestaciones_sociales/detalle', [
+                'title' => 'Detalle de Prestaciones Sociales',
+                'error' => 'Error al calcular prestaciones sociales: ' . $e->getMessage(),
+                'calculo' => null
+            ]);
+        }
+    }
+    
+    public function calcular() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            try {
+                $prestacionesModel = $this->model('PrestacionesSocialesModel');
+                $idEmpleado = intval($_POST['empleado_id'] ?? 0);
+                $diasTrabajados = intval($_POST['dias_trabajados'] ?? 360);
+                
+                if ($idEmpleado <= 0) {
+                    throw new InvalidArgumentException('Debe seleccionar un empleado válido');
+                }
+                
+                $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado, $diasTrabajados);
+                
+                // Guardar el cálculo si se solicita
+                if (isset($_POST['guardar']) && $_POST['guardar'] === '1') {
+                    $prestacionesId = $prestacionesModel->guardarPrestaciones($calculo);
+                    $mensaje = 'Prestaciones calculadas y guardadas correctamente (ID: ' . $prestacionesId . ')';
+                } else {
+                    $mensaje = 'Prestaciones calculadas correctamente';
+                }
+                
+                $this->view('prestaciones_sociales/resultado', [
+                    'title' => 'Resultado de Prestaciones Sociales',
+                    'calculo' => $calculo,
+                    'success' => $mensaje
+                ]);
+                
+            } catch (Exception $e) {
+                $empleadoModel = $this->model('Empleado');
+                $empleados = $empleadoModel->getAll();
+                
+                $this->view('prestaciones_sociales/calcular', [
+                    'title' => 'Calcular Prestaciones Sociales',
+                    'empleados' => $empleados,
+                    'error' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+        } else {
+            // Mostrar formulario
+            $empleadoModel = $this->model('Empleado');
+            $empleados = $empleadoModel->getAll();
+            
+            $this->view('prestaciones_sociales/calcular', [
+                'title' => 'Calcular Prestaciones Sociales',
+                'empleados' => $empleados
+            ]);
+        }
+    }
+    
+    public function reporteAnual() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        try {
+            $prestacionesModel = $this->model('PrestacionesSocialesModel');
+            $anio = isset($_GET['anio']) ? intval($_GET['anio']) : date('Y');
+            
+            // Por ahora usar 360 días como base anual
+            $calculoAnual = $prestacionesModel->calcularPrestacionesTodosEmpleados(360);
+            
+            $this->view('prestaciones_sociales/reporte_anual', [
+                'title' => 'Reporte Anual de Prestaciones Sociales ' . $anio,
+                'anio' => $anio,
+                'calculo_anual' => $calculoAnual,
+                'fecha_reporte' => date('Y-m-d H:i:s')
+            ]);
+            
+        } catch (Exception $e) {
+            $this->view('prestaciones_sociales/reporte_anual', [
+                'title' => 'Reporte Anual de Prestaciones Sociales',
+                'error' => 'Error al generar el reporte: ' . $e->getMessage(),
+                'anio' => date('Y'),
+                'calculo_anual' => null,
+                'fecha_reporte' => date('Y-m-d H:i:s')
+            ]);
+        }
+    }
+    
+    public function configuracion() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        $this->view('prestaciones_sociales/configuracion', [
+            'title' => 'Configuración de Prestaciones Sociales',
+            'parametros' => [
+                'salario_minimo' => PrestacionesSocialesModel::SALARIO_MINIMO,
+                'dias_laborales_anio' => PrestacionesSocialesModel::DIAS_LABORALES_ANIO,
+                'interes_cesantias' => PrestacionesSocialesModel::INTERES_CESANTIAS * 100
+            ],
+            'formulas' => [
+                'cesantias' => '(Salario + Auxilio Transporte) × Días Trabajados ÷ 360',
+                'intereses' => 'Cesantías × 12% × (Días Trabajados ÷ 360)',
+                'prima' => '(Salario + Auxilio Transporte) × Días Trabajados ÷ 360',
+                'vacaciones' => 'Salario × Días Trabajados ÷ 720 (sin auxilio de transporte)'
+            ]
+        ]);
+    }
+}

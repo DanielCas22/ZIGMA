@@ -33,9 +33,9 @@
                             <label class="form-label">Rol o Cargo</label>
                             <select name="rol" class="form-select" required id="rolSelect" onchange="actualizarSueldo()">
                                 <option value="">Seleccione un rol</option>
-                                <option value="empleado" data-sueldo="2500000">Empleado</option>
-                                <option value="rrhh" data-sueldo="4000000">RRHH</option>
-                                <option value="admin" data-sueldo="6000000">Admin</option>
+                                <option value="empleado" data-sueldo="1423000">Empleado</option>
+                                <option value="rrhh" data-sueldo="2000000">RRHH</option>
+                                <option value="admin" data-sueldo="4000000">Admin</option>
                             </select>
                             <div class="form-text">
                                 <small class="text-muted">
@@ -50,14 +50,14 @@
                                 <span class="input-group-text">
                                     <i class="fas fa-dollar-sign"></i>
                                 </span>
-                                <input type="number" name="sueldo_actual" id="sueldoInput" class="form-control" placeholder="Seleccione un rol o ingrese un sueldo" min="1" step="1000">
+                                <input type="number" name="sueldo_actual" id="sueldoInput" class="form-control" placeholder="Seleccione un rol o ingrese un sueldo" min="1" max="100000000" step="1">
                                 <button type="button" class="btn btn-outline-info" onclick="autoAsignarSueldo()" title="Auto-asignar según rol">
                                     <i class="fas fa-magic"></i>
                                 </button>
                             </div>
                             <div class="form-text">
                                 <i class="fas fa-info-circle text-info me-1"></i>
-                                Puede ingresar un sueldo personalizado o usar el botón de auto-asignación según el rol
+                                Ingrese un sueldo entre $1 y $100.000.000 pesos colombianos
                             </div>
                         </div>
                         <div class="d-flex justify-content-between">
@@ -77,9 +77,19 @@ function actualizarSueldo() {
     const rolSelect = document.getElementById('rolSelect');
     const sueldoInput = document.getElementById('sueldoInput');
     
-    if (rolSelect.value && !sueldoInput.value) {
-        // Solo auto-asignar si el campo de sueldo está vacío
-        autoAsignarSueldo();
+    if (rolSelect.value) {
+        // Cambiar el sueldo inmediatamente al seleccionar un rol
+        const selectedOption = rolSelect.options[rolSelect.selectedIndex];
+        const sueldo = selectedOption.getAttribute('data-sueldo');
+        sueldoInput.value = sueldo;
+        sueldoInput.classList.add('text-success', 'fw-bold');
+        
+        // Mostrar mensaje de confirmación
+        mostrarMensaje(`Sueldo actualizado: $${Number(sueldo).toLocaleString('es-CO')}`, 'success');
+    } else {
+        // Si no hay rol seleccionado, limpiar el campo
+        sueldoInput.value = '';
+        sueldoInput.classList.remove('text-success', 'fw-bold');
     }
 }
 

@@ -52,15 +52,15 @@
                             <label class="form-label">Rol o Cargo</label>
                             <select name="rol" class="form-select" required id="rolSelect" onchange="actualizarSueldo()">
                                 <option value="">Seleccione un rol</option>
-                                <option value="empleado" data-sueldo="2500000" 
+                                <option value="empleado" data-sueldo="1423000" 
                                     <?= (isset($empleadoConRol['rol_principal']) && $empleadoConRol['rol_principal'] === 'empleado') ? 'selected' : '' ?>>
                                     Empleado
                                 </option>
-                                <option value="rrhh" data-sueldo="4000000" 
+                                <option value="rrhh" data-sueldo="2000000" 
                                     <?= (isset($empleadoConRol['rol_principal']) && $empleadoConRol['rol_principal'] === 'rrhh') ? 'selected' : '' ?>>
                                     RRHH
                                 </option>
-                                <option value="admin" data-sueldo="6000000" 
+                                <option value="admin" data-sueldo="4000000" 
                                     <?= (isset($empleadoConRol['rol_principal']) && $empleadoConRol['rol_principal'] === 'admin') ? 'selected' : '' ?>>
                                     Admin
                                 </option>
@@ -81,7 +81,7 @@
                                 </span>
                                 <input type="number" name="sueldo_actual" id="sueldoInput" class="form-control" 
                                        value="<?= $empleado['sueldo_actual'] ?>" 
-                                       placeholder="Ingrese un sueldo" min="1" step="1000">
+                                       placeholder="Ingrese un sueldo" min="1" max="100000000" step="1">
                                 <button type="button" class="btn btn-outline-warning" onclick="autoAsignarSueldo()" title="Auto-asignar según rol">
                                     <i class="fas fa-magic"></i>
                                 </button>
@@ -109,14 +109,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Auto-actualización del sueldo cuando cambia el rol (solo si el campo está vacío)
+// Auto-actualización del sueldo cuando cambia el rol
 function actualizarSueldo() {
     const rolSelect = document.getElementById('rolSelect');
     const sueldoInput = document.getElementById('sueldoInput');
     
-    if (rolSelect.value && !sueldoInput.value) {
-        // Solo auto-asignar si el campo de sueldo está vacío
-        autoAsignarSueldo();
+    if (rolSelect.value) {
+        // Cambiar el sueldo inmediatamente al seleccionar un rol
+        const selectedOption = rolSelect.options[rolSelect.selectedIndex];
+        const sueldo = selectedOption.getAttribute('data-sueldo');
+        sueldoInput.value = sueldo;
+        sueldoInput.classList.add('text-warning', 'fw-bold');
+        
+        // Mostrar mensaje de confirmación
+        mostrarMensaje(`Sueldo actualizado: $${Number(sueldo).toLocaleString('es-CO')}`, 'success');
+    } else {
+        // Si no hay rol seleccionado, limpiar el campo
+        sueldoInput.value = '';
+        sueldoInput.classList.remove('text-warning', 'fw-bold');
     }
 }
 

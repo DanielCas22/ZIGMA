@@ -1,6 +1,16 @@
 <?php
 
 class SalarioPorRol extends Model {
+    /**
+     * Mapa de salarios por defecto según jerarquía de roles
+     */
+    private function defaultMap() {
+        return [
+            'empleado' => 1423000.0,
+            'rrhh' => 2000000.0,
+            'admin' => 4000000.0,
+        ];
+    }
     
     /**
      * Obtener todos los salarios por rol
@@ -9,7 +19,23 @@ class SalarioPorRol extends Model {
         $sql = "SELECT * FROM salarios_por_rol ORDER BY salario DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Si la tabla está vacía, devolver los valores por defecto en el mismo formato aproximado
+        if (!$rows || count($rows) === 0) {
+            $defaults = $this->defaultMap();
+            $orden = ['admin', 'rrhh', 'empleado'];
+            $out = [];
+            foreach ($orden as $rol) {
+                $out[] = [
+                    'rol' => $rol,
+                    'salario' => $defaults[$rol],
+                    'descripcion' => 'Valor por defecto',
+                ];
+            }
+            return $out;
+        }
+        return $rows;
     }
     
     /**
@@ -20,7 +46,12 @@ class SalarioPorRol extends Model {
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$rol]);
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $resultado ? floatval($resultado['salario']) : null;
+        if ($resultado) {
+            return floatval($resultado['salario']);
+        }
+        // Fallback a valores por defecto si no existe en DB
+        $defaults = $this->defaultMap();
+        return $defaults[$rol] ?? null;
     }
     
     /**
@@ -30,7 +61,18 @@ class SalarioPorRol extends Model {
         $sql = "SELECT * FROM salarios_por_rol WHERE rol = ?";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$rol]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) return $row;
+        // Fallback informativo
+        $defaults = $this->defaultMap();
+        if (isset($defaults[$rol])) {
+            return [
+                'rol' => $rol,
+                'salario' => $defaults[$rol],
+                'descripcion' => 'Valor por defecto',
+            ];
+        }
+        return null;
     }
     
     /**

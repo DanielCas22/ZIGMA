@@ -75,10 +75,10 @@
                                 <?php if (!empty($empleados)): ?>
                                     <?php foreach ($empleados as $emp): ?>
                                         <tr>
-                                            <td><?= $emp['id_empleados'] ?></td>
-                                            <td><?= $emp['nombre'] ?></td>
-                                            <td><?= $emp['apellidos'] ?></td>
-                                            <td><?= isset($emp['rol']) && $emp['rol'] !== '' ? $emp['rol'] : 'Sin rol' ?></td>
+                                            <td><?= htmlspecialchars($emp['id_empleados']) ?></td>
+                                            <td><?= htmlspecialchars($emp['nombre']) ?></td>
+                                            <td><?= htmlspecialchars(($emp['apellidos'] ?? null) !== null ? $emp['apellidos'] : ($emp['apellido'] ?? '')) ?></td>
+                                            <td><?= htmlspecialchars(isset($emp['rol']) && $emp['rol'] !== '' ? $emp['rol'] : 'Sin rol') ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php else: ?>
