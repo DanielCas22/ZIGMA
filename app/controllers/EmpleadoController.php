@@ -3,6 +3,7 @@ require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Empleado.php';
 require_once __DIR__ . '/../models/Rol.php';
 require_once __DIR__ . '/../models/SalarioPorRol.php';
+require_once __DIR__ . '/../models/ARLModel.php';
 
 class EmpleadoController extends Controller {
     private function baseUrl() {
@@ -50,6 +51,7 @@ class EmpleadoController extends Controller {
             $nombre = $_POST['nombres'] ?? '';
             $apellido = $_POST['apellido'] ?? '';
             $rol_especifico = $_POST['rol'] ?? 'empleado';
+            $riesgo_arl = isset($_POST['riesgo_arl']) ? intval($_POST['riesgo_arl']) : 2; // Por defecto Clase II
             $salario_manual = isset($_POST['sueldo_actual']) && !empty($_POST['sueldo_actual']) ? floatval($_POST['sueldo_actual']) : null;
 
             // Determinar el salario a usar
@@ -77,6 +79,15 @@ class EmpleadoController extends Controller {
             if ($resultado) {
                 // Obtener el id del empleado recién insertado
                 $empleado_id = $empleadoModel->getLastInsertId();
+
+                // Asignar riesgo ARL al empleado
+                try {
+                    $arlModel = $this->model('ARLModel');
+                    $arlModel->asignarRiesgoEmpleado($empleado_id, $riesgo_arl);
+                } catch (Exception $e) {
+                    // Si hay error al asignar ARL, continuar (se usará el valor por defecto)
+                    error_log("Error al asignar riesgo ARL: " . $e->getMessage());
+                }
 
                 // Crear usuario automáticamente
                 $userModel = $this->model('User');
@@ -132,6 +143,18 @@ class EmpleadoController extends Controller {
             exit;
         }
         
+        // Obtener riesgo ARL actual del empleado
+        try {
+            $arlModel = $this->model('ARLModel');
+            $riesgoEmpleado = $arlModel->getRiesgoEmpleado($id);
+            if ($riesgoEmpleado) {
+                $empleado['riesgo_arl'] = $riesgoEmpleado['codigo_riesgo'];
+            }
+        } catch (Exception $e) {
+            // Si hay error, continuar sin riesgo asignado
+            error_log("Error al obtener riesgo ARL: " . $e->getMessage());
+        }
+        
         // Obtener roles disponibles
         $rolModel = $this->model('Rol');
         $roles = $rolModel->getAll();
@@ -157,6 +180,7 @@ class EmpleadoController extends Controller {
             $nombre = $_POST['nombres'] ?? '';
             $apellido = $_POST['apellido'] ?? '';
             $rol_especifico = $_POST['rol'] ?? 'empleado';
+            $riesgo_arl = isset($_POST['riesgo_arl']) ? intval($_POST['riesgo_arl']) : 2; // Por defecto Clase II
             $salario_manual = isset($_POST['sueldo_actual']) && !empty($_POST['sueldo_actual']) ? floatval($_POST['sueldo_actual']) : null;
 
             // Determinar el salario a usar
@@ -183,6 +207,15 @@ class EmpleadoController extends Controller {
             $resultado = $empleadoModel->update($id, $data);
 
             if ($resultado) {
+                // Actualizar riesgo ARL del empleado
+                try {
+                    $arlModel = $this->model('ARLModel');
+                    $arlModel->asignarRiesgoEmpleado($id, $riesgo_arl);
+                } catch (Exception $e) {
+                    // Si hay error al asignar ARL, continuar
+                    error_log("Error al actualizar riesgo ARL: " . $e->getMessage());
+                }
+
                 // Actualizar roles del usuario asociado
                 $userModel = $this->model('User');
                 $rolModel = $this->model('Rol');
@@ -236,7 +269,7 @@ class EmpleadoController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $empleado_id = intval($_POST['empleado_id']);
-                $nuevo_sueldo = floatval($_POST['sueldo_actual']);
+                $nuevo_sueldo = floatval($_POST['salario']);
                 
                 $empleadoModel = $this->model('Empleado');
                 $resultado = $empleadoModel->updateSalario($empleado_id, $nuevo_sueldo);
@@ -274,5 +307,47 @@ class EmpleadoController extends Controller {
         }
         header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
         exit();
+    }
+
+    public function detalle() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        if (!isset($_GET['id'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
+            exit;
+        }
+        
+        $id = intval($_GET['id']);
+        $empleadoModel = $this->model('Empleado');
+        $empleado = $empleadoModel->getByIdWithRoles($id);
+        
+        if (!$empleado) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index&error=notfound');
+            exit;
+        }
+        
+        // Obtener horas extras del empleado si existen
+        $horasExtrasModel = $this->model('HorasExtras');
+        $horasExtras = $horasExtrasModel->getHorasExtrasByEmpleado($id);
+        
+        // Calcular totales de horas extras
+        $total_horas_extras = 0;
+        $total_valor_extras = 0;
+        if ($horasExtras) {
+            foreach ($horasExtras as $he) {
+                $total_horas_extras += floatval($he['cantidad'] ?? 0);
+                $total_valor_extras += floatval($he['valor'] ?? 0);
+            }
+        }
+        
+        $this->view('empleado/detalle', [
+            'empleado' => $empleado,
+            'horasExtras' => $horasExtras,
+            'total_horas_extras' => $total_horas_extras,
+            'total_valor_extras' => $total_valor_extras
+        ]);
     }
 }

@@ -1,18 +1,38 @@
 <?php
 
+require_once __DIR__ . '/Model.php';
 require_once __DIR__ . '/ARLModel.php';
+require_once __DIR__ . '/DevengadoModel.php';
 
 /**
  * Modelo para cálculos de Seguridad Social
- * Basado en el PROM proporcionado para cálculo de aportes de salud y pensión
+ * Basado en total devengado según normatividad colombiana 2025
  */
 class SeguridadSocialModel extends Model {
     
-    // CONSTANTES PORCENTAJES SEGURIDAD SOCIAL
+    // CONSTANTES PORCENTAJES SEGURIDAD SOCIAL 2025
     const PORC_SALUD_EMPLEADO = 4.0;
     const PORC_PENSION_EMPLEADO = 4.0;
     const PORC_SALUD_EMPLEADOR = 8.5;
     const PORC_PENSION_EMPLEADOR = 12.0;
+    
+    private function obtenerRolesEmpleado($idEmpleado) {
+        try {
+            $empleadoModel = new Empleado();
+            $empleadoConRoles = $empleadoModel->getByIdWithRoles($idEmpleado);
+            
+            if ($empleadoConRoles && isset($empleadoConRoles['todos_los_roles'])) {
+                // Dividir los roles y limpiar espacios
+                $rolesString = $empleadoConRoles['todos_los_roles'];
+                $rolesArray = array_map('trim', explode(',', $rolesString));
+                return $rolesArray;
+            }
+            
+            return ['empleado']; // Rol por defecto para información
+        } catch (Exception $e) {
+            return ['empleado'];
+        }
+    }
     
     /**
      * Calcular seguridad social completa (empleado + empleador) basado en el primer PROM
@@ -63,48 +83,68 @@ class SeguridadSocialModel extends Model {
     }
     
     /**
-     * Calcular seguridad social básica (solo empleado) basado en el segundo PROM
-     * @param float $salarioBase Salario base del empleado
-     * @param int $diasTrabajados Días trabajados en el período
-     * @return array Array con los cálculos básicos de seguridad social
+     * Calcular seguridad social basado en total devengado
+     * Fórmulas actualizadas 2025:
+     * - Salud: (total devengado - auxilio transporte) * 8.5%
+     * - Pensión: (total devengado - auxilio transporte) * 12%
      */
-    public function calcularSeguridadSocialBasica($salarioBase, $diasTrabajados) {
+    public function calcularSeguridadSocialBasica($totalDevengado, $auxilioTransporte = 0) {
         // Validación
-        if ($salarioBase <= 0 || $diasTrabajados <= 0) {
-            throw new InvalidArgumentException('Error: Datos inválidos - salario base y días trabajados deben ser mayores a 0');
+        if ($totalDevengado <= 0) {
+            throw new InvalidArgumentException('Error: Total devengado debe ser mayor a 0');
         }
 
-        // CÁLCULO SALARIO PROPORCIONAL
-        $salarioProporcional = ($salarioBase * $diasTrabajados) / 30;
+        // Base de cálculo: Total devengado menos auxilio de transporte
+        $baseCalculo = $totalDevengado - $auxilioTransporte;
+        
+        // Asegurar que la base no sea negativa
+        if ($baseCalculo < 0) {
+            $baseCalculo = 0;
+        }
 
-        // CÁLCULO APORTES SEGURIDAD SOCIAL
-        $salud = $salarioProporcional * (self::PORC_SALUD_EMPLEADO / 100);
-        $pension = $salarioProporcional * (self::PORC_PENSION_EMPLEADO / 100);
+        // CÁLCULO APORTES SEGURIDAD SOCIAL EMPLEADOR
+        $salud = $baseCalculo * (self::PORC_SALUD_EMPLEADOR / 100);
+        $pension = $baseCalculo * (self::PORC_PENSION_EMPLEADOR / 100);
         $totalSeguridadSocial = $salud + $pension;
 
+        // CÁLCULO APORTES EMPLEADO (informativo)
+        $saludEmpleado = $baseCalculo * (self::PORC_SALUD_EMPLEADO / 100);
+        $pensionEmpleado = $baseCalculo * (self::PORC_PENSION_EMPLEADO / 100);
+        $totalEmpleado = $saludEmpleado + $pensionEmpleado;
+
         return [
-            'salario_base' => $salarioBase,
-            'dias_trabajados' => $diasTrabajados,
-            'salario_proporcional' => $salarioProporcional,
+            'total_devengado' => $totalDevengado,
+            'auxilio_transporte' => $auxilioTransporte,
+            'base_calculo' => $baseCalculo,
+            'aportes_empleador' => [
+                'salud' => [
+                    'porcentaje' => self::PORC_SALUD_EMPLEADOR,
+                    'valor' => $salud,
+                    'formula' => '(Total Devengado - Auxilio) × 8.5%'
+                ],
+                'pension' => [
+                    'porcentaje' => self::PORC_PENSION_EMPLEADOR,
+                    'valor' => $pension,
+                    'formula' => '(Total Devengado - Auxilio) × 12%'
+                ],
+                'total' => $totalSeguridadSocial
+            ],
             'aportes_empleado' => [
                 'salud' => [
                     'porcentaje' => self::PORC_SALUD_EMPLEADO,
-                    'valor' => $salud
+                    'valor' => $saludEmpleado
                 ],
                 'pension' => [
                     'porcentaje' => self::PORC_PENSION_EMPLEADO,
-                    'valor' => $pension
+                    'valor' => $pensionEmpleado
                 ],
-                'total' => $totalSeguridadSocial
+                'total' => $totalEmpleado
             ]
         ];
     }
     
     /**
-     * Calcular seguridad social por empleado según su salario individual
-     * @param int $idEmpleado ID del empleado
-     * @param int $diasTrabajados Días trabajados (opcional, por defecto 30)
-     * @return array Array con los cálculos de seguridad social del empleado
+     * Calcular seguridad social por empleado basado en total devengado
      */
     public function calcularSeguridadSocialPorEmpleado($idEmpleado, $diasTrabajados = 30) {
         // Obtener datos del empleado
@@ -114,18 +154,20 @@ class SeguridadSocialModel extends Model {
         if (!$empleado) {
             throw new InvalidArgumentException('Empleado no encontrado');
         }
+
+        // Obtener el total devengado usando DevengadoModel
+        $devengadoModel = new DevengadoModel();
+        $devengadoData = $devengadoModel->calcularDevengadoCompleto($idEmpleado);
         
-        // Usar directamente el sueldo_actual del empleado
-        $salarioBase = 0;
-        
-        if (isset($empleado['sueldo_actual']) && $empleado['sueldo_actual'] > 0) {
-            $salarioBase = floatval($empleado['sueldo_actual']);
-        } else {
-            throw new InvalidArgumentException("El empleado {$empleado['nombre']} {$empleado['apellido']} no tiene un salario asignado");
+        if (!$devengadoData) {
+            throw new InvalidArgumentException("No se pudo calcular el devengado para el empleado {$empleado['nombre']} {$empleado['apellido']}");
         }
-        
-        // Calcular seguridad social básica
-        $calculoBasico = $this->calcularSeguridadSocialBasica($salarioBase, $diasTrabajados);
+
+        $totalDevengado = $devengadoData['resumen']['total_devengado'];
+        $auxilioTransporte = $devengadoData['conceptos']['auxilio_transporte']['valor'] ?? 0;
+
+        // Calcular seguridad social basada en total devengado
+        $calculoBasico = $this->calcularSeguridadSocialBasica($totalDevengado, $auxilioTransporte);
         
         // Obtener información adicional del empleado (roles si existen - solo informativo)
         $roles = $this->obtenerRolesEmpleado($idEmpleado);
@@ -137,9 +179,12 @@ class SeguridadSocialModel extends Model {
         $uvt = 49799; // UVT 2025
         $umbral_uvt = 95;
         $umbral_cop = $uvt * $umbral_uvt;
-        if ($salarioBase > $umbral_cop) {
+        
+        // Usar la base de cálculo para retención
+        $baseCalculo = $calculoBasico['base_calculo'];
+        if ($baseCalculo > $umbral_cop) {
             try {
-                $retencion = $retencionModel->calcularProcedimiento1($salarioBase);
+                $retencion = $retencionModel->calcularProcedimiento1($baseCalculo);
             } catch (Exception $e) {
                 // Si falla la retención, continuar sin ella
                 error_log("Error calculando retención para empleado {$idEmpleado}: " . $e->getMessage());
@@ -147,46 +192,26 @@ class SeguridadSocialModel extends Model {
         }
         
         // Agregar información del empleado y retención
-        $calculoBasico['empleado'] = [
+        $resultado = $calculoBasico;
+        $resultado['empleado'] = [
             'id' => $empleado['id_empleados'],
             'nombre' => $empleado['nombre'],
             'apellido' => $empleado['apellido'],
-            'roles' => $roles,
-            'salario_asignado' => $salarioBase,
-            'tiene_salario_individual' => true
+            'cargo' => $empleado['cargo'] ?? 'No especificado',
+            'total_devengado' => $totalDevengado,
+            'auxilio_transporte' => $auxilioTransporte,
+            'roles' => $roles
         ];
-        $calculoBasico['retencion_fuente'] = $retencion;
         
-        return $calculoBasico;
-    }
-    
-    /**
-     * Obtener roles de un empleado (informativo, no afecta cálculos)
-     * @param int $idEmpleado ID del empleado
-     * @return array Array con los roles del empleado
-     */
-    private function obtenerRolesEmpleado($idEmpleado) {
-        try {
-            $userModel = new User();
-            $usuario = $userModel->getByEmpleadoId($idEmpleado);
-            
-            if ($usuario) {
-                $rolHasUserModel = new RolHasUser();
-                return $rolHasUserModel->getRolesByUserId($usuario['id_doc']);
-            }
-            
-            return ['empleado']; // Rol por defecto para información
-        } catch (Exception $e) {
-            return ['empleado'];
+        if ($retencion) {
+            $resultado['retencion_fuente'] = $retencion;
         }
         
-        return $calculoBasico;
+        return $resultado;
     }
     
     /**
      * Calcular seguridad social para todos los empleados
-     * @param int $diasTrabajados Días trabajados (opcional, por defecto 30)
-     * @return array Array con los cálculos de todos los empleados
      */
     public function calcularSeguridadSocialTodosEmpleados($diasTrabajados = 30) {
         $empleadoModel = new Empleado();
@@ -245,39 +270,46 @@ class SeguridadSocialModel extends Model {
      * @param int $diasTrabajados Días trabajados (opcional, por defecto 30)
      * @return array Array con cálculos de seguridad social + ARL
      */
+    /**
+     * Calcular seguridad social completa incluyendo ARL
+     * Basado en total devengado
+     */
     public function calcularSeguridadSocialConARL($idEmpleado, $diasTrabajados = 30) {
         // Calcular seguridad social básica
         $calculoSeguridad = $this->calcularSeguridadSocialPorEmpleado($idEmpleado, $diasTrabajados);
         
-        // Calcular ARL
+        // Calcular ARL usando el total devengado
         $arlModel = new ARLModel();
-        $calculoARL = $arlModel->calcularARLEmpleado($idEmpleado, $diasTrabajados);
+        $totalDevengado = $calculoSeguridad['total_devengado'];
+        $auxilioTransporte = $calculoSeguridad['auxilio_transporte'];
+        
+        // El ARL también debe calcularse sobre la base (total devengado - auxilio)
+        $calculoARL = $arlModel->calcularARLPorDevengado($idEmpleado, $totalDevengado, $auxilioTransporte);
         
         // Combinar ambos cálculos
         return [
             'empleado' => $calculoSeguridad['empleado'],
-            'salario_base' => $calculoSeguridad['salario_base'],
-            'dias_trabajados' => $diasTrabajados,
-            'salario_proporcional' => $calculoSeguridad['salario_proporcional'],
-            'seguridad_social' => $calculoSeguridad['aportes_empleado'],
-            'arl' => [
-                'codigo_riesgo' => $calculoARL['codigo_riesgo'],
-                'nivel_riesgo' => $calculoARL['nivel_riesgo'],
-                'porcentaje' => $calculoARL['porcentaje_arl'],
-                'valor' => $calculoARL['aporte_arl']
+            'total_devengado' => $calculoSeguridad['total_devengado'],
+            'auxilio_transporte' => $calculoSeguridad['auxilio_transporte'],
+            'base_calculo' => $calculoSeguridad['base_calculo'],
+            'seguridad_social' => [
+                'empleador' => $calculoSeguridad['aportes_empleador'],
+                'empleado' => $calculoSeguridad['aportes_empleado']
             ],
+            'arl' => $calculoARL,
             'totales' => [
-                'seguridad_social' => $calculoSeguridad['aportes_empleado']['total'],
-                'arl' => $calculoARL['aporte_arl'],
-                'total_deducciones' => $calculoSeguridad['aportes_empleado']['total'] + $calculoARL['aporte_arl']
-            ]
+                'seguridad_social_empleador' => $calculoSeguridad['aportes_empleador']['total'],
+                'seguridad_social_empleado' => $calculoSeguridad['aportes_empleado']['total'],
+                'arl' => $calculoARL['valor_arl'] ?? 0,
+                'total_empleador' => $calculoSeguridad['aportes_empleador']['total'] + ($calculoARL['valor_arl'] ?? 0),
+                'total_empleado' => $calculoSeguridad['aportes_empleado']['total']
+            ],
+            'retencion_fuente' => $calculoSeguridad['retencion_fuente'] ?? null
         ];
     }
     
     /**
      * Calcular seguridad social + ARL para todos los empleados
-     * @param int $diasTrabajados Días trabajados (opcional, por defecto 30)
-     * @return array Array con todos los cálculos incluyendo ARL
      */
     public function calcularSeguridadSocialConARLTodos($diasTrabajados = 30) {
         $empleadoModel = new Empleado();
@@ -314,22 +346,22 @@ class SeguridadSocialModel extends Model {
         $riesgoPorNivel = [];
         
         foreach ($calculosEmpleados as $calculo) {
-            $totalSalud += $calculo['seguridad_social']['salud']['valor'];
-            $totalPension += $calculo['seguridad_social']['pension']['valor'];
-            $totalARL += $calculo['arl']['valor'];
-            $totalGeneral += $calculo['totales']['total_deducciones'];
+            $totalSalud += $calculo['seguridad_social']['empleado']['salud']['valor'] ?? 0;
+            $totalPension += $calculo['seguridad_social']['empleado']['pension']['valor'] ?? 0;
+            $totalARL += $calculo['arl']['valor_arl'] ?? 0;
+            $totalGeneral += $calculo['totales']['total_empleado'] ?? 0;
             
             // Contar por nivel de riesgo
-            $codigoRiesgo = $calculo['arl']['codigo_riesgo'];
+            $codigoRiesgo = $calculo['arl']['codigo_riesgo'] ?? 2;
             if (!isset($riesgoPorNivel[$codigoRiesgo])) {
                 $riesgoPorNivel[$codigoRiesgo] = [
                     'cantidad' => 0,
-                    'nivel_info' => $calculo['arl']['nivel_riesgo'],
+                    'nivel_info' => $calculo['arl']['nivel_riesgo']['descripcion'] ?? 'Riesgo ' . $codigoRiesgo,
                     'total_arl' => 0
                 ];
             }
             $riesgoPorNivel[$codigoRiesgo]['cantidad']++;
-            $riesgoPorNivel[$codigoRiesgo]['total_arl'] += $calculo['arl']['valor'];
+            $riesgoPorNivel[$codigoRiesgo]['total_arl'] += $calculo['arl']['valor_arl'] ?? 0;
         }
         
         return [
@@ -338,16 +370,39 @@ class SeguridadSocialModel extends Model {
                 'salud' => $totalSalud,
                 'pension' => $totalPension,
                 'arl' => $totalARL,
-                'seguridad_social' => $totalSalud + $totalPension,
-                'total_general' => $totalGeneral
+                'total_seguridad_social' => $totalGeneral
             ],
             'promedios' => [
                 'salud' => $totalEmpleados > 0 ? $totalSalud / $totalEmpleados : 0,
                 'pension' => $totalEmpleados > 0 ? $totalPension / $totalEmpleados : 0,
                 'arl' => $totalEmpleados > 0 ? $totalARL / $totalEmpleados : 0,
-                'total_general' => $totalEmpleados > 0 ? $totalGeneral / $totalEmpleados : 0
+                'total_seguridad_social' => $totalEmpleados > 0 ? $totalGeneral / $totalEmpleados : 0
             ],
             'distribucion_riesgo' => $riesgoPorNivel
         ];
+    }
+
+    /**
+     * Calcular seguridad social CON ARL para todos los empleados
+     * @param int $diasTrabajados Días trabajados en el mes
+     * @return array Array con los cálculos de todos los empleados incluyendo ARL
+     */
+    public function calcularSeguridadSocialConARLTodosEmpleados($diasTrabajados = 30) {
+        $empleadoModel = new Empleado();
+        $empleados = $empleadoModel->getAll();
+        
+        $resultados = [];
+        
+        foreach ($empleados as $empleado) {
+            try {
+                $calculo = $this->calcularSeguridadSocialConARL($empleado['id_empleados'], $diasTrabajados);
+                $resultados[] = $calculo;
+            } catch (Exception $e) {
+                // Log del error pero continuar con los demás empleados
+                error_log("Error calculando seguridad social CON ARL para empleado {$empleado['id_empleados']}: " . $e->getMessage());
+            }
+        }
+        
+        return $resultados;
     }
 }

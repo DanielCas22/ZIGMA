@@ -1,4 +1,5 @@
 <?php
+
 class PrestacionesSocialesController extends Controller {
     
     private function baseUrl() {
@@ -50,9 +51,8 @@ class PrestacionesSocialesController extends Controller {
         
         try {
             $prestacionesModel = $this->model('PrestacionesSocialesModel');
-            $diasTrabajados = isset($_POST['dias_trabajados']) ? intval($_POST['dias_trabajados']) : 360;
             
-            $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado, $diasTrabajados);
+            $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado);
             
             $this->view('prestaciones_sociales/detalle', [
                 'title' => 'Detalle de Prestaciones Sociales',
@@ -79,13 +79,12 @@ class PrestacionesSocialesController extends Controller {
             try {
                 $prestacionesModel = $this->model('PrestacionesSocialesModel');
                 $idEmpleado = intval($_POST['empleado_id'] ?? 0);
-                $diasTrabajados = intval($_POST['dias_trabajados'] ?? 360);
                 
                 if ($idEmpleado <= 0) {
                     throw new InvalidArgumentException('Debe seleccionar un empleado válido');
                 }
                 
-                $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado, $diasTrabajados);
+                $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado);
                 
                 // Guardar el cálculo si se solicita
                 if (isset($_POST['guardar']) && $_POST['guardar'] === '1') {
@@ -133,8 +132,8 @@ class PrestacionesSocialesController extends Controller {
             $prestacionesModel = $this->model('PrestacionesSocialesModel');
             $anio = isset($_GET['anio']) ? intval($_GET['anio']) : date('Y');
             
-            // Por ahora usar 360 días como base anual
-            $calculoAnual = $prestacionesModel->calcularPrestacionesTodosEmpleados(360);
+            // Cálculo mensual para todos los empleados
+            $calculoAnual = $prestacionesModel->calcularPrestacionesTodosEmpleados();
             
             $this->view('prestaciones_sociales/reporte_anual', [
                 'title' => 'Reporte Anual de Prestaciones Sociales ' . $anio,

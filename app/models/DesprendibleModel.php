@@ -1,0 +1,129 @@
+<?php
+
+class DesprendibleModel {
+    private $db;
+    
+    public function __construct() {
+        // Cargar conexión a base de datos (siguiendo el patrón de Model.php)
+        $this->db = require __DIR__ . '/../../config/database.php';
+        
+        // Cargar modelos necesarios
+        require_once __DIR__ . '/Empleado.php';
+        require_once __DIR__ . '/NominaModel.php';
+    }
+    
+    /**
+     * Obtener datos completos del desprendible para un empleado
+     */
+    public function obtenerDesprendible($empleadoId, $mes = null, $anio = null) {
+        // Si no se especifica mes/año, usar el actual
+        if (!$mes) $mes = date('m');
+        if (!$anio) $anio = date('Y');
+        
+        // Obtener datos del empleado
+        $empleadoModel = new Empleado();
+        $empleado = $empleadoModel->find($empleadoId);
+        
+        if (!$empleado) {
+            return null;
+        }
+        
+        // Obtener cálculos de nómina
+        $nominaModel = new NominaModel();
+        $nominaEmpleado = $nominaModel->calcularNominaCompleta($empleadoId);
+        
+        // Obtener información de la empresa (esto debería venir de configuración)
+        $infoEmpresa = $this->obtenerInfoEmpresa();
+        
+        // Formatear período
+        $meses = [
+            '01' => 'ENERO', '02' => 'FEBRERO', '03' => 'MARZO', '04' => 'ABRIL',
+            '05' => 'MAYO', '06' => 'JUNIO', '07' => 'JULIO', '08' => 'AGOSTO',
+            '09' => 'SEPTIEMBRE', '10' => 'OCTUBRE', '11' => 'NOVIEMBRE', '12' => 'DICIEMBRE'
+        ];
+        
+        $periodo = "LIQUIDACION DE NOMINA DEL 01 AL 30 DEL MES DE " . $meses[$mes] . " DEL AÑO " . $anio;
+        
+        return [
+            'empresa' => $infoEmpresa,
+            'empleado' => [
+                'nombre' => ($empleado['nombre'] ?? '') . ' ' . ($empleado['apellido'] ?? ''),
+                'cedula' => $empleado['id_doc'] ?? $empleado['id_empleados'] ?? 'N/A',
+                'periodo' => $periodo,
+                'dias_trabajados' => 30 // Esto debería calcularse según el período real
+            ],
+            'devengado' => [
+                'sueldo_basico' => $nominaEmpleado['devengado']['salario_basico'] ?? 0,
+                'horas_extras' => $nominaEmpleado['devengado']['horas_extras'] ?? 0,
+                'comisiones' => $nominaEmpleado['devengado']['comisiones'] ?? 0,
+                'auxilio_transporte' => $nominaEmpleado['devengado']['auxilio_transporte'] ?? 0,
+                'otros' => $nominaEmpleado['devengado']['otros_devengados'] ?? 0,
+                'total_devengado' => $nominaEmpleado['resumen']['total_devengado'] ?? 0
+            ],
+            'deducciones' => [
+                'aportes_salud' => $nominaEmpleado['deducciones']['salud'] ?? 0,
+                'aportes_pension' => $nominaEmpleado['deducciones']['pension'] ?? 0,
+                'aportes_fs' => $nominaEmpleado['deducciones']['fondo_solidaridad'] ?? 0,
+                'retencion' => $nominaEmpleado['deducciones']['retencion_fuente'] ?? 0,
+                'otros_descuentos' => $nominaEmpleado['deducciones']['otros_deducidos'] ?? 0,
+                'total_deducido' => $nominaEmpleado['deducciones']['total_deducciones'] ?? 0
+            ],
+            'neto_pagado' => $nominaEmpleado['resumen']['neto_pagar'] ?? 0,
+            'fecha_generacion' => date('Y-m-d'),
+            'numero_desprendible' => $this->generarNumeroDesprendible($empleadoId, $mes, $anio)
+        ];
+    }
+    
+    /**
+     * Obtener información de la empresa
+     */
+    private function obtenerInfoEmpresa() {
+        // Esto debería venir de una tabla de configuración de la empresa
+        return [
+            'nombre' => 'ZIGMA CORPORATION S.A.S',
+            'nit' => '900.123.456-7',
+            'direccion' => 'Calle 123 #45-67',
+            'telefono' => '(601) 234-5678',
+            'ciudad' => 'Bogotá D.C.',
+            'logo' => 'assets/img/logo-empresa.png' // Ruta del logo
+        ];
+    }
+    
+    /**
+     * Generar número único del desprendible
+     */
+    private function generarNumeroDesprendible($empleadoId, $mes, $anio) {
+        return str_pad($empleadoId, 3, '0', STR_PAD_LEFT) . 
+               str_pad($mes, 2, '0', STR_PAD_LEFT) . 
+               $anio . 
+               rand(100, 999);
+    }
+    
+    /**
+     * Obtener lista de empleados para selección
+     */
+    public function obtenerEmpleadosParaDesprendible() {
+        // Obtener empleados con información completa incluyendo id_doc y rol
+        // Excluir empleados con ID 1, 2 y 3 que son únicamente roles
+        $sql = 'SELECT e.*, u.id_doc, r.nombre as rol_nombre
+                FROM empleados e 
+                LEFT JOIN user u ON e.id_empleados = u.empleado_id 
+                LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id
+                LEFT JOIN rol r ON rhu.rol_id = r.id_rol
+                WHERE e.id_empleados NOT IN (1, 2, 3)
+                ORDER BY e.nombre, e.apellido';
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Validar si existe información de nómina para un empleado en un período
+     */
+    public function validarPeriodo($empleadoId, $mes, $anio) {
+        // Aquí se validaría si existe información de nómina para ese período
+        // Por ahora retornamos true
+        return true;
+    }
+}

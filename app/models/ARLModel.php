@@ -1,5 +1,9 @@
 <?php
 
+require_once __DIR__ . '/Model.php';
+require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/Empleado.php';
+
 /**
  * Modelo para cálculos de ARL (Administradora de Riesgos Laborales)
  * Basado en el PROM proporcionado para cá    /**
@@ -26,7 +30,52 @@ class ARLModel extends Model {
     protected $table = 'empleados_riesgo_arl';
     
     /**
+     * Calcular ARL basado en total devengado
+     * ARL se calcula sobre la base: (total devengado - auxilio transporte)
+     */
+    public function calcularARLPorDevengado($idEmpleado, $totalDevengado, $auxilioTransporte = 0) {
+        // Obtener el código de riesgo del empleado
+        $codigoRiesgo = $this->obtenerCodigoRiesgoEmpleado($idEmpleado);
+        
+        // Validaciones
+        if ($totalDevengado <= 0) {
+            throw new InvalidArgumentException('Error: El total devengado debe ser mayor a 0');
+        }
+        
+        if ($codigoRiesgo < 1 || $codigoRiesgo > 5) {
+            throw new InvalidArgumentException('Error: Código de riesgo inválido. Debe ser entre 1 y 5');
+        }
+        
+        // Base de cálculo: Total devengado menos auxilio de transporte
+        $baseCalculo = $totalDevengado - $auxilioTransporte;
+        
+        // Asegurar que la base no sea negativa
+        if ($baseCalculo < 0) {
+            $baseCalculo = 0;
+        }
+        
+        // Obtener porcentaje según riesgo
+        $nivelRiesgo = self::NIVELES_RIESGO[$codigoRiesgo];
+        $porcentajeARL = $nivelRiesgo['porcentaje'];
+        
+        // CÁLCULO DEL APORTE A LA ARL
+        $valorARL = $baseCalculo * ($porcentajeARL / 100);
+        
+        return [
+            'total_devengado' => $totalDevengado,
+            'auxilio_transporte' => $auxilioTransporte,
+            'base_calculo' => $baseCalculo,
+            'codigo_riesgo' => $codigoRiesgo,
+            'nivel_riesgo' => $nivelRiesgo,
+            'porcentaje_arl' => $porcentajeARL,
+            'valor_arl' => $valorARL,
+            'formula' => '(Total Devengado - Auxilio) × ' . $porcentajeARL . '%'
+        ];
+    }
+
+    /**
      * Calcular ARL básico según el PROM
+     * Mantiene compatibilidad con el sistema anterior
      * @param float $salarioBase Salario base del empleado
      * @param int $diasTrabajados Días trabajados en el período
      * @param int $codigoRiesgo Código de riesgo (1-5)
@@ -107,6 +156,20 @@ class ARLModel extends Model {
         }
     }
     
+    /**
+     * Obtener el código de riesgo de un empleado
+     */
+    private function obtenerCodigoRiesgoEmpleado($idEmpleado) {
+        $riesgoEmpleado = $this->getRiesgoEmpleado($idEmpleado);
+        
+        if ($riesgoEmpleado) {
+            return intval($riesgoEmpleado['codigo_riesgo']);
+        }
+        
+        // Para empleados generales, podemos usar Riesgo II como default
+        return 2; // Riesgo II - Bajo
+    }
+
     /**
      * Obtener el nivel de riesgo de un empleado
      * @param int $idEmpleado ID del empleado

@@ -1,85 +1,90 @@
 <?php
+require_once 'Empleado.php';
+require_once 'DevengadoModel.php';
+
 class PrestacionesSocialesModel extends Model {
     
-    // Constantes para cálculos de prestaciones sociales 2025
+    // Constantes para cálculos mensuales de prestaciones sociales 2025
     const SALARIO_MINIMO = 1423000;
-    const DIAS_LABORALES_ANIO = 360;
-    const INTERES_CESANTIAS = 0.12; // 12% anual
+    
+    // Porcentajes mensuales para prestaciones sociales
+    const PORC_CESANTIAS_MENSUAL = 8.33; // 8.33% anual ÷ 12 meses = 0.694% mensual  
+    const PORC_INTERESES_MENSUAL = 12.0; // 12% anual sobre cesantías acumuladas
+    const PORC_PRIMA_MENSUAL = 8.33; // 8.33% anual ÷ 12 meses = 0.694% mensual
+    const PORC_VACACIONES_MENSUAL = 4.17; // 4.17% anual ÷ 12 meses = 0.347% mensual
     
     /**
-     * Calcular cesantías para un empleado
-     * Fórmula: (Salario mensual × Días trabajados) ÷ 360
+     * Calcular cesantías mensuales para un empleado
+     * Fórmula mensual: (Salario + Aux. Transporte) ÷ 12
      */
-    public function calcularCesantias($salarioMensual, $diasTrabajados = 360, $auxilioTransporte = 0) {
-        $salarioBase = $salarioMensual + $auxilioTransporte;
-        $cesantias = ($salarioBase * $diasTrabajados) / self::DIAS_LABORALES_ANIO;
+    public function calcularCesantiasMensuales($salarioMensual, $auxilioTransporte) {
+        $baseCalculo = $salarioMensual + $auxilioTransporte;
+        $cesantiasMensuales = $baseCalculo / 12; // Un doceavo del salario mensual
         
         return [
-            'salario_base' => $salarioBase,
-            'dias_trabajados' => $diasTrabajados,
-            'valor_cesantias' => $cesantias,
-            'formula' => "($salarioBase × $diasTrabajados) ÷ 360",
-            'incluye_auxilio_transporte' => $auxilioTransporte > 0
+            'salario_mensual' => $salarioMensual,
+            'auxilio_transporte' => $auxilioTransporte,
+            'base_calculo' => $baseCalculo,
+            'valor_cesantias' => $cesantiasMensuales,
+            'formula' => "(Salario + Aux. Trans.) ÷ 12",
+            'tipo_calculo' => 'mensual'
         ];
     }
     
     /**
-     * Calcular intereses sobre cesantías
-     * Fórmula: Cesantías × 12% × (Días trabajados ÷ 360)
+     * Calcular intereses sobre cesantías mensuales
+     * Fórmula: Cesantías acumuladas × 12% ÷ 12 meses = 1% mensual
      */
-    public function calcularInteresesCesantias($valorCesantias, $diasTrabajados = 360) {
-        $factorTiempo = $diasTrabajados / self::DIAS_LABORALES_ANIO;
-        $intereses = $valorCesantias * self::INTERES_CESANTIAS * $factorTiempo;
+    public function calcularInteresesCesantiasMensuales($cesantiasAcumuladas) {
+        $interesesMensuales = $cesantiasAcumuladas * 0.01; // 1% mensual
         
         return [
-            'valor_cesantias' => $valorCesantias,
-            'porcentaje_interes' => self::INTERES_CESANTIAS * 100,
-            'factor_tiempo' => $factorTiempo,
-            'valor_intereses' => $intereses,
-            'formula' => "$valorCesantias × 12% × ($diasTrabajados ÷ 360)"
+            'cesantias_acumuladas' => $cesantiasAcumuladas,
+            'valor_intereses' => $interesesMensuales,
+            'formula' => "Cesantías Acumuladas × 1% mensual",
+            'porcentaje_aplicado' => 1.0
         ];
     }
     
     /**
-     * Calcular prima de servicios
-     * Fórmula: (Salario mensual × Días trabajados) ÷ 360
+     * Calcular prima de servicios mensual
+     * Fórmula: (Salario + Aux. Transporte) ÷ 12
      */
-    public function calcularPrimaServicios($salarioMensual, $diasTrabajados = 360, $auxilioTransporte = 0) {
-        $salarioBase = $salarioMensual + $auxilioTransporte;
-        $prima = ($salarioBase * $diasTrabajados) / self::DIAS_LABORALES_ANIO;
+    public function calcularPrimaServiciosMensual($salarioMensual, $auxilioTransporte) {
+        $baseCalculo = $salarioMensual + $auxilioTransporte;
+        $primaMensual = $baseCalculo / 12; // Un doceavo del salario mensual
         
         return [
-            'salario_base' => $salarioBase,
-            'dias_trabajados' => $diasTrabajados,
-            'valor_prima' => $prima,
-            'formula' => "($salarioBase × $diasTrabajados) ÷ 360",
-            'incluye_auxilio_transporte' => $auxilioTransporte > 0
+            'salario_mensual' => $salarioMensual,
+            'auxilio_transporte' => $auxilioTransporte,
+            'base_calculo' => $baseCalculo,
+            'valor_prima' => $primaMensual,
+            'formula' => "(Salario + Aux. Trans.) ÷ 12",
+            'tipo_calculo' => 'mensual'
         ];
     }
     
     /**
-     * Calcular vacaciones
-     * Fórmula: (Salario mensual × Días trabajados) ÷ 720 (solo salario básico, sin auxilio)
+     * Calcular vacaciones mensuales
+     * Fórmula: Salario ÷ 24 (sin incluir auxilio de transporte)
      */
-    public function calcularVacaciones($salarioMensual, $diasTrabajados = 360) {
-        // Las vacaciones NO incluyen auxilio de transporte
-        $vacaciones = ($salarioMensual * $diasTrabajados) / 720; // 720 días = 2 años de factor
+    public function calcularVacacionesMensuales($salarioMensual) {
+        $vacacionesMensuales = $salarioMensual / 24; // Salario ÷ 24 meses (2 años)
         
         return [
-            'salario_base' => $salarioMensual,
-            'dias_trabajados' => $diasTrabajados,
-            'valor_vacaciones' => $vacaciones,
-            'formula' => "($salarioMensual × $diasTrabajados) ÷ 720",
-            'incluye_auxilio_transporte' => false,
-            'nota' => 'Las vacaciones NO incluyen auxilio de transporte'
+            'salario_mensual' => $salarioMensual,
+            'valor_vacaciones' => $vacacionesMensuales,
+            'formula' => "Salario ÷ 24",
+            'tipo_calculo' => 'mensual',
+            'nota' => 'Vacaciones sin auxilio de transporte',
+            'incluye_auxilio_transporte' => false
         ];
     }
-    
+
     /**
-     * Calcular todas las prestaciones sociales para un empleado
+     * Calcular todas las prestaciones sociales mensuales para un empleado
      */
-    public function calcularPrestacionesCompletas($idEmpleado, $diasTrabajados = 360) {
-        // Obtener datos del empleado
+    public function calcularPrestacionesCompletas($idEmpleado) {
         $empleadoModel = new Empleado();
         $empleado = $empleadoModel->find($idEmpleado);
         
@@ -92,18 +97,26 @@ class PrestacionesSocialesModel extends Model {
             throw new InvalidArgumentException("El empleado {$empleado['nombre']} {$empleado['apellido']} no tiene un salario asignado");
         }
         
-        // Calcular auxilio de transporte
         $auxilioTransporte = $empleadoModel->getAuxilioTransporte($salarioMensual);
         
-        // Calcular cada prestación
-        $cesantias = $this->calcularCesantias($salarioMensual, $diasTrabajados, $auxilioTransporte);
-        $intereses = $this->calcularInteresesCesantias($cesantias['valor_cesantias'], $diasTrabajados);
-        $prima = $this->calcularPrimaServicios($salarioMensual, $diasTrabajados, $auxilioTransporte);
-        $vacaciones = $this->calcularVacaciones($salarioMensual, $diasTrabajados);
+        // Calcular cesantías acumuladas (para el cálculo de intereses)
+        // En un sistema real, esto vendría de la base de datos
+        // Por ahora usamos el cálculo mensual × meses trabajados (asumimos 1 mes)
+        $cesantiasMensuales = $this->calcularCesantiasMensuales($salarioMensual, $auxilioTransporte);
+        $cesantiasAcumuladas = $cesantiasMensuales['valor_cesantias']; // Para un mes
+        
+        // Calcular cada prestación mensual
+        $cesantias = $cesantiasMensuales;
+        $intereses = $this->calcularInteresesCesantiasMensuales($cesantiasAcumuladas);
+        $prima = $this->calcularPrimaServiciosMensual($salarioMensual, $auxilioTransporte);
+        $vacaciones = $this->calcularVacacionesMensuales($salarioMensual);
         
         // Calcular totales
         $totalPrestaciones = $cesantias['valor_cesantias'] + $intereses['valor_intereses'] + 
                            $prima['valor_prima'] + $vacaciones['valor_vacaciones'];
+        
+        // Calcular total devengado básico (salario + auxilio para este contexto)
+        $totalDevengadoBasico = $salarioMensual + $auxilioTransporte;
         
         return [
             'empleado' => [
@@ -111,12 +124,13 @@ class PrestacionesSocialesModel extends Model {
                 'nombre' => $empleado['nombre'],
                 'apellido' => $empleado['apellido'],
                 'salario_mensual' => $salarioMensual,
-                'auxilio_transporte' => $auxilioTransporte
+                'auxilio_transporte' => $auxilioTransporte,
+                'total_devengado' => $totalDevengadoBasico
             ],
             'parametros' => [
-                'dias_trabajados' => $diasTrabajados,
+                'periodo' => 'Mensual',
                 'salario_minimo' => self::SALARIO_MINIMO,
-                'interes_cesantias' => self::INTERES_CESANTIAS * 100 . '%'
+                'fecha_calculo' => date('Y-m-d H:i:s')
             ],
             'prestaciones' => [
                 'cesantias' => $cesantias,
@@ -154,7 +168,11 @@ class PrestacionesSocialesModel extends Model {
         
         foreach ($empleados as $empleado) {
             try {
-                $calculo = $this->calcularPrestacionesCompletas($empleado['id_empleados'], $diasTrabajados);
+                $calculo = $this->calcularPrestacionesCompletas($empleado['id_empleados']);
+                
+                // Agregar información para compatibilidad con la vista
+                $calculo['parametros']['dias_trabajados'] = 'Mensual'; // Ya no usamos días
+                
                 $resultados[] = $calculo;
                 
                 // Sumar totales

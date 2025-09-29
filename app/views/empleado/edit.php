@@ -92,6 +92,32 @@
                             </div>
                         </div>
                         
+                        <div class="mb-3">
+                            <label class="form-label">🛡️ Nivel de Riesgo ARL</label>
+                            <select name="riesgo_arl" class="form-select" required id="riesgoSelect">
+                                <option value="">Seleccione el nivel de riesgo</option>
+                                <option value="1" <?= (isset($empleado['riesgo_arl']) && $empleado['riesgo_arl'] == 1) ? 'selected' : '' ?>>
+                                    Clase I - Mínimo (0.522%)
+                                </option>
+                                <option value="2" <?= (isset($empleado['riesgo_arl']) && $empleado['riesgo_arl'] == 2) ? 'selected' : (!isset($empleado['riesgo_arl']) ? 'selected' : '') ?>>
+                                    Clase II - Bajo (1.044%) <?= !isset($empleado['riesgo_arl']) ? '- Por defecto' : '' ?>
+                                </option>
+                                <option value="3" <?= (isset($empleado['riesgo_arl']) && $empleado['riesgo_arl'] == 3) ? 'selected' : '' ?>>
+                                    Clase III - Medio (2.436%)
+                                </option>
+                                <option value="4" <?= (isset($empleado['riesgo_arl']) && $empleado['riesgo_arl'] == 4) ? 'selected' : '' ?>>
+                                    Clase IV - Alto (4.350%)
+                                </option>
+                                <option value="5" <?= (isset($empleado['riesgo_arl']) && $empleado['riesgo_arl'] == 5) ? 'selected' : '' ?>>
+                                    Clase V - Máximo (6.960%)
+                                </option>
+                            </select>
+                            <div class="form-text">
+                                <i class="fas fa-shield-alt text-warning me-1"></i>
+                                Nivel actual: <?= isset($empleado['riesgo_arl']) ? 'Clase ' . ['I', 'II', 'III', 'IV', 'V'][$empleado['riesgo_arl'] - 1] : 'Sin asignar (se usará Clase II por defecto)' ?>
+                            </div>
+                        </div>
+                        
                         <div class="d-flex justify-content-between">
                             <button type="submit" class="btn btn-warning px-4">
                                 <i class="fas fa-save me-2"></i>Actualizar

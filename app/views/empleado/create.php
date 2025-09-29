@@ -60,6 +60,21 @@
                                 Ingrese un sueldo entre $1 y $100.000.000 pesos colombianos
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">🛡️ Nivel de Riesgo ARL</label>
+                            <select name="riesgo_arl" class="form-select" required id="riesgoSelect">
+                                <option value="">Seleccione el nivel de riesgo</option>
+                                <option value="1">Clase I - Mínimo (0.522%)</option>
+                                <option value="2" selected>Clase II - Bajo (1.044%) - Por defecto</option>
+                                <option value="3">Clase III - Medio (2.436%)</option>
+                                <option value="4">Clase IV - Alto (4.350%)</option>
+                                <option value="5">Clase V - Máximo (6.960%)</option>
+                            </select>
+                            <div class="form-text">
+                                <i class="fas fa-shield-alt text-warning me-1"></i>
+                                El nivel de riesgo determina el porcentaje de ARL que se aplicará sobre el salario
+                            </div>
+                        </div>
                         <div class="d-flex justify-content-between">
                             <button type="submit" class="btn btn-success px-4">Registrar</button>
                             <a href="/ZIGMA/public/index.php?url=Empleado/index" class="btn btn-outline-secondary px-4">Cancelar</a>

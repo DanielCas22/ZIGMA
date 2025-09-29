@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../models/Model.php';
 require_once __DIR__ . '/../models/SeguridadSocialModel.php';
 require_once __DIR__ . '/../models/ARLModel.php';
 require_once __DIR__ . '/../models/Empleado.php';
@@ -16,7 +17,6 @@ class SeguridadSocialController extends Controller {
     private $arlModel;
     
     public function __construct() {
-        parent::__construct();
         $this->seguridadSocialModel = new SeguridadSocialModel();
         $this->arlModel = new ARLModel();
     }
@@ -26,25 +26,29 @@ class SeguridadSocialController extends Controller {
      */
     public function index() {
         try {
-            // Obtener cálculos de todos los empleados
-            $calculosEmpleados = $this->seguridadSocialModel->calcularSeguridadSocialTodosEmpleados();
-            $resumenTotal = $this->seguridadSocialModel->obtenerResumenTotal($calculosEmpleados);
+            $diasTrabajados = 30; // Valor por defecto
+            
+            // Obtener cálculos de todos los empleados CON ARL
+            $calculosEmpleados = $this->seguridadSocialModel->calcularSeguridadSocialConARLTodosEmpleados($diasTrabajados);
+            $resumenTotal = $this->seguridadSocialModel->obtenerResumenTotalConARL($calculosEmpleados);
             
             $data = [
-                'title' => 'Cálculo de Seguridad Social por Empleado',
+                'title' => 'Cálculo de Seguridad Social + ARL por Empleado',
                 'calculos_empleados' => $calculosEmpleados,
                 'resumen_total' => $resumenTotal,
-                'success' => 'Cálculos de seguridad social generados correctamente'
+                'dias_trabajados' => $diasTrabajados,
+                'success' => 'Cálculos de seguridad social + ARL generados correctamente'
             ];
             
             $this->view('seguridad_social/index', $data);
             
         } catch (Exception $e) {
             $data = [
-                'title' => 'Cálculo de Seguridad Social por Empleado',
+                'title' => 'Cálculo de Seguridad Social + ARL por Empleado',
                 'error' => 'Error al calcular seguridad social: ' . $e->getMessage(),
                 'calculos_empleados' => [],
-                'resumen_total' => []
+                'resumen_total' => [],
+                'dias_trabajados' => 30
             ];
             
             $this->view('seguridad_social/index', $data);
@@ -157,15 +161,16 @@ class SeguridadSocialController extends Controller {
                     throw new InvalidArgumentException('Los días trabajados deben estar entre 1 y 31');
                 }
                 
-                $calculosEmpleados = $this->seguridadSocialModel->calcularSeguridadSocialTodosEmpleados($diasTrabajados);
-                $resumenTotal = $this->seguridadSocialModel->obtenerResumenTotal($calculosEmpleados);
+                // Usar cálculo CON ARL para la vista principal
+                $calculosEmpleados = $this->seguridadSocialModel->calcularSeguridadSocialConARLTodosEmpleados($diasTrabajados);
+                $resumenTotal = $this->seguridadSocialModel->obtenerResumenTotalConARL($calculosEmpleados);
                 
                 $data = [
-                    'title' => 'Cálculo de Seguridad Social por Empleado',
+                    'title' => 'Cálculo de Seguridad Social + ARL por Empleado',
                     'calculos_empleados' => $calculosEmpleados,
                     'resumen_total' => $resumenTotal,
                     'dias_trabajados' => $diasTrabajados,
-                    'success' => "Cálculos actualizados para {$diasTrabajados} días trabajados"
+                    'success' => "Cálculos actualizados para {$diasTrabajados} días trabajados (incluyendo ARL)"
                 ];
                 
                 $this->view('seguridad_social/index', $data);

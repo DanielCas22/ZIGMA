@@ -43,21 +43,13 @@
                 <div>
                     <h1 class="text-primary">
                         <i class="fas fa-gift me-3"></i>Prestaciones Sociales
+                        <span class="badge bg-success">NUEVA VERSIÓN CON CONCEPTOS ADICIONALES</span>
                     </h1>
-                    <p class="text-muted mb-0">Cesantías, Intereses, Prima y Vacaciones</p>
+                    <p class="text-muted mb-0">Cesantías, Intereses, Prima y Vacaciones + Conceptos Adicionales</p>
                 </div>
                 <div class="btn-group">
-                    <a href="/ZIGMA/public/index.php?url=Dashboard/index" class="btn btn-outline-primary">
-                        <i class="fas fa-home"></i> Dashboard
-                    </a>
-                    <a href="/ZIGMA/public/index.php?url=PrestacionesSociales/calcular" class="btn btn-success">
-                        <i class="fas fa-calculator"></i> Calcular Individual
-                    </a>
-                    <a href="/ZIGMA/public/index.php?url=PrestacionesSociales/reporteAnual" class="btn btn-info">
-                        <i class="fas fa-chart-line"></i> Reporte Anual
-                    </a>
-                    <a href="/ZIGMA/public/index.php?url=PrestacionesSociales/configuracion" class="btn btn-secondary">
-                        <i class="fas fa-cog"></i> Configuración
+                    <a href="/ZIGMA/public/index.php?url=Dashboard/index" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Volver al Inicio
                     </a>
                 </div>
             </div>
@@ -201,7 +193,7 @@
                                                 </strong>
                                             </td>
                                             <td>
-                                                <a href="/ZIGMA/public/index.php?url=PrestacionesSociales/detalle/<?= $calculo['empleado']['id'] ?>" 
+                                                <a href="?url=PrestacionesSociales/detalle/<?= $calculo['empleado']['id'] ?>" 
                                                    class="btn btn-sm btn-outline-primary" title="Ver detalle">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
@@ -246,11 +238,14 @@
                         </div>
                         <div class="card-body">
                             <ul class="list-unstyled mb-0">
-                                <li><strong>Cesantías:</strong> <span class="formula-text">(Salario + Aux. Trans.) × Días ÷ 360</span></li>
-                                <li><strong>Intereses:</strong> <span class="formula-text">Cesantías × 12% × (Días ÷ 360)</span></li>
-                                <li><strong>Prima:</strong> <span class="formula-text">(Salario + Aux. Trans.) × Días ÷ 360</span></li>
-                                <li><strong>Vacaciones:</strong> <span class="formula-text">Salario × Días ÷ 720</span></li>
+                                <li><strong>Cesantías:</strong> <span class="formula-text">(Salario + Aux. Trans.) ÷ 12</span></li>
+                                <li><strong>Intereses:</strong> <span class="formula-text">Cesantías Acumuladas × 1% mensual</span></li>
+                                <li><strong>Prima:</strong> <span class="formula-text">(Salario + Aux. Trans.) ÷ 12</span></li>
+                                <li><strong>Vacaciones:</strong> <span class="formula-text">Salario ÷ 24 (sin auxilio)</span></li>
                             </ul>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fas fa-calendar-alt"></i> <strong>Cálculo Mensual</strong> - Nómina con cortes mensuales
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -264,7 +259,8 @@
                                 <li><i class="fas fa-check text-success"></i> Cálculos basados en legislación colombiana 2025</li>
                                 <li><i class="fas fa-check text-success"></i> Salario mínimo: $<?= number_format(1423000, 0) ?></li>
                                 <li><i class="fas fa-check text-success"></i> Auxilio de transporte: $<?= number_format(200000, 0) ?></li>
-                                <li><i class="fas fa-check text-success"></i> Interés cesantías: 12% anual</li>
+                                <li><i class="fas fa-check text-success"></i> Interés cesantías: 12% anual (1% mensual)</li>
+                                <li><i class="fas fa-calendar-alt text-primary"></i> <strong>Nómina mensual</strong> - Cortes cada 30 días</li>
                             </ul>
                         </div>
                     </div>

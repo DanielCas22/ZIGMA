@@ -1,85 +1,116 @@
 <?php
-class NominaController extends Controller {
-    private function baseUrl() {
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
-        return $protocol . $_SERVER['HTTP_HOST'] . '/ZIGMA';
-    }
+require_once 'Controller.php';
 
-    // Punto de entrada para calcular y mostrar retención de un empleado
-    public function integrarCalculoRetencionFuente() {
+class NominaController extends Controller {
+    
+    public function index() {
         if (!isset($_SESSION['user'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
-
-        $empleado_id = isset($_GET['empleado_id']) ? intval($_GET['empleado_id']) : (isset($_POST['empleado_id']) ? intval($_POST['empleado_id']) : 0);
-        if ($empleado_id <= 0) {
-            header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index&error=no_empleado');
-            exit;
+        
+        try {
+            $nominaModel = $this->model('NominaModel');
+            $nominaCompleta = $nominaModel->calcularNominaGeneral();
+            
+            $this->view('nomina/index', [
+                'title' => 'Nómina - Sistema de Pago de Salarios',
+                'nomina_empleados' => $nominaCompleta['nomina_empleados'],
+                'totales_empresa' => $nominaCompleta['totales_empresa'],
+                'estadisticas' => $nominaCompleta['estadisticas'],
+                'total_empleados' => $nominaCompleta['total_empleados'],
+                'periodo' => $nominaCompleta['periodo'],
+                'fecha_generacion' => $nominaCompleta['fecha_generacion'],
+                'success' => 'Nómina calculada correctamente'
+            ]);
+            
+        } catch (Exception $e) {
+            $this->view('nomina/index', [
+                'title' => 'Nómina - Sistema de Pago de Salarios',
+                'error' => 'Error al calcular nómina: ' . $e->getMessage(),
+                'nomina_empleados' => [],
+                'totales_empresa' => [],
+                'estadisticas' => [],
+                'total_empleados' => 0,
+                'periodo' => date('Y-m'),
+                'fecha_generacion' => date('Y-m-d H:i:s')
+            ]);
         }
-
-        // Datos del empleado
-        $empleadoModel = $this->model('Empleado');
-        $empleado = $empleadoModel->getById($empleado_id);
-        if (!$empleado) {
-            header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index&error=notfound');
-            exit;
-        }
-
-        $salario = floatval($empleado['sueldo_actual'] ?? 0);
-
-        // Obtener parámetros de deducciones/exenciones
-        $params = $this->manejarDatosEmpleadoRetencion();
-
-        // Calcular ambos procedimientos
-        $retencionModel = $this->model('RetencionFuenteModel');
-        $proc1 = $retencionModel->calcularProcedimiento1($salario, $params);
-        $proc2 = $retencionModel->calcularProcedimiento2($salario, $params);
-
-        // Elegir mayor valor
-        $valor_final = max(floatval($proc1['retencion_art383']), floatval($proc2['retencion_minima_cop']));
-        $procedimiento_aplicado = ($valor_final == floatval($proc1['retencion_art383'])) ? 'ART_383' : 'ART_384_MINIMA';
-
-        // Guardar cálculo (opcional enlazar a total_deducido si existe)
-        $retencionModel->guardarCalculoRetencion(array_merge($params, [
-            'sueldo' => $salario,
-            'limite_30_salario' => $proc1['limite_30_salario'],
-            'subtotal_1' => $proc1['subtotal_1'],
-            'dependientes_uvt_32' => $proc1['dependientes_uvt_32'],
-            'salud_prepagada_16_uvt' => $proc1['salud_prepagada_16_uvt'],
-            'intereses_vivienda_100_uvt' => $proc1['intereses_vivienda_100_uvt'],
-            'subtotal_2' => $proc1['subtotal_2'],
-            'renta_exenta' => $proc1['renta_exenta'],
-            'base_retencion' => $proc1['base_retencion'],
-            'base_retencion_uvt' => $proc1['base_retencion_uvt'],
-            'retencion_art833' => $valor_final // almacenar el resultado aplicado
-        ]));
-
-        // Render de resumen
-        $this->view('nomina/resumen', [
-            'empleado' => $empleado,
-            'salario' => $salario,
-            'proc1' => $proc1,
-            'proc2' => $proc2,
-            'valor_final' => $valor_final,
-            'procedimiento_aplicado' => $procedimiento_aplicado
-        ]);
     }
-
-    // Recolecta datos desde POST/GET con valores por defecto 0
-    public function manejarDatosEmpleadoRetencion() {
-        $src = $_POST + $_GET;
-        return [
-            'salud' => isset($src['salud']) ? floatval($src['salud']) : 0,
-            'pension' => isset($src['pension']) ? floatval($src['pension']) : 0,
-            'fondo_solidaridad' => isset($src['fondo_solidaridad']) ? floatval($src['fondo_solidaridad']) : 0,
-            'pension_voluntaria' => isset($src['pension_voluntaria']) ? floatval($src['pension_voluntaria']) : 0,
-            'afc' => isset($src['afc']) ? floatval($src['afc']) : (isset($src['aporte_afc']) ? floatval($src['aporte_afc']) : 0),
-            'certificado_dependientes' => isset($src['certificado_dependientes']) ? floatval($src['certificado_dependientes']) : 0,
-            'salud_prepagados' => isset($src['salud_prepagados']) ? floatval($src['salud_prepagados']) : 0,
-            'pago_interes_vivienda' => isset($src['pago_interes_vivienda']) ? floatval($src['pago_interes_vivienda']) : 0,
-            'promedio_anio_anterior_salud' => isset($src['promedio_anio_anterior_salud']) ? floatval($src['promedio_anio_anterior_salud']) : 0,
-            'total_deducido_id' => isset($src['total_deducido_id']) ? intval($src['total_deducido_id']) : null,
-        ];
+    
+    public function detalle($idEmpleado) {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        try {
+            $nominaModel = $this->model('NominaModel');
+            $nominaEmpleado = $nominaModel->calcularNominaCompleta($idEmpleado);
+            
+            $this->view('nomina/detalle', [
+                'title' => 'Detalle Nómina - ' . $nominaEmpleado['empleado']['nombre'] . ' ' . $nominaEmpleado['empleado']['apellido'],
+                'nomina' => $nominaEmpleado,
+                'success' => 'Detalle de nómina generado correctamente'
+            ]);
+            
+        } catch (Exception $e) {
+            $this->view('nomina/detalle', [
+                'title' => 'Detalle Nómina',
+                'error' => 'Error al generar detalle de nómina: ' . $e->getMessage(),
+                'nomina' => null
+            ]);
+        }
+    }
+    
+    public function reporte() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        try {
+            $nominaModel = $this->model('NominaModel');
+            $periodo = $_GET['periodo'] ?? date('Y-m');
+            $reporte = $nominaModel->generarReporteNomina($periodo);
+            
+            $this->view('nomina/reporte', [
+                'title' => 'Reporte de Nómina',
+                'reporte' => $reporte,
+                'success' => 'Reporte generado correctamente'
+            ]);
+            
+        } catch (Exception $e) {
+            $this->view('nomina/reporte', [
+                'title' => 'Reporte de Nómina',
+                'error' => 'Error al generar reporte: ' . $e->getMessage(),
+                'reporte' => null
+            ]);
+        }
+    }
+    
+    public function resumen() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        try {
+            $nominaModel = $this->model('NominaModel');
+            $resumen = $nominaModel->obtenerResumenEjecutivo();
+            
+            $this->view('nomina/resumen', [
+                'title' => 'Resumen Ejecutivo - Nómina',
+                'resumen' => $resumen,
+                'success' => 'Resumen ejecutivo generado correctamente'
+            ]);
+            
+        } catch (Exception $e) {
+            $this->view('nomina/resumen', [
+                'title' => 'Resumen Ejecutivo - Nómina',
+                'error' => 'Error al generar resumen: ' . $e->getMessage(),
+                'resumen' => null
+            ]);
+        }
     }
 }

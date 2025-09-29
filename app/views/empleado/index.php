@@ -139,10 +139,6 @@
                                                 <strong class="text-success">
                                                     $<?= number_format(isset($emp['sueldo_actual']) ? floatval($emp['sueldo_actual']) : 0, 0, ',', '.') ?>
                                                 </strong>
-                                                <a href="#" onclick="editarSueldo(<?= $emp['id_empleados'] ?>, '<?= htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) ?>', <?= isset($emp['sueldo_actual']) ? floatval($emp['sueldo_actual']) : 0 ?>)" 
-                                                   class="btn btn-sm btn-outline-primary ms-2" title="Editar sueldo">
-                                                    <i class="fas fa-edit fa-xs"></i>
-                                                </a>
                                             </td>
                                             <td>
                                                 <?php 
@@ -185,7 +181,11 @@
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <div class="btn-group" role="group">
+                                                <div class="d-flex gap-2">
+                                                    <a href="/ZIGMA/public/index.php?url=Empleado/detalle&id=<?= $emp['id_empleados'] ?>" 
+                                                       class="btn btn-sm btn-info" title="Ver detalle del empleado">
+                                                        <i class="fa fa-eye"></i> Detalle
+                                                    </a>
                                                     <a href="/ZIGMA/public/index.php?url=Empleado/edit&id=<?= $emp['id_empleados'] ?>" 
                                                        class="btn btn-sm btn-warning" title="Editar empleado">
                                                         <i class="fa fa-edit"></i> Editar
@@ -212,48 +212,6 @@
     </div>
 </div>
 
-<!-- Modal para editar salario -->
-<div class="modal fade" id="modalEditarSalario" tabindex="-1" aria-labelledby="modalEditarSalarioLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalEditarSalarioLabel">
-                    <i class="fas fa-dollar-sign me-2"></i>Editar Salario
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="formEditarSalario" method="post" action="/ZIGMA/public/index.php?url=Empleado/updateSalario">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Empleado:</label>
-                        <p id="nombreEmpleado" class="text-muted"></p>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nuevoSalario" class="form-label">Nuevo Salario Base</label>
-                        <div class="input-group">
-                            <span class="input-group-text">
-                                <i class="fas fa-dollar-sign"></i>
-                            </span>
-                            <input type="number" id="nuevoSalario" name="salario" class="form-control" min="0" step="1000" required>
-                        </div>
-                        <div class="form-text">
-                            <i class="fas fa-info-circle text-info me-1"></i>
-                            Ingrese el nuevo salario base mensual en pesos colombianos
-                        </div>
-                    </div>
-                    <input type="hidden" id="empleadoId" name="empleado_id">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save me-1"></i>Guardar Cambios
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // Activar tooltips de Bootstrap
@@ -263,16 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 });
-
-// Función para editar salario
-function editarSalario(empleadoId, nombreCompleto, salarioActual) {
-    document.getElementById('empleadoId').value = empleadoId;
-    document.getElementById('nombreEmpleado').textContent = nombreCompleto;
-    document.getElementById('nuevoSalario').value = salarioActual;
-    
-    var modal = new bootstrap.Modal(document.getElementById('modalEditarSalario'));
-    modal.show();
-}
 </script>
 </body>
 </html>

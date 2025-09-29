@@ -91,15 +91,19 @@
                                 <div class="row text-center">
                                     <div class="col-md-3">
                                         <h6>Días Trabajados</h6>
-                                        <span class="badge bg-primary fs-6"><?= $calculo['parametros']['dias_trabajados'] ?> días</span>
+                                        <span class="badge bg-primary fs-6">Período: <?= $calculo['parametros']['periodo'] ?? 'Mensual' ?></span>
                                     </div>
                                     <div class="col-md-3">
                                         <h6>Salario Mínimo</h6>
                                         <span class="currency">$<?= number_format($calculo['parametros']['salario_minimo'], 0) ?></span>
                                     </div>
                                     <div class="col-md-3">
-                                        <h6>Interés Cesantías</h6>
-                                        <span class="badge bg-warning fs-6"><?= $calculo['parametros']['interes_cesantias'] ?></span>
+                                        <h6>Total Devengado</h6>
+                                        <span class="currency">$<?= number_format($calculo['empleado']['total_devengado'], 0) ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h6>Tipo Cálculo</h6>
+                                        <span class="badge bg-warning fs-6"><?= $calculo['parametros']['periodo'] ?? 'Mensual' ?></span>
                                     </div>
                                     <div class="col-md-3">
                                         <h6>Fecha Cálculo</h6>
@@ -121,19 +125,19 @@
                             </div>
                             <div class="card-body">
                                 <div class="formula-box">
-                                    <?= htmlspecialchars($calculo['prestaciones']['cesantias']['formula']) ?>
+                                    <?= htmlspecialchars($calculo['prestaciones']['cesantias']['formula'] ?? 'Total Devengado × 8.33%') ?>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Salario base (incluye aux. transporte):</small>
-                                    <div class="currency">$<?= number_format($calculo['prestaciones']['cesantias']['salario_base'], 2) ?></div>
+                                    <small class="text-muted">Total devengado base:</small>
+                                    <div class="currency">$<?= number_format($calculo['empleado']['total_devengado'], 2) ?></div>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Días trabajados:</small>
-                                    <div><?= $calculo['prestaciones']['cesantias']['dias_trabajados'] ?> días</div>
+                                    <small class="text-muted">Porcentaje aplicado:</small>
+                                    <div>8.33%</div>
                                 </div>
                                 <hr>
                                 <div class="text-center">
-                                    <h4 class="currency text-info">$<?= number_format($calculo['prestaciones']['cesantias']['valor_cesantias'], 2) ?></h4>
+                                    <h4 class="currency text-info">$<?= number_format($calculo['prestaciones']['cesantias']['valor_cesantias'] ?? 0, 2) ?></h4>
                                     <small class="text-muted">Valor Cesantías</small>
                                 </div>
                             </div>
@@ -148,23 +152,23 @@
                             </div>
                             <div class="card-body">
                                 <div class="formula-box">
-                                    <?= htmlspecialchars($calculo['prestaciones']['intereses_cesantias']['formula']) ?>
+                                    <?= htmlspecialchars($calculo['prestaciones']['intereses_cesantias']['formula'] ?? 'Total Devengado × 1%') ?>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Valor cesantías base:</small>
-                                    <div class="currency">$<?= number_format($calculo['prestaciones']['intereses_cesantias']['valor_cesantias'], 2) ?></div>
+                                    <small class="text-muted">Total devengado base:</small>
+                                    <div class="currency">$<?= number_format($calculo['empleado']['total_devengado'], 2) ?></div>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Porcentaje de interés:</small>
-                                    <div><?= $calculo['prestaciones']['intereses_cesantias']['porcentaje_interes'] ?>% anual</div>
+                                    <small class="text-muted">Porcentaje aplicado:</small>
+                                    <div>1.00%</div>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Factor tiempo:</small>
-                                    <div><?= number_format($calculo['prestaciones']['intereses_cesantias']['factor_tiempo'], 4) ?></div>
+                                    <small class="text-muted">Porcentaje aplicado:</small>
+                                    <div>1.00%</div>
                                 </div>
                                 <hr>
                                 <div class="text-center">
-                                    <h4 class="currency text-warning">$<?= number_format($calculo['prestaciones']['intereses_cesantias']['valor_intereses'], 2) ?></h4>
+                                    <h4 class="currency text-warning">$<?= number_format($calculo['prestaciones']['intereses_cesantias']['valor_intereses'] ?? 0, 2) ?></h4>
                                     <small class="text-muted">Valor Intereses</small>
                                 </div>
                             </div>
@@ -179,19 +183,19 @@
                             </div>
                             <div class="card-body">
                                 <div class="formula-box">
-                                    <?= htmlspecialchars($calculo['prestaciones']['prima_servicios']['formula']) ?>
+                                    <?= htmlspecialchars($calculo['prestaciones']['prima_servicios']['formula'] ?? 'Total Devengado × 8.33%') ?>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Salario base (incluye aux. transporte):</small>
-                                    <div class="currency">$<?= number_format($calculo['prestaciones']['prima_servicios']['salario_base'], 2) ?></div>
+                                    <small class="text-muted">Total devengado base:</small>
+                                    <div class="currency">$<?= number_format($calculo['empleado']['total_devengado'], 2) ?></div>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Días trabajados:</small>
-                                    <div><?= $calculo['prestaciones']['prima_servicios']['dias_trabajados'] ?> días</div>
+                                    <small class="text-muted">Porcentaje aplicado:</small>
+                                    <div>8.33%</div>
                                 </div>
                                 <hr>
                                 <div class="text-center">
-                                    <h4 class="currency text-success">$<?= number_format($calculo['prestaciones']['prima_servicios']['valor_prima'], 2) ?></h4>
+                                    <h4 class="currency text-success">$<?= number_format($calculo['prestaciones']['prima_servicios']['valor_prima'] ?? 0, 2) ?></h4>
                                     <small class="text-muted">Valor Prima</small>
                                 </div>
                             </div>
@@ -206,22 +210,22 @@
                             </div>
                             <div class="card-body">
                                 <div class="formula-box">
-                                    <?= htmlspecialchars($calculo['prestaciones']['vacaciones']['formula']) ?>
+                                    <?= htmlspecialchars($calculo['prestaciones']['vacaciones']['formula'] ?? '(Total Devengado - Auxilio Transporte) × 4.17%') ?>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Salario base (sin aux. transporte):</small>
-                                    <div class="currency">$<?= number_format($calculo['prestaciones']['vacaciones']['salario_base'], 2) ?></div>
+                                    <small class="text-muted">Base de cálculo:</small>
+                                    <div class="currency">$<?= number_format($calculo['prestaciones']['vacaciones']['base_vacaciones'] ?? 0, 2) ?></div>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-muted">Días trabajados:</small>
-                                    <div><?= $calculo['prestaciones']['vacaciones']['dias_trabajados'] ?> días</div>
+                                    <small class="text-muted">Auxilio transporte descontado:</small>
+                                    <div class="currency">$<?= number_format($calculo['prestaciones']['vacaciones']['auxilio_transporte'] ?? 0, 2) ?></div>
                                 </div>
                                 <div class="mb-2">
-                                    <small class="text-info"><i class="fas fa-info-circle"></i> <?= $calculo['prestaciones']['vacaciones']['nota'] ?></small>
+                                    <small class="text-info"><i class="fas fa-info-circle"></i> <?= $calculo['prestaciones']['vacaciones']['nota'] ?? 'Las vacaciones NO incluyen auxilio de transporte' ?></small>
                                 </div>
                                 <hr>
                                 <div class="text-center">
-                                    <h4 class="currency text-primary">$<?= number_format($calculo['prestaciones']['vacaciones']['valor_vacaciones'], 2) ?></h4>
+                                    <h4 class="currency text-primary">$<?= number_format($calculo['prestaciones']['vacaciones']['valor_vacaciones'] ?? 0, 2) ?></h4>
                                     <small class="text-muted">Valor Vacaciones</small>
                                 </div>
                             </div>
@@ -240,23 +244,23 @@
                                 <table class="table table-borderless">
                                     <tr>
                                         <td>Cesantías:</td>
-                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['cesantias'], 2) ?></td>
+                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['cesantias'] ?? 0, 2) ?></td>
                                     </tr>
                                     <tr>
                                         <td>Intereses sobre Cesantías:</td>
-                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['intereses'], 2) ?></td>
+                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['intereses'] ?? 0, 2) ?></td>
                                     </tr>
                                     <tr>
                                         <td>Prima de Servicios:</td>
-                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['prima'], 2) ?></td>
+                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['prima'] ?? 0, 2) ?></td>
                                     </tr>
                                     <tr>
                                         <td>Vacaciones:</td>
-                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['vacaciones'], 2) ?></td>
+                                        <td class="text-end currency">$<?= number_format($calculo['resumen']['desglose']['vacaciones'] ?? 0, 2) ?></td>
                                     </tr>
                                     <tr class="border-top">
                                         <td><strong>TOTAL PRESTACIONES SOCIALES:</strong></td>
-                                        <td class="text-end"><h4 class="currency text-danger">$<?= number_format($calculo['resumen']['total_prestaciones'], 2) ?></h4></td>
+                                        <td class="text-end"><h4 class="currency text-danger">$<?= number_format($calculo['resumen']['total_prestaciones'] ?? 0, 2) ?></h4></td>
                                     </tr>
                                 </table>
                             </div>
@@ -273,29 +277,22 @@
                     </div>
                 </div>
 
-                <!-- Formulario para recalcular con diferentes días -->
+                <!-- Información del cálculo -->
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-sync me-2"></i>Recalcular con Diferentes Días</h6>
+                        <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información del Cálculo</h6>
                     </div>
                     <div class="card-body">
-                        <form method="post">
-                            <div class="row align-items-end">
-                                <div class="col-md-4">
-                                    <label class="form-label">Días Trabajados</label>
-                                    <input type="number" name="dias_trabajados" class="form-control" 
-                                           value="<?= $calculo['parametros']['dias_trabajados'] ?>" min="1" max="360">
-                                </div>
-                                <div class="col-md-4">
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-calculator"></i> Recalcular
-                                    </button>
-                                </div>
-                                <div class="col-md-4">
-                                    <small class="text-muted">Ingrese los días trabajados en el año para recalcular</small>
-                                </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Tipo de cálculo:</strong> Mensual (basado en total devengado)</p>
+                                <p><strong>Total devengado:</strong> $<?= number_format($calculo['empleado']['total_devengado']) ?></p>
                             </div>
-                        </form>
+                            <div class="col-md-6">
+                                <p><strong>Fecha:</strong> <?= date('d/m/Y H:i') ?></p>
+                                <p><strong>Período:</strong> <?= $calculo['parametros']['periodo'] ?? 'Mensual' ?></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
