@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS conceptos_adicionales_prestaciones (
     activo BOOLEAN DEFAULT TRUE,
     creado_por VARCHAR(100),
     INDEX idx_empleado_id (empleado_id),
-    FOREIGN KEY (empleado_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id_empleados) ON DELETE CASCADE
 );
 
 -- Datos de ejemplo
