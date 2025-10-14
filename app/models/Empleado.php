@@ -21,37 +21,7 @@ class Empleado extends Model {
     }
 
     public function getAll() {
-        $filterBySystem = $this->hasColumn('es_usuario_sistema');
-        $sql = 'SELECT * FROM empleados e';
-        $conditions = [];
-        if ($filterBySystem) {
-            $conditions[] = '(e.es_usuario_sistema IS NULL OR e.es_usuario_sistema = 0)';
-        }
-        // Excluir placeholders/roles por nombre (usa solo nombre y apellido existentes)
-        $conditions[] = "NOT (
-            UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
-            OR UPPER(TRIM(e.nombre)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
-            OR UPPER(TRIM(e.apellido)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
-            OR (
-                UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%COORD%' AND (
-                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RRHH%' OR
-                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RH%' OR
-                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RECURSOS%HUMANOS%'
-                )
-            )
-            OR (
-                UPPER(TRIM(e.nombre)) LIKE '%COORD%' AND (
-                    UPPER(TRIM(e.nombre)) LIKE '%RRHH%' OR
-                    UPPER(TRIM(e.nombre)) LIKE '%RH%' OR
-                    UPPER(TRIM(e.nombre)) LIKE '%RECURSOS%HUMANOS%'
-                )
-            )
-        )";
-        
-        if (!empty($conditions)) {
-            $sql .= ' WHERE ' . implode(' AND ', $conditions);
-        }
-        $sql .= ' ORDER BY e.nombre';
+        $sql = 'SELECT * FROM empleados ORDER BY nombre';
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

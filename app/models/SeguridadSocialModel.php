@@ -405,4 +405,55 @@ class SeguridadSocialModel extends Model {
         
         return $resultados;
     }
+    
+    /**
+     * Calcular seguridad social CON ARL para todos los empleados - VERSIÓN TEMPORAL SIN ARL
+     * @param int $diasTrabajados Días trabajados en el mes
+     * @return array Array con los cálculos de todos los empleados
+     */
+    public function calcularSeguridadSocialConARLTodosEmpleadosTemporal($diasTrabajados = 30) {
+        $empleadoModel = new Empleado();
+        $empleados = $empleadoModel->getAll();
+        
+        $resultados = [];
+        
+        foreach ($empleados as $empleado) {
+            try {
+                // Solo calcular seguridad social básica (sin ARL)
+                $calculo = $this->calcularSeguridadSocialPorEmpleado($empleado['id_empleados'], $diasTrabajados);
+                
+                // Agregar formato compatible con la vista
+                $resultado = [
+                    'empleado' => $calculo['empleado'],
+                    'total_devengado' => $calculo['total_devengado'],
+                    'auxilio_transporte' => $calculo['auxilio_transporte'],
+                    'base_calculo' => $calculo['base_calculo'],
+                    'seguridad_social' => [
+                        'empleador' => $calculo['aportes_empleador'],
+                        'empleado' => $calculo['aportes_empleado']
+                    ],
+                    'arl' => [
+                        'valor_arl' => 0,
+                        'codigo_riesgo' => 2,
+                        'nivel_riesgo' => ['descripcion' => 'Clase II - Bajo']
+                    ],
+                    'totales' => [
+                        'seguridad_social_empleador' => $calculo['aportes_empleador']['total'],
+                        'seguridad_social_empleado' => $calculo['aportes_empleado']['total'],
+                        'arl' => 0,
+                        'total_empleador' => $calculo['aportes_empleador']['total'],
+                        'total_empleado' => $calculo['aportes_empleado']['total']
+                    ],
+                    'retencion_fuente' => $calculo['retencion_fuente'] ?? null
+                ];
+                
+                $resultados[] = $resultado;
+            } catch (Exception $e) {
+                // Log del error pero continuar con los demás empleados
+                error_log("Error calculando seguridad social para empleado {$empleado['id_empleados']}: " . $e->getMessage());
+            }
+        }
+        
+        return $resultados;
+    }
 }

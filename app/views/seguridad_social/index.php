@@ -247,7 +247,15 @@
                                 </span>
                             </td>
                             <td class="text-right currency" style="background-color: #fff3cd;">
-                                <?php echo number_format(($calculo['arl']['porcentaje_arl'] ?? 0), 3); ?>%
+                                <?php 
+                                    $porcentaje = 0;
+                                    if (isset($calculo['arl']['nivel_riesgo']['porcentaje'])) {
+                                        $porcentaje = $calculo['arl']['nivel_riesgo']['porcentaje'];
+                                    } elseif (isset($calculo['arl']['porcentaje_arl'])) {
+                                        $porcentaje = $calculo['arl']['porcentaje_arl'];
+                                    }
+                                    echo number_format($porcentaje, 3);
+                                ?>%
                             </td>
                             <td class="text-right currency" style="background-color: #fff3cd;">
                                 $<?php echo number_format(($calculo['arl']['valor_arl'] ?? 0), 2); ?>

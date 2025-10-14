@@ -11,20 +11,20 @@ require_once __DIR__ . '/Empleado.php';
  */
 class ARLModel extends Model {
     
-    // CONSTANTES DE PORCENTAJES DE RIESGO (según PROM)
-    const RIESGO_I = 0.522;
-    const RIESGO_II = 1.044;
-    const RIESGO_III = 2.436;
-    const RIESGO_IV = 4.350;
-    const RIESGO_V = 6.960;
+    // CONSTANTES DE PORCENTAJES DE RIESGO ARL (según tabla oficial)
+    const RIESGO_I = 0.522;    // Clase I - Mínimo
+    const RIESGO_II = 1.044;   // Clase II - Bajo  
+    const RIESGO_III = 2.436;  // Clase III - Medio
+    const RIESGO_IV = 4.350;   // Clase IV - Alto
+    const RIESGO_V = 6.960;    // Clase V - Máximo
     
     // Mapeo de niveles de riesgo
     const NIVELES_RIESGO = [
-        1 => ['codigo' => 'I', 'porcentaje' => self::RIESGO_I, 'descripcion' => 'Riesgo Mínimo'],
-        2 => ['codigo' => 'II', 'porcentaje' => self::RIESGO_II, 'descripcion' => 'Riesgo Bajo'],
-        3 => ['codigo' => 'III', 'porcentaje' => self::RIESGO_III, 'descripcion' => 'Riesgo Medio'],
-        4 => ['codigo' => 'IV', 'porcentaje' => self::RIESGO_IV, 'descripcion' => 'Riesgo Alto'],
-        5 => ['codigo' => 'V', 'porcentaje' => self::RIESGO_V, 'descripcion' => 'Riesgo Máximo']
+        1 => ['codigo' => 'I', 'porcentaje' => self::RIESGO_I, 'descripcion' => 'Clase I - Mínimo'],
+        2 => ['codigo' => 'II', 'porcentaje' => self::RIESGO_II, 'descripcion' => 'Clase II - Bajo'],
+        3 => ['codigo' => 'III', 'porcentaje' => self::RIESGO_III, 'descripcion' => 'Clase III - Medio'],
+        4 => ['codigo' => 'IV', 'porcentaje' => self::RIESGO_IV, 'descripcion' => 'Clase IV - Alto'],
+        5 => ['codigo' => 'V', 'porcentaje' => self::RIESGO_V, 'descripcion' => 'Clase V - Máximo']
     ];
     
     protected $table = 'empleados_riesgo_arl';
@@ -34,16 +34,12 @@ class ARLModel extends Model {
      * ARL se calcula sobre la base: (total devengado - auxilio transporte)
      */
     public function calcularARLPorDevengado($idEmpleado, $totalDevengado, $auxilioTransporte = 0) {
-        // Obtener el código de riesgo del empleado
-        $codigoRiesgo = $this->obtenerCodigoRiesgoEmpleado($idEmpleado);
+        // Obtener información completa del riesgo desde la BD
+        $riesgoInfo = $this->obtenerRiesgoCompletoEmpleado($idEmpleado);
         
         // Validaciones
         if ($totalDevengado <= 0) {
             throw new InvalidArgumentException('Error: El total devengado debe ser mayor a 0');
-        }
-        
-        if ($codigoRiesgo < 1 || $codigoRiesgo > 5) {
-            throw new InvalidArgumentException('Error: Código de riesgo inválido. Debe ser entre 1 y 5');
         }
         
         // Base de cálculo: Total devengado menos auxilio de transporte
@@ -54,22 +50,28 @@ class ARLModel extends Model {
             $baseCalculo = 0;
         }
         
-        // Obtener porcentaje según riesgo
-        $nivelRiesgo = self::NIVELES_RIESGO[$codigoRiesgo];
-        $porcentajeARL = $nivelRiesgo['porcentaje'];
+        // Calcular ARL usando el porcentaje de la BD
+        $valorARL = $baseCalculo * ($riesgoInfo['porcentaje'] / 100);
         
-        // CÁLCULO DEL APORTE A LA ARL
-        $valorARL = $baseCalculo * ($porcentajeARL / 100);
+        // Obtener datos del empleado
+        $empleadoModel = new Empleado();
+        $empleado = $empleadoModel->find($idEmpleado);
         
         return [
+            'empleado_id' => $idEmpleado,
+            'empleado_nombre' => $empleado ? $empleado['nombre'] . ' ' . $empleado['apellido'] : 'Desconocido',
             'total_devengado' => $totalDevengado,
             'auxilio_transporte' => $auxilioTransporte,
             'base_calculo' => $baseCalculo,
-            'codigo_riesgo' => $codigoRiesgo,
-            'nivel_riesgo' => $nivelRiesgo,
-            'porcentaje_arl' => $porcentajeARL,
+            'codigo_riesgo' => $riesgoInfo['codigo_riesgo'],
+            'clase_riesgo' => $riesgoInfo['clase_riesgo'],
+            'nivel_riesgo' => [
+                'descripcion' => $riesgoInfo['descripcion'],
+                'porcentaje' => $riesgoInfo['porcentaje']
+            ],
             'valor_arl' => $valorARL,
-            'formula' => '(Total Devengado - Auxilio) × ' . $porcentajeARL . '%'
+            'formula' => "($" . number_format($baseCalculo) . " × {$riesgoInfo['porcentaje']}%) = $" . number_format($valorARL),
+            'fecha_calculo' => date('Y-m-d H:i:s')
         ];
     }
 
@@ -159,15 +161,69 @@ class ARLModel extends Model {
     /**
      * Obtener el código de riesgo de un empleado
      */
-    private function obtenerCodigoRiesgoEmpleado($idEmpleado) {
-        $riesgoEmpleado = $this->getRiesgoEmpleado($idEmpleado);
-        
-        if ($riesgoEmpleado) {
-            return intval($riesgoEmpleado['codigo_riesgo']);
+    public function obtenerCodigoRiesgoEmpleado($idEmpleado) {
+        try {
+            $sql = "SELECT era.codigo_riesgo, nra.valor_inicial as porcentaje
+                    FROM empleados_riesgo_arl era
+                    JOIN niveles_riesgo_arl nra ON era.codigo_riesgo = nra.codigo
+                    WHERE era.id_empleado = ? AND era.activo = 1";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$idEmpleado]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($resultado) {
+                return $resultado['codigo_riesgo'];
+            }
+            
+            // Si no tiene riesgo asignado, asignar Clase II por defecto
+            $this->asignarRiesgoEmpleado($idEmpleado, 2);
+            return 2;
+            
+        } catch (Exception $e) {
+            error_log("Error obteniendo riesgo para empleado $idEmpleado: " . $e->getMessage());
+            return 2; // Riesgo por defecto
         }
-        
-        // Para empleados generales, podemos usar Riesgo II como default
-        return 2; // Riesgo II - Bajo
+    }
+
+    /**
+     * Obtener información completa del riesgo con porcentaje desde BD
+     */
+    public function obtenerRiesgoCompletoEmpleado($idEmpleado) {
+        try {
+            $sql = "SELECT era.codigo_riesgo, nra.descripcion, nra.porcentaje
+                    FROM empleados_riesgo_arl era
+                    JOIN niveles_riesgo_arl nra ON era.codigo_riesgo = nra.codigo
+                    WHERE era.id_empleado = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$idEmpleado]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($resultado) {
+                return [
+                    'codigo_riesgo' => $resultado['codigo_riesgo'],
+                    'clase_riesgo' => 'Clase ' . self::NIVELES_RIESGO[$resultado['codigo_riesgo']]['codigo'],
+                    'descripcion' => $resultado['descripcion'],
+                    'porcentaje' => floatval($resultado['porcentaje'])
+                ];
+            }
+            
+            // Si no tiene riesgo asignado, usar Clase II por defecto
+            return [
+                'codigo_riesgo' => 2,
+                'clase_riesgo' => 'Clase II',
+                'descripcion' => 'Clase II - Bajo',
+                'porcentaje' => 1.044
+            ];
+            
+        } catch (Exception $e) {
+            error_log("Error obteniendo riesgo completo para empleado $idEmpleado: " . $e->getMessage());
+            return [
+                'codigo_riesgo' => 2,
+                'clase_riesgo' => 'Clase II', 
+                'descripcion' => 'Clase II - Bajo',
+                'porcentaje' => 1.044
+            ];
+        }
     }
 
     /**

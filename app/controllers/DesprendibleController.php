@@ -7,6 +7,12 @@ class DesprendibleController extends Controller {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
+        
+        // Verificar que el usuario esté autenticado
+        if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
+            header('Location: /ZIGMA/public/index.php');
+            exit;
+        }
     }
     
     /**
@@ -29,7 +35,7 @@ class DesprendibleController extends Controller {
      */
     public function mostrar($empleadoId = null, $mes = null, $anio = null) {
         if (!$empleadoId) {
-            header('Location: ' . URL_ROOT . '=Desprendible');
+            header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
         
@@ -38,7 +44,7 @@ class DesprendibleController extends Controller {
         
         if (!$desprendible) {
             $_SESSION['error'] = 'No se encontró información para generar el desprendible';
-            header('Location: ' . URL_ROOT . '=Desprendible');
+            header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
         
@@ -55,7 +61,7 @@ class DesprendibleController extends Controller {
      */
     public function pdf($empleadoId = null, $mes = null, $anio = null) {
         if (!$empleadoId) {
-            header('Location: ' . URL_ROOT . '=Desprendible');
+            header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
         
@@ -64,7 +70,7 @@ class DesprendibleController extends Controller {
         
         if (!$desprendible) {
             $_SESSION['error'] = 'No se encontró información para generar el desprendible';
-            header('Location: ' . URL_ROOT . '=Desprendible');
+            header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
         

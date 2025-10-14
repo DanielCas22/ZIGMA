@@ -20,7 +20,7 @@
                         </h2>
                         <small class="opacity-75">Generar y consultar desprendibles de pago</small>
                     </div>
-                    <a href="<?= URL_ROOT ?>=dashboard" class="btn btn-light">
+                    <a href="/ZIGMA/public/index.php?url=dashboard" class="btn btn-light">
                         <i class="fas fa-home me-1"></i> Dashboard
                     </a>
                 </div>
@@ -52,7 +52,7 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <form id="formSeleccionEmpleado" method="GET" action="<?= URL_ROOT ?>=Desprendible/mostrar">
+                        <form id="formSeleccionEmpleado" method="GET" action="/ZIGMA/public/index.php?url=Desprendible/mostrar">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="empleado_id" class="form-label">
