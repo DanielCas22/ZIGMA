@@ -6,53 +6,50 @@
     <title><?= $data['title'] ?> - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-    <div class="container-fluid">
-        <!-- Header -->
-        <div class="row bg-primary text-white py-3 mb-4">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h2 class="mb-0">
-                            <i class="fas fa-file-invoice me-2"></i>
-                            <?= $data['title'] ?>
-                        </h2>
-                        <small class="opacity-75">Generar y consultar desprendibles de pago</small>
-                    </div>
-                    <a href="/ZIGMA/public/index.php?url=dashboard" class="btn btn-light">
-                        <i class="fas fa-home me-1"></i> Dashboard
-                    </a>
-                </div>
-            </div>
+<body>
+
+<!-- Navbar -->
+<?php $pageTitle = "Desprendible de Pago"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header-zigma mb-4 fade-in-up text-center">
+        <h2 class="mb-1">
+            <i class="fas fa-file-invoice me-2"></i>
+            Desprendible de Pago
+        </h2>
+        <p class="text-muted mb-0">Generar y consultar desprendibles de pago</p>
+    </div>
+
+    <!-- Flash Messages -->
+    <?php if(isset($_SESSION['error'])): ?>
+        <div class="alert-zigma-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <?= $_SESSION['error']; unset($_SESSION['error']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+    <?php endif; ?>
+    <?php if(isset($_SESSION['success'])): ?>
+        <div class="alert-zigma-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <?= $_SESSION['success']; unset($_SESSION['success']); ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
-        <!-- Flash Messages -->
-        <?php if(isset($_SESSION['error'])): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?= $_SESSION['error']; unset($_SESSION['error']); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-        <?php if(isset($_SESSION['success'])): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?= $_SESSION['success']; unset($_SESSION['success']); ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        <?php endif; ?>
-
-        <!-- Selección de Empleado -->
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-users me-2"></i>
-                            Seleccionar Empleado
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="formSeleccionEmpleado" method="GET" action="/ZIGMA/public/index.php?url=Desprendible/mostrar">
+    <!-- Selección de Empleado -->
+    <div class="row justify-content-center fade-in-up">
+        <div class="col-md-8">
+            <div class="card-zigma shadow-lg">
+                <div class="card-body p-4">
+                    <h5 class="mb-4 text-zigma-navy">
+                        <i class="fas fa-users me-2"></i>
+                        Seleccionar Empleado
+                    </h5>
+                    <form id="formSeleccionEmpleado" method="GET" action="/ZIGMA/public/index.php?url=Desprendible/mostrar">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="empleado_id" class="form-label">
@@ -107,7 +104,7 @@
                             </div>
                             
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <button type="submit" class="btn-zigma-primary btn-lg px-5">
                                     <i class="fas fa-file-invoice me-2"></i>
                                     Generar Desprendible
                                 </button>
@@ -119,19 +116,17 @@
         </div>
 
         <!-- Lista de Empleados -->
-        <div class="row mt-4">
+        <div class="row mt-4 fade-in-up">
             <div class="col-12">
-                <div class="card shadow">
-                    <div class="card-header bg-secondary text-white">
-                        <h6 class="mb-0">
+                <div class="card-zigma shadow">
+                    <div class="card-body">
+                        <h6 class="mb-3 text-zigma-navy">
                             <i class="fas fa-list me-2"></i>
                             Empleados Registrados
                         </h6>
-                    </div>
-                    <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-dark">
+                            <table class="table-zigma">
+                                <thead>
                                     <tr>
                                         <th>Documento</th>
                                         <th>Nombre Completo</th>
@@ -146,13 +141,13 @@
                                                 <td><?= $empleado['id_doc'] ?? $empleado['id_empleados'] ?? 'N/A' ?></td>
                                                 <td><?= ($empleado['nombre'] ?? '') . ' ' . ($empleado['apellido'] ?? '') ?></td>
                                                 <td>
-                                                    <span class="badge bg-primary"><?= $empleado['rol_nombre'] ?? $empleado['cargo'] ?? 'No definido' ?></span>
+                                                    <span class="badge-zigma-primary"><?= $empleado['rol_nombre'] ?? $empleado['cargo'] ?? 'No definido' ?></span>
                                                 </td>
                                                 <td>
                                                     <a href="<?= URL_ROOT ?>=Desprendible/mostrar/<?= $empleado['id_empleados'] ?? $empleado['id'] ?>" 
-                                                       class="btn btn-sm btn-outline-primary" 
+                                                       class="btn-zigma-info btn-sm" 
                                                        title="Ver desprendible actual">
-                                                        <i class="fas fa-file-invoice"></i>
+                                                        <i class="fas fa-file-invoice me-1"></i> Ver
                                                     </a>
                                                 </td>
                                             </tr>

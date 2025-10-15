@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Horas Extras</title>
+    <title>Editar Horas Extras - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
 </head>
 <body>
+<!-- Navbar -->
+<?php $pageTitle = "Editar Horas Extras"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <div class="card shadow border-warning border-2">
-                <div class="card-body">
+        <div class="col-lg-8 fade-in-up">
+            <div class="card-zigma shadow-lg">
+                <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <span class="d-inline-block bg-warning text-dark rounded-circle p-3 mb-2">
+                        <span class="d-inline-block bg-gradient-zigma text-white rounded-circle p-3 mb-2 pulse">
                             <i class="fa-solid fa-edit fa-2x"></i>
                         </span>
-                        <h2 class="mb-0 text-warning">Editar Horas Extras</h2>
+                        <h2 class="mb-0 text-zigma-secondary fw-bold">Editar Horas Extras</h2>
                         <p class="text-muted">Modifica los datos de las horas extras registradas</p>
-                    </div>
-                    <div class="mb-3">
-                        <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn btn-outline-primary">
-                            <i class="fa fa-arrow-left"></i> Volver a Horas Extras
-                        </a>
                     </div>
                     <form method="post" action="">
                         <div class="mb-3">
@@ -93,7 +93,7 @@
                         </div>
                         
                         <!-- Mostrar valores actuales calculados -->
-                        <div class="alert alert-info">
+                        <div class="alert-zigma-info">
                             <div class="row">
                                 <div class="col-md-6">
                                     <strong><i class="fas fa-percentage me-2"></i>Porcentaje actual:</strong> 
@@ -112,10 +112,10 @@
                         </div>
 
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-warning px-4">
+                            <button type="submit" class="btn-zigma-warning px-4">
                                 <i class="fas fa-save me-2"></i>Actualizar
                             </button>
-                            <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn btn-outline-secondary px-4">
+                            <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn-zigma-secondary px-4">
                                 <i class="fas fa-times me-2"></i>Cancelar
                             </a>
                         </div>

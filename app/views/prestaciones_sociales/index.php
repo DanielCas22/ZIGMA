@@ -6,13 +6,8 @@
     <title><?= $title ?? 'Prestaciones Sociales' ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
-        .prestaciones-card {
-            transition: transform 0.2s;
-        }
-        .prestaciones-card:hover {
-            transform: translateY(-5px);
-        }
         .currency {
             font-family: 'Courier New', monospace;
             font-weight: bold;
@@ -25,10 +20,6 @@
             border-radius: 4px;
             color: #495057;
         }
-        .totales-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
         .prestacion-badge {
             font-size: 0.75em;
             padding: 0.25em 0.5em;
@@ -36,7 +27,17 @@
     </style>
 </head>
 <body>
-<div class="container-fluid py-4">
+
+<!-- Navbar -->
+<?php $pageTitle = "Prestaciones Sociales"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
+<div class="container-fluid py-4 fade-in-up">
+    <div class="page-header-zigma mb-4 text-center">
+        <h2><i class="fas fa-gift me-2"></i>Prestaciones Sociales</h2>
+        <p class="mb-0">Gestión de Cesantías, Intereses, Prima y Vacaciones</p>
+    </div>
+    
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">

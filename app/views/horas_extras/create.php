@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agregar Horas Extras</title>
+    <title>Agregar Horas Extras - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
 </head>
 <body>
+<!-- Navbar -->
+<?php $pageTitle = "Agregar Horas Extras"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <div class="card shadow border-primary border-2">
-                <div class="card-body">
+        <div class="col-lg-8 fade-in-up">
+            <div class="card-zigma shadow-lg">
+                <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <span class="d-inline-block bg-primary text-white rounded-circle p-3 mb-2">
+                        <span class="d-inline-block bg-gradient-zigma text-white rounded-circle p-3 mb-2 pulse">
                             <i class="fa-solid fa-clock fa-2x"></i>
                         </span>
-                        <h2 class="mb-0 text-primary">Agregar Horas Extras</h2>
+                        <h2 class="mb-0 text-zigma-primary fw-bold">Agregar Horas Extras</h2>
                         <p class="text-muted">Registra las horas extras de un empleado</p>
                     </div>
-                    <div class="mb-3">
-                        <a href="/ZIGMA/public/index.php?url=Dashboard/index" class="btn btn-outline-primary">
-                            <i class="fa fa-home"></i> Volver al menú
-                        </a>
-                    </div>
                     <?php if (isset($error)): ?>
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div class="alert-zigma-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <?= htmlspecialchars($error) ?>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -101,13 +101,17 @@
                                 <input type="number" name="anio" class="form-control" min="2020" max="2030" required value="<?= date('Y') ?>">
                             </div>
                         </div>
-                        <div class="alert alert-info">
+                        <div class="alert-zigma-info">
                             <i class="fas fa-calculator me-2"></i>
                             <strong>Cálculo automático:</strong> El valor de las horas extras se calculará automáticamente usando las tarifas oficiales de Colombia 2025.
                         </div>
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-success px-4">Guardar</button>
-                            <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn btn-outline-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn-zigma-success px-4">
+                                <i class="fas fa-save me-2"></i>Guardar
+                            </button>
+                            <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn-zigma-secondary px-4">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
                         </div>
                     </form>
                 </div>

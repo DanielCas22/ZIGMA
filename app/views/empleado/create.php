@@ -3,21 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Empleado</title>
+    <title>Registrar Empleado - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
 </head>
 <body>
+<!-- Navbar -->
+<?php $pageTitle = "Registrar Empleado"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <div class="card shadow border-primary border-2">
-                <div class="card-body">
+        <div class="col-lg-8 fade-in-up">
+            <div class="card-zigma shadow-lg border-0">
+                <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <span class="d-inline-block bg-primary text-white rounded-circle p-3 mb-2">
+                        <span class="d-inline-block bg-gradient-zigma text-white rounded-circle p-3 mb-2 pulse">
                             <i class="fa fa-user-plus fa-2x"></i>
                         </span>
-                        <h2 class="mb-0 text-primary">Registrar Empleado</h2>
+                        <h2 class="mb-0 text-zigma-primary fw-bold">Registrar Empleado</h2>
                         <p class="text-muted">Agrega un nuevo empleado al sistema</p>
                     </div>
                     <form method="post" action="/ZIGMA/public/index.php?url=Empleado/store">
@@ -76,8 +81,12 @@
                             </div>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-success px-4">Registrar</button>
-                            <a href="/ZIGMA/public/index.php?url=Empleado/index" class="btn btn-outline-secondary px-4">Cancelar</a>
+                            <button type="submit" class="btn-zigma-success px-4">
+                                <i class="fas fa-save me-2"></i>Registrar
+                            </button>
+                            <a href="/ZIGMA/public/index.php?url=Empleado/index" class="btn-zigma-secondary px-4">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
                         </div>
                     </form>
                 </div>

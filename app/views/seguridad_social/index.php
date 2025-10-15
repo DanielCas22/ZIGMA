@@ -4,40 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($title ?? 'Seguridad Social'); ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-        }
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
-        }
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        .alert-error {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
         }
         .form-section {
             background-color: #f8f9fa;
@@ -111,43 +81,38 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1><?php echo htmlspecialchars($title ?? 'Cálculo de Seguridad Social + ARL'); ?></h1>
-        
-        <div style="margin-bottom: 20px;">
-            <a href="/ZIGMA/public/index.php?url=Dashboard/index" class="btn" style="background-color: #007bff; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">
-                🏠 Volver al inicio
-            </a>
-        </div>
-        
-        <div class="nav-links">
-            <a href="/seguridad_social" class="btn">Vista Principal</a>
-        </div>
-        
-        <?php /* 
-        <div style="background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #28a745;">
-            <h3>💼 Sistema Basado en Salarios Individuales</h3>
-            <p><strong>Los cálculos se realizan usando el salario individual asignado a cada empleado.</strong></p>
-            <p>• Cada empleado tiene su propio salario en el campo <code>sueldo_actual</code></p>
-            <p>• Los roles son solo informativos y no afectan los cálculos</p>
-            <p>• Para modificar salarios, edita directamente la información del empleado</p>
-        </div>
-        */ ?>
+
+<!-- Navbar -->
+<?php $pageTitle = "Seguridad Social"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
+<div class="container py-4 fade-in-up">
+    <div class="page-header-zigma mb-4">
+        <h2><i class="fas fa-shield-alt me-2"></i><?php echo htmlspecialchars($title ?? 'Cálculo de Seguridad Social + ARL'); ?></h2>
+    </div>
 
         <?php if (isset($success)): ?>
-            <div class="alert alert-success">
+            <div class="alert alert-zigma-success alert-dismissible fade show">
+                <i class="fas fa-check-circle me-2"></i>
                 <?php echo htmlspecialchars($success); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
 
         <?php if (isset($error)): ?>
-            <div class="alert alert-error">
+            <div class="alert alert-zigma-danger alert-dismissible fade show">
+                <i class="fas fa-exclamation-triangle me-2"></i>
                 <?php echo htmlspecialchars($error); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
 
         <!-- Formulario para actualizar días trabajados -->
-        <div class="form-section">
+        <div class="card-zigma mb-4">
+            <div class="card-header-zigma">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Configuración de Días Trabajados</h5>
+            </div>
+            <div class="card-body">
             <h3>⏱️ Configurar Período de Cálculo</h3>
             <p style="font-size: 14px; color: #666; margin-bottom: 15px;">
                 Ajuste los días trabajados para recalcular automáticamente los valores de seguridad social y ARL.

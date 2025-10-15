@@ -6,33 +6,15 @@
     <title><?= htmlspecialchars($title) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
-        .devengado-header {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-        }
         .devengado-table {
             font-size: 0.9rem;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        .devengado-table thead {
-            background: #28a745;
-            color: white;
-        }
-        .devengado-table th {
-            font-weight: 600;
-            text-align: center;
-            vertical-align: middle;
-            padding: 1rem 0.5rem;
-            border: 1px solid #fff;
         }
         .devengado-table td {
             text-align: right;
             vertical-align: middle;
             padding: 0.75rem 0.5rem;
-            border: 1px solid #dee2e6;
         }
         .devengado-table td:first-child {
             text-align: left;
@@ -66,34 +48,20 @@
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
 
-    <!-- Header del Devengado -->
-    <div class="devengado-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="mb-0">
-                        <i class="fas fa-money-bill-wave me-3"></i>
-                        Total Devengado - Nómina
-                    </h1>
-                    <p class="mb-0 mt-2 opacity-90">
-                        Resumen completo de ingresos por empleado
-                    </p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <a href="?url=dashboard" class="btn btn-light btn-lg">
-                        <i class="fas fa-arrow-left me-2"></i>Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
+<!-- Navbar -->
+<?php $pageTitle = "Total Devengado"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
+<div class="container-fluid py-4 fade-in-up">
+    <div class="page-header-zigma mb-4">
+        <h2><i class="fas fa-money-bill-wave me-2"></i>Total Devengado - Nómina</h2>
+        <p class="mb-0 mt-2">Resumen completo de ingresos por empleado</p>
     </div>
-
-    <div class="container-fluid">
         
         <?php if (isset($error)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div class="alert alert-zigma-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 <strong>Error:</strong> <?= htmlspecialchars($error) ?>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>

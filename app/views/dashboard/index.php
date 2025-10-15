@@ -5,11 +5,181 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --zigma-navy: #1e3a8a;
+            --zigma-blue: #2563eb;
+            --zigma-pink: #ec4899;
+            --zigma-magenta: #d946ef;
+            --zigma-cyan: #06b6d4;
+            --zigma-cyan-light: #22d3ee;
+            --zigma-dark: #1f2937;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar h5 {
+            color: #ec4899;
+            font-weight: 700;
+            border-bottom: 2px solid #ec4899;
+            padding-bottom: 0.5rem;
+        }
+        
+        .nav-link {
+            color: #d1d5db !important;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-link:hover {
+            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+            color: white !important;
+            transform: translateX(5px);
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+            color: white !important;
+        }
+        
+        .nav-link svg {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover svg {
+            transform: scale(1.1);
+        }
+        
+        .btn-outline-light:hover {
+            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+            border-color: #ec4899;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.15);
+        }
+        
+        .card-title {
+            color: #1e3a8a;
+            font-weight: 700;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #d946ef 0%, #ec4899 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.3);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+            border: none;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+        }
+        
+        .btn-outline-primary {
+            color: #ec4899;
+            border-color: #ec4899;
+        }
+        
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
+            border-color: #ec4899;
+            color: white;
+        }
+        
+        .btn-outline-success {
+            color: #06b6d4;
+            border-color: #06b6d4;
+        }
+        
+        .btn-outline-success:hover {
+            background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+            border-color: #06b6d4;
+            color: white;
+        }
+        
+        .btn-outline-warning,
+        .btn-outline-info,
+        .btn-outline-danger {
+            color: #d946ef;
+            border-color: #d946ef;
+        }
+        
+        .btn-outline-warning:hover,
+        .btn-outline-info:hover,
+        .btn-outline-danger:hover {
+            background: linear-gradient(135deg, #d946ef 0%, #ec4899 100%);
+            border-color: #d946ef;
+            color: white;
+        }
+        
+        .border-primary {
+            border-color: #ec4899 !important;
+        }
+        
+        .border-success {
+            border-color: #06b6d4 !important;
+        }
+        
+        .border-warning,
+        .border-info,
+        .border-danger {
+            border-color: #d946ef !important;
+        }
+        
+        .text-primary {
+            color: #ec4899 !important;
+        }
+        
+        .text-success {
+            color: #06b6d4 !important;
+        }
+        
+        .text-warning,
+        .text-info,
+        .text-danger {
+            color: #d946ef !important;
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#">ZIGMA</a>
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="/ZIGMA/public/img/logo_zigma.jpg" alt="Logo ZIGMA" style="height:40px; width:auto; margin-right:10px;">
+      <span>ZIGMA</span>
+    </a>
     <div class="d-flex">
       <span class="navbar-text me-3">Bienvenido, <?php echo htmlspecialchars($data['user']['rol']); ?></span>
       <a href="logout.php" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
@@ -18,11 +188,11 @@
 </nav>
 <div class="container-fluid">
   <div class="row">
-    <div class="col-md-2 bg-light vh-100 p-3">
+    <div class="col-md-2 sidebar vh-100 p-3">
       <h5>Menú</h5>
       <ul class="nav flex-column">
         <li class="nav-item mb-2">
-          <a class="nav-link active fw-bold text-primary d-flex align-items-center" href="/ZIGMA/public/index.php?url=HorasExtras">
+          <a class="nav-link active fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=HorasExtras">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-clock-history me-2" viewBox="0 0 16 16">
               <path d="M8.515 3.879a.5.5 0 0 0-1 0v4.25a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 1 0 .496-.868l-3.248-1.856V3.88z"/>
               <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zm0-1A7 7 0 1 0 8 1a7 7 0 0 0 0 14z"/>
@@ -31,7 +201,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-success d-flex align-items-center" href="/ZIGMA/public/index.php?url=Empleado/index">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=Empleado/index">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-people me-2" viewBox="0 0 16 16">
               <path d="M13 7a2 2 0 1 0-4 0 2 2 0 0 0 4 0zM6 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
               <path fill-rule="evenodd" d="M13 9c1.105 0 2 .672 2 1.5V13h-5v-2.5c0-.828.895-1.5 2-1.5zM6 9c1.105 0 2 .672 2 1.5V13H1v-2.5C1 9.672 1.895 9 3 9z"/>
@@ -40,7 +210,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-warning d-flex align-items-center" href="/ZIGMA/public/index.php?url=PrestacionesSociales">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=PrestacionesSociales">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gift me-2" viewBox="0 0 16 16">
               <path d="M3 2.5a2.5 2.5 0 0 1 5 0 2.5 2.5 0 0 1 5 0v.006c0 .07 0 .27-.038.494H15a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 14.5V7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2.038A2.968 2.968 0 0 1 3 2.5zm1.068.5H7v-.5a1.5 1.5 0 1 0-3 0c0 .085.002.274.045.43a.522.522 0 0 0 .023.07zM9 3h2.932a.56.56 0 0 0 .023-.07c.043-.156.045-.345.045-.43a1.5 1.5 0 0 0-3 0V3zM1 4v2h6V4H1zm8 0v2h6V4H9zm5 3H9v8h4.5a.5.5 0 0 0 .5-.5V7zm-7 8V7H2v7.5a.5.5 0 0 0 .5.5H7z"/>
             </svg>
@@ -48,7 +218,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-info d-flex align-items-center" href="/ZIGMA/public/index.php?url=SeguridadSocial">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=SeguridadSocial">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-shield-check me-2" viewBox="0 0 16 16">
               <path d="M5.338 1.59a61.44 61.44 0 0 0-2.837.856.481.481 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.725 10.725 0 0 0 2.287 2.233c.346.244.652.42.893.533.12.057.218.095.293.118a.55.55 0 0 0 .101.025.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z"/>
               <path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
@@ -57,7 +227,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-danger d-flex align-items-center" href="/ZIGMA/public/index.php?url=Devengado">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=Devengado">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cash-stack me-2" viewBox="0 0 16 16">
               <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zM7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
               <path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2H3z"/>
@@ -66,7 +236,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-danger d-flex align-items-center" href="/ZIGMA/public/index.php?url=TotalDeducido">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=TotalDeducido">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-dash-circle me-2" viewBox="0 0 16 16">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
               <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
@@ -75,7 +245,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-success d-flex align-items-center" href="/ZIGMA/public/index.php?url=Parafiscales">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=Parafiscales">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-building me-2" viewBox="0 0 16 16">
               <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1ZM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z"/>
               <path d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V1Zm11 0H3v14h3v-2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V15h3V1Z"/>
@@ -84,7 +254,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-primary d-flex align-items-center" href="/ZIGMA/public/index.php?url=Nomina">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=Nomina">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-spreadsheet me-2" viewBox="0 0 16 16">
               <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5v2zM3 12v-2h2v2H3zm0 1h2v2H4a1 1 0 0 1-1-1v-1zm3 2v-2h3v2H6zm4 0v-2h3v1a1 1 0 0 1-1 1h-2zm3-3h-3v-2h3v2zm-7 0v-2h3v2H6z"/>
             </svg>
@@ -92,7 +262,7 @@
           </a>
         </li>
         <li class="nav-item mb-2">
-          <a class="nav-link fw-bold text-warning d-flex align-items-center" href="/ZIGMA/public/index.php?url=Desprendible">
+          <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=Desprendible">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-invoice me-2" viewBox="0 0 16 16">
               <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
               <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>

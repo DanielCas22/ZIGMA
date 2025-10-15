@@ -6,98 +6,30 @@
     <title><?= htmlspecialchars($title) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .deducido-header {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-            color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-        }
-        .deducido-table {
-            font-size: 0.9rem;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        .deducido-table thead {
-            background: #dc3545;
-            color: white;
-        }
-        .deducido-table th {
-            font-weight: 600;
-            text-align: center;
-            vertical-align: middle;
-            padding: 1rem 0.5rem;
-            border: 1px solid #fff;
-        }
-        .deducido-table td {
-            text-align: right;
-            vertical-align: middle;
-            padding: 0.75rem 0.5rem;
-            border: 1px solid #dee2e6;
-        }
-        .deducido-table td:first-child {
-            text-align: left;
-            font-weight: 500;
-        }
-        .total-row {
-            background: #f8f9fa;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-        .total-row td {
-            border-top: 2px solid #dc3545;
-        }
-        .valor-destacado {
-            background: #fff5f5;
-            font-weight: 600;
-        }
-        .card-estadistica {
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        .card-estadistica:hover {
-            transform: translateY(-5px);
-        }
-        .btn-detalle {
-            font-size: 0.8rem;
-            padding: 0.25rem 0.5rem;
-        }
-        .currency {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        .otros-concepto {
-            transition: all 0.3s ease;
-        }
-        .otros-concepto:hover {
-            background-color: #fff5f5 !important;
-            transform: scale(1.02);
-        }
-    </style>
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 
-    <!-- Header -->
-    <div class="deducido-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="display-6 fw-bold mb-2">
-                        <i class="fas fa-minus-circle me-3"></i>
-                        Total Deducido - Nómina
-                    </h1>
-                    <p class="mb-0 mt-2 opacity-90">
-                        Deducciones por salud, pensión, fondo de solidaridad y retención en la fuente
-                    </p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <a href="?url=dashboard" class="btn btn-light btn-lg">
-                        <i class="fas fa-arrow-left me-2"></i>Dashboard
-                    </a>
-                </div>
+<!-- Navbar -->
+<?php $pageTitle = "Total Deducido"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
+<!-- Header -->
+<div class="container">
+    <div class="page-header-zigma mb-4 py-4 fade-in-up">
+        <div class="row align-items-center">
+            <div class="col-md-12 text-center">
+                <h1 class="display-6 fw-bold mb-2">
+                    <i class="fas fa-minus-circle me-3"></i>
+                    Total Deducido - Nómina
+                </h1>
+                <p class="mb-0 mt-2 text-muted">
+                    Deducciones por salud, pensión, fondo de solidaridad y retención en la fuente
+                </p>
             </div>
         </div>
     </div>
+</div>
 
     <div class="container-fluid px-4">
         

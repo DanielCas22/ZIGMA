@@ -6,34 +6,22 @@
     <title>Nómina - Sistema de Pago de Salarios</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
-        .nomina-header {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            color: white;
-            padding: 30px 0;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
         .table-nomina {
             font-size: 11px;
-            border: 2px solid #2c3e50;
         }
         .table-nomina th {
-            background-color: #34495e;
-            color: white;
             text-align: center;
             vertical-align: middle;
             font-weight: bold;
             font-size: 10px;
             padding: 8px 4px;
-            border: 1px solid #2c3e50;
         }
         .table-nomina td {
             text-align: center;
             vertical-align: middle;
             padding: 6px 4px;
-            border: 1px solid #bdc3c7;
-            background-color: white;
         }
         .table-nomina .empleado-nombre {
             text-align: left;
@@ -94,33 +82,33 @@
         }
     </style>
 </head>
-<body class="bg-light">
-    <div class="container-fluid py-4">
-        <!-- Header -->
-        <div class="nomina-header text-center no-print">
-            <div class="container">
-                <h1><i class="fas fa-file-invoice-dollar me-3"></i>NÓMINA PARA PAGO DE SALARIOS</h1>
-                <p class="mb-1">Período: <?= strtoupper(date('F Y', strtotime($periodo . '-01'))) ?></p>
-                <p class="mb-0">Generado: <?= date('d/m/Y H:i', strtotime($fecha_generacion)) ?></p>
-            </div>
-        </div>
+<body>
+
+<!-- Navbar -->
+<?php $pageTitle = "Nómina Completa"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="page-header-zigma text-center no-print mb-4">
+        <h1><i class="fas fa-file-invoice-dollar me-3"></i>NÓMINA PARA PAGO DE SALARIOS</h1>
+        <p class="mb-1">Período: <?= strtoupper(date('F Y', strtotime($periodo . '-01'))) ?></p>
+        <p class="mb-0">Generado: <?= date('d/m/Y H:i', strtotime($fecha_generacion)) ?></p>
+    </div>
 
         <!-- Controles -->
         <div class="row mb-3 no-print">
             <div class="col-md-6">
-                <a href="/ZIGMA/dashboard" class="btn btn-outline-secondary">
-                    <i class="fas fa-home me-1"></i> Inicio
-                </a>
-                <button onclick="window.print()" class="btn btn-print ms-2">
+                <button onclick="window.print()" class="btn btn-zigma-primary">
                     <i class="fas fa-print me-1"></i> Imprimir
                 </button>
             </div>
             <div class="col-md-6 text-end">
                 <div class="btn-group">
-                    <a href="/ZIGMA/Nomina/reporte" class="btn btn-info">
+                    <a href="/ZIGMA/Nomina/reporte" class="btn btn-zigma-secondary">
                         <i class="fas fa-file-alt me-1"></i> Reporte
                     </a>
-                    <a href="/ZIGMA/Nomina/resumen" class="btn btn-success">
+                    <a href="/ZIGMA/Nomina/resumen" class="btn btn-zigma-primary">
                         <i class="fas fa-chart-bar me-1"></i> Resumen
                     </a>
                 </div>
@@ -130,34 +118,34 @@
         <!-- Estadísticas Rápidas -->
         <div class="row mb-4 no-print">
             <div class="col-md-3">
-                <div class="card card-estadisticas">
+                <div class="card-zigma">
                     <div class="card-body text-center">
-                        <h5>Total Empleados</h5>
-                        <h3><?= $total_empleados ?></h3>
+                        <h5 class="text-zigma-primary"><i class="fas fa-users me-2"></i>Total Empleados</h5>
+                        <h3 class="text-zigma-navy"><?= $total_empleados ?></h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card card-estadisticas">
+                <div class="card-zigma">
                     <div class="card-body text-center">
-                        <h5>Total Devengado</h5>
-                        <h3>$<?= number_format($totales_empresa['total_devengado'] ?? 0, 0, ',', '.') ?></h3>
+                        <h5 class="text-zigma-secondary"><i class="fas fa-dollar-sign me-2"></i>Total Devengado</h5>
+                        <h3 class="text-zigma-navy">$<?= number_format($totales_empresa['total_devengado'] ?? 0, 0, ',', '.') ?></h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card card-estadisticas">
+                <div class="card-zigma">
                     <div class="card-body text-center">
-                        <h5>Total Deducciones</h5>
-                        <h3>$<?= number_format($totales_empresa['total_deducciones'] ?? 0, 0, ',', '.') ?></h3>
+                        <h5 class="text-zigma-primary"><i class="fas fa-minus-circle me-2"></i>Total Deducciones</h5>
+                        <h3 class="text-zigma-navy">$<?= number_format($totales_empresa['total_deducciones'] ?? 0, 0, ',', '.') ?></h3>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="card card-estadisticas">
+                <div class="card-zigma">
                     <div class="card-body text-center">
-                        <h5>Neto a Pagar</h5>
-                        <h3>$<?= number_format($totales_empresa['total_neto_pagar'] ?? 0, 0, ',', '.') ?></h3>
+                        <h5 class="text-zigma-secondary"><i class="fas fa-money-bill-wave me-2"></i>Neto a Pagar</h5>
+                        <h3 class="text-zigma-navy">$<?= number_format($totales_empresa['total_neto_pagar'] ?? 0, 0, ',', '.') ?></h3>
                     </div>
                 </div>
             </div>
@@ -165,7 +153,7 @@
 
         <!-- Tabla de Nómina -->
         <div class="table-responsive">
-            <table class="table table-nomina table-bordered">
+            <table class="table table-nomina table-zigma table-bordered">
                 <thead>
                     <tr>
                         <th rowspan="3" style="width: 40px;">No.</th>

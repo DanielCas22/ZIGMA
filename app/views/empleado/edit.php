@@ -3,26 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Empleado</title>
+    <title>Editar Empleado - ZIGMA</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
 </head>
 <body>
+<!-- Navbar -->
+<?php $pageTitle = "Editar Empleado"; ?>
+<?php include __DIR__ . '/../components/navbar.php'; ?>
+
 <div class="container py-4">
     <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <div class="card shadow border-warning border-2">
-                <div class="card-body">
+        <div class="col-lg-8 fade-in-up">
+            <div class="card-zigma shadow-lg border-0">
+                <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <span class="d-inline-block bg-warning text-white rounded-circle p-3 mb-2">
+                        <span class="d-inline-block bg-gradient-zigma text-white rounded-circle p-3 mb-2 pulse">
                             <i class="fa fa-user-edit fa-2x"></i>
                         </span>
-                        <h2 class="mb-0 text-warning">Editar Empleado</h2>
+                        <h2 class="mb-0 text-zigma-secondary fw-bold">Editar Empleado</h2>
                         <p class="text-muted">Modifica los datos del empleado <?= htmlspecialchars($empleado['nombre'] . ' ' . $empleado['apellido']) ?></p>
                     </div>
 
                     <?php if (isset($_GET['error'])): ?>
-                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <div class="alert-zigma-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <?php if ($_GET['error'] === 'update'): ?>
                                 Error al actualizar los datos del empleado. Inténtelo nuevamente.
@@ -119,10 +124,10 @@
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <button type="submit" class="btn btn-warning px-4">
+                            <button type="submit" class="btn-zigma-warning px-4">
                                 <i class="fas fa-save me-2"></i>Actualizar
                             </button>
-                            <a href="/ZIGMA/public/index.php?url=Empleado/index" class="btn btn-outline-secondary px-4">
+                            <a href="/ZIGMA/public/index.php?url=Empleado/index" class="btn-zigma-secondary px-4">
                                 <i class="fas fa-arrow-left me-2"></i>Cancelar
                             </a>
                         </div>
