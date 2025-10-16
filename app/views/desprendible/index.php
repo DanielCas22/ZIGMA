@@ -141,7 +141,23 @@
                                                 <td><?= $empleado['id_doc'] ?? $empleado['id_empleados'] ?? 'N/A' ?></td>
                                                 <td><?= ($empleado['nombre'] ?? '') . ' ' . ($empleado['apellido'] ?? '') ?></td>
                                                 <td>
-                                                    <span class="badge-zigma-primary"><?= $empleado['rol_nombre'] ?? $empleado['cargo'] ?? 'No definido' ?></span>
+                                                    <?php 
+                                                    $rol_nombre = strtolower($empleado['rol_nombre'] ?? $empleado['cargo'] ?? 'Sin rol');
+                                                    $badge_class = 'badge-role-default';
+                                                    $display_name = 'No definido';
+                                                    
+                                                    if (strpos($rol_nombre, 'admin') !== false) {
+                                                        $badge_class = 'badge-role-admin';
+                                                        $display_name = 'Admin';
+                                                    } elseif (strpos($rol_nombre, 'rrhh') !== false) {
+                                                        $badge_class = 'badge-role-rrhh';
+                                                        $display_name = 'RRHH';
+                                                    } elseif (strpos($rol_nombre, 'empleado') !== false) {
+                                                        $badge_class = 'badge-role-empleado';
+                                                        $display_name = 'Empleado';
+                                                    }
+                                                    ?>
+                                                    <span class="<?= $badge_class ?>"><?= $display_name ?></span>
                                                 </td>
                                                 <td>
                                                     <a href="<?= URL_ROOT ?>=Desprendible/mostrar/<?= $empleado['id_empleados'] ?? $empleado['id'] ?>" 

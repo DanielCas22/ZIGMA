@@ -162,9 +162,6 @@
                             <td>
                                 <?php 
                                     $roles = $calculo['empleado']['roles'];
-                                    // Debug temporal - mostrar qué contiene roles
-                                    // echo "<!-- Debug: " . print_r($roles, true) . " -->";
-                                    
                                     $rolesFormateados = [];
                                     
                                     // Verificar si roles es array
@@ -183,8 +180,19 @@
                                         $rolesFormateados[] = is_string($roles) ? $roles : 'empleado';
                                     }
                                     
-                                    // Mostrar roles separados por "/"
-                                    echo htmlspecialchars(implode(' / ', $rolesFormateados));
+                                    // Mostrar badges diferenciados por color
+                                    foreach ($rolesFormateados as $rol) {
+                                        $rol_lower = strtolower($rol);
+                                        $badge_class = 'badge-role-default';
+                                        if (strpos($rol_lower, 'admin') !== false) {
+                                            $badge_class = 'badge-role-admin';
+                                        } elseif (strpos($rol_lower, 'rrhh') !== false || strpos($rol_lower, 'recursos humanos') !== false) {
+                                            $badge_class = 'badge-role-rrhh';
+                                        } elseif (strpos($rol_lower, 'empleado') !== false) {
+                                            $badge_class = 'badge-role-empleado';
+                                        }
+                                        echo '<span class="badge ' . $badge_class . '">' . htmlspecialchars($rol) . '</span> ';
+                                    }
                                 ?>
                             </td>
                             <td class="text-right currency">

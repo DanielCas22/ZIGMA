@@ -163,19 +163,19 @@
                                                 $rol_display = '';
                                                 switch($rol_principal) {
                                                     case 'admin': 
-                                                        $rol_badge_class = 'badge-zigma-danger'; 
+                                                        $rol_badge_class = 'badge-role-admin'; 
                                                         $rol_display = 'Admin';
                                                         break;
                                                     case 'rrhh': 
-                                                        $rol_badge_class = 'badge-zigma-warning'; 
+                                                        $rol_badge_class = 'badge-role-rrhh'; 
                                                         $rol_display = 'RRHH';
                                                         break;
                                                     case 'empleado': 
-                                                        $rol_badge_class = 'badge-zigma-primary'; 
+                                                        $rol_badge_class = 'badge-role-empleado'; 
                                                         $rol_display = 'Empleado';
                                                         break;
                                                     default: 
-                                                        $rol_badge_class = 'badge-zigma-secondary'; 
+                                                        $rol_badge_class = 'badge-role-default'; 
                                                         $rol_display = 'Sin rol';
                                                         break;
                                                 }

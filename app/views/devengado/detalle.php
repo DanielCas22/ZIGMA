@@ -6,6 +6,7 @@
     <title><?= htmlspecialchars($title) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
         .detalle-header {
             background: linear-gradient(135deg, #28a745, #20c997);
@@ -54,7 +55,18 @@
                     <?php if (isset($calculo['empleado'])): ?>
                     <p class="mb-0 mt-2 opacity-90">
                         <strong><?= htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']) ?></strong>
-                        - <?= htmlspecialchars($calculo['empleado']['cargo'] ?? 'Sin cargo especificado') ?>
+                        <?php
+                        $rol_nombre = strtolower($calculo['empleado']['cargo'] ?? 'Sin cargo');
+                        $badge_class = 'badge-role-default';
+                        if (strpos($rol_nombre, 'admin') !== false) {
+                            $badge_class = 'badge-role-admin';
+                        } elseif (strpos($rol_nombre, 'rrhh') !== false || strpos($rol_nombre, 'recursos humanos') !== false) {
+                            $badge_class = 'badge-role-rrhh';
+                        } elseif (strpos($rol_nombre, 'empleado') !== false) {
+                            $badge_class = 'badge-role-empleado';
+                        }
+                        ?>
+                        - <span class="badge <?= $badge_class ?>"><?= htmlspecialchars($calculo['empleado']['cargo'] ?? 'Sin cargo especificado') ?></span>
                     </p>
                     <?php endif; ?>
                 </div>
@@ -321,7 +333,21 @@
                         <ul class="list-unstyled mb-0">
                             <li><strong>Nombre:</strong> <?= htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']) ?></li>
                             <li><strong>Documento:</strong> <?= htmlspecialchars($calculo['empleado']['documento'] ?: 'N/A') ?></li>
-                            <li><strong>Cargo:</strong> <?= htmlspecialchars($calculo['empleado']['cargo']) ?></li>
+                            <li>
+                                <strong>Cargo:</strong> 
+                                <?php
+                                $rol_nombre = strtolower($calculo['empleado']['cargo'] ?? 'Sin cargo');
+                                $badge_class = 'badge-role-default';
+                                if (strpos($rol_nombre, 'admin') !== false) {
+                                    $badge_class = 'badge-role-admin';
+                                } elseif (strpos($rol_nombre, 'rrhh') !== false || strpos($rol_nombre, 'recursos humanos') !== false) {
+                                    $badge_class = 'badge-role-rrhh';
+                                } elseif (strpos($rol_nombre, 'empleado') !== false) {
+                                    $badge_class = 'badge-role-empleado';
+                                }
+                                ?>
+                                <span class="badge <?= $badge_class ?>"><?= htmlspecialchars($calculo['empleado']['cargo']) ?></span>
+                            </li>
                             <li><strong>ID Empleado:</strong> <?= $calculo['empleado']['id'] ?></li>
                         </ul>
                     </div>

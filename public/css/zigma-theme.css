@@ -181,6 +181,14 @@ body {
     vertical-align: middle;
 }
 
+/* Evitar que el texto se parta en varias líneas en celdas específicas */
+.table-zigma tbody td .badge-zigma-primary,
+.table-zigma tbody td .badge-zigma-secondary,
+.table-zigma tbody td .badge-zigma-info {
+    white-space: nowrap;
+    display: inline-block;
+}
+
 /* Table Container - Full Width */
 .table-responsive {
     width: 100%;
@@ -219,6 +227,9 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.875rem;
 }
 
 .badge-zigma-secondary {
@@ -227,6 +238,9 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.875rem;
 }
 
 .badge-zigma-info {
@@ -235,6 +249,99 @@ body {
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
     font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.875rem;
+}
+
+.badge-zigma-success {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.875rem;
+}
+
+.badge-zigma-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.875rem;
+}
+
+.badge-zigma-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.875rem;
+}
+
+/* Badges para Roles Específicos */
+.badge-role-admin {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+.badge-role-empleado {
+    background: linear-gradient(135deg, var(--zigma-pink) 0%, var(--zigma-magenta) 100%);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+}
+
+.badge-role-rrhh {
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.badge-role-default {
+    background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: inline-block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
 }
 
 /* Alerts */

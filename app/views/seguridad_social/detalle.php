@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($title ?? 'Detalle de Seguridad Social'); ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -165,8 +168,18 @@
                 <div style="margin-top: 15px;">
                     <strong>Roles:</strong>
                     <div class="roles-list">
-                        <?php foreach ($calculo['empleado']['roles'] as $rol): ?>
-                            <span class="role-badge"><?php echo htmlspecialchars($rol); ?></span>
+                        <?php foreach ($calculo['empleado']['roles'] as $rol): 
+                            $rol_lower = strtolower($rol);
+                            $badge_class = 'badge-role-default';
+                            if (strpos($rol_lower, 'admin') !== false) {
+                                $badge_class = 'badge-role-admin';
+                            } elseif (strpos($rol_lower, 'rrhh') !== false || strpos($rol_lower, 'recursos humanos') !== false) {
+                                $badge_class = 'badge-role-rrhh';
+                            } elseif (strpos($rol_lower, 'empleado') !== false) {
+                                $badge_class = 'badge-role-empleado';
+                            }
+                        ?>
+                            <span class="badge <?php echo $badge_class; ?>"><?php echo htmlspecialchars($rol); ?></span>
                         <?php endforeach; ?>
                     </div>
                 </div>

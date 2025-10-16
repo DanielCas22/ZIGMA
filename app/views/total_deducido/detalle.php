@@ -6,6 +6,7 @@
     <title>Detalle Total Deducido - <?= htmlspecialchars($empleado['nombre'] ?? 'Empleado') ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
         .card-stat {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -62,7 +63,18 @@
                         </h2>
                         <p class="text-muted mb-0">
                             <i class="fas fa-id-card me-1"></i> <?= htmlspecialchars($empleado['documento'] ?? $empleado['cedula'] ?? 'N/A') ?> | 
-                            <i class="fas fa-briefcase me-1"></i> <?= htmlspecialchars($empleado['cargo'] ?? $empleado['rol_nombre'] ?? 'No especificado') ?>
+                            <?php
+                            $rol_nombre = strtolower($empleado['cargo'] ?? $empleado['rol_nombre'] ?? 'Sin rol');
+                            $badge_class = 'badge-role-default';
+                            if (strpos($rol_nombre, 'admin') !== false) {
+                                $badge_class = 'badge-role-admin';
+                            } elseif (strpos($rol_nombre, 'rrhh') !== false || strpos($rol_nombre, 'recursos humanos') !== false) {
+                                $badge_class = 'badge-role-rrhh';
+                            } elseif (strpos($rol_nombre, 'empleado') !== false) {
+                                $badge_class = 'badge-role-empleado';
+                            }
+                            ?>
+                            <i class="fas fa-briefcase me-1"></i> <span class="badge <?= $badge_class ?>"><?= htmlspecialchars($empleado['cargo'] ?? $empleado['rol_nombre'] ?? 'No especificado') ?></span>
                         </p>
                     </div>
                     <div>

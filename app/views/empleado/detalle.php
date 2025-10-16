@@ -6,6 +6,7 @@
     <title>Detalle Empleado - <?= htmlspecialchars($empleado['nombre'] . ' ' . $empleado['apellido']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
         .employee-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -44,18 +45,32 @@
                             <?= htmlspecialchars($empleado['nombre'] . ' ' . $empleado['apellido']) ?>
                         </h1>
                         <p class="lead mb-1">ID: <?= $empleado['id_empleados'] ?></p>
-                        <span class="badge bg-light text-dark fs-6">
-                            <?php
-                            $rol_principal = $empleado['rol_principal'] ?? 'Sin rol';
-                            $rol_display = '';
-                            switch($rol_principal) {
-                                case 'admin': $rol_display = 'Administrador'; break;
-                                case 'rrhh': $rol_display = 'Recursos Humanos'; break;
-                                case 'empleado': $rol_display = 'Empleado'; break;
-                                default: $rol_display = 'Sin rol'; break;
-                            }
-                            echo htmlspecialchars($rol_display);
-                            ?>
+                        <?php
+                        $rol_principal = $empleado['rol_principal'] ?? 'Sin rol';
+                        $rol_display = '';
+                        $badge_class = 'badge-role-default';
+                        
+                        switch($rol_principal) {
+                            case 'admin': 
+                                $rol_display = 'Administrador'; 
+                                $badge_class = 'badge-role-admin';
+                                break;
+                            case 'rrhh': 
+                                $rol_display = 'Recursos Humanos'; 
+                                $badge_class = 'badge-role-rrhh';
+                                break;
+                            case 'empleado': 
+                                $rol_display = 'Empleado'; 
+                                $badge_class = 'badge-role-empleado';
+                                break;
+                            default: 
+                                $rol_display = 'Sin rol'; 
+                                $badge_class = 'badge-role-default';
+                                break;
+                        }
+                        ?>
+                        <span class="<?= $badge_class ?> fs-6">
+                            <?= htmlspecialchars($rol_display) ?>
                         </span>
                     </div>
                     <div class="col-md-2">

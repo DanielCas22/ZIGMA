@@ -165,7 +165,18 @@
                                 <td>
                                     <strong><?= htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']) ?></strong>
                                     <br>
-                                    <small class="text-muted"><?= htmlspecialchars($calculo['empleado']['cargo'] ?? 'N/A') ?></small>
+                                    <?php
+                                    $rol_nombre = strtolower($calculo['empleado']['cargo'] ?? 'Sin rol');
+                                    $badge_class = 'badge-role-default';
+                                    if (strpos($rol_nombre, 'admin') !== false) {
+                                        $badge_class = 'badge-role-admin';
+                                    } elseif (strpos($rol_nombre, 'rrhh') !== false || strpos($rol_nombre, 'recursos humanos') !== false) {
+                                        $badge_class = 'badge-role-rrhh';
+                                    } elseif (strpos($rol_nombre, 'empleado') !== false) {
+                                        $badge_class = 'badge-role-empleado';
+                                    }
+                                    ?>
+                                    <span class="badge <?= $badge_class ?>"><?= htmlspecialchars($calculo['empleado']['cargo'] ?? 'N/A') ?></span>
                                 </td>
                                 <td>
                                     <strong>$<?= number_format($calculo['conceptos']['sueldo_basico']['valor']) ?></strong>
