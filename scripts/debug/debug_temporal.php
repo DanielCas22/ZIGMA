@@ -1,9 +1,9 @@
 <?php
-require_once 'config/database.php';
-require_once 'app/models/Model.php';
-require_once 'app/models/Empleado.php';
-require_once 'app/models/DevengadoModel.php';
-require_once 'app/models/SeguridadSocialModel.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../app/models/Model.php';
+require_once __DIR__ . '/../../app/models/Empleado.php';
+require_once __DIR__ . '/../../app/models/DevengadoModel.php';
+require_once __DIR__ . '/../../app/models/SeguridadSocialModel.php';
 
 try {
     echo "=== TESTING VERSIÓN TEMPORAL SIN ARL ===" . PHP_EOL;

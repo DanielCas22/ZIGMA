@@ -1,6 +1,6 @@
 <?php
 // Script para insertar horas extras variadas
-require_once 'config/database.php';
+require_once __DIR__ . '/../../config/database.php';
 
 $pdo = new PDO('mysql:host=localhost;dbname=zigmaog;charset=utf8', 'root', '');
 

@@ -1,10 +1,10 @@
 <?php
-require_once 'config/database.php';
-require_once 'app/models/Model.php';
-require_once 'app/models/Empleado.php';
-require_once 'app/models/DevengadoModel.php';
-require_once 'app/models/SeguridadSocialModel.php';
-require_once 'app/models/ARLModel.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../app/models/Model.php';
+require_once __DIR__ . '/../../app/models/Empleado.php';
+require_once __DIR__ . '/../../app/models/DevengadoModel.php';
+require_once __DIR__ . '/../../app/models/SeguridadSocialModel.php';
+require_once __DIR__ . '/../../app/models/ARLModel.php';
 
 try {
     echo "=== TESTING SEGURIDAD SOCIAL MODEL ===" . PHP_EOL;

@@ -156,32 +156,31 @@
             <table class="table table-nomina table-zigma table-bordered">
                 <thead>
                     <tr>
-                        <th rowspan="3" style="width: 40px;">No.</th>
-                        <th rowspan="3" style="width: 150px;">Nombres y Apellidos</th>
+                        <th rowspan="2" style="width: 40px;">No.</th>
+                        <th rowspan="2" style="width: 150px;">Nombres y Apellidos</th>
                         <th colspan="3" style="background-color: #27ae60;">SUELDO</th>
-                        <th colspan="7" style="background-color: #2ecc71;" class="seccion-devengado">DEVENGADO</th>
-                        <th rowspan="3" style="background-color: #27ae60;">TOTAL DEVENGADO</th>
+                        <th colspan="5" style="background-color: #2ecc71;" class="seccion-devengado">DEVENGADO</th>
+                        <th style="background-color: #27ae60;">TOTAL DEVENGADO</th>
                         <th colspan="5" style="background-color: #e74c3c;" class="seccion-deducciones">DEDUCCIONES</th>
-                        <th rowspan="3" style="background-color: #e74c3c;">TOTAL DEDUCCION</th>
-                        <th rowspan="3" style="background-color: #27ae60;">NETO PAGADO</th>
+                        <th style="background-color: #e74c3c;">TOTAL DEDUCCIÓN</th>
+                        <th style="background-color: #27ae60;">NETO PAGADO</th>
                     </tr>
                     <tr>
-                        <th rowspan="2" class="seccion-devengado">BÁSICO</th>
-                        <th colspan="2">TIEMPO</th>
-                        <th rowspan="2" class="seccion-devengado">SUELDO BÁSICO</th>
-                        <th rowspan="2" class="seccion-devengado">HORAS EXTRAS</th>
-                        <th rowspan="2" class="seccion-devengado">COMISIÓN</th>
-                        <th rowspan="2" class="seccion-devengado">AUXILIO TRANS.</th>
-                        <th rowspan="2" class="seccion-devengado">OTROS</th>
-                        <th rowspan="2" class="seccion-deducciones">Salud</th>
-                        <th rowspan="2" class="seccion-deducciones">Pensión</th>
-                        <th rowspan="2" class="seccion-deducciones">Fondo Solidaridad</th>
-                        <th rowspan="2" class="seccion-deducciones">Retención</th>
-                        <th rowspan="2" class="seccion-deducciones">Otros</th>
-                    </tr>
-                    <tr>
+                        <th>BÁSICO</th>
                         <th>DÍAS</th>
                         <th>HORAS</th>
+                        <th>SUELDO BÁSICO</th>
+                        <th>HORAS EXTRAS</th>
+                        <th>COMISIÓN</th>
+                        <th>AUXILIO TRANS.</th>
+                        <th>OTROS</th>
+                        <th>Salud</th>
+                        <th>Pensión</th>
+                        <th>Fondo Solidaridad</th>
+                        <th>Retención</th>
+                        <th>Otros</th>
+                        <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>

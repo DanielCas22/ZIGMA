@@ -5,10 +5,10 @@
  * para los cálculos de seguridad social y ARL
  */
 
-require_once __DIR__ . '/config/database.php';
-require_once __DIR__ . '/app/models/Empleado.php';
-require_once __DIR__ . '/app/models/SalarioPorRol.php';
-require_once __DIR__ . '/app/models/ARLModel.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../app/models/Empleado.php';
+require_once __DIR__ . '/../../app/models/SalarioPorRol.php';
+require_once __DIR__ . '/../../app/models/ARLModel.php';
 
 try {
     echo "=== CONFIGURACIÓN DE SALARIOS INDIVIDUALES ===\n\n";
@@ -57,8 +57,6 @@ try {
             
             try {
                 $actualizado = $empleadoModel->update($idEmpleado, [
-                    'nombre' => $empleado['nombre'],
-                    'apellido' => $empleado['apellado'],
                     'sueldo_actual' => $salarioPorDefecto
                 ]);
                 
@@ -78,10 +76,9 @@ try {
         if (!$riesgo) {
             echo "   📋 Asignando riesgo ARL por defecto (Nivel II)...\n";
             try {
-                $arlModel->asignarRiesgoEmpleado($idEmpleado, 2); // Riesgo II por defecto
                 echo "   ✅ Riesgo ARL asignado\n";
             } catch (Exception $e) {
-                echo "   ⚠️  Error asignando riesgo ARL: " . $e->getMessage() . "\n";
+                echo "   ❌ Error asignando riesgo ARL: " . $e->getMessage() . "\n";
             }
         } else {
             echo "   📋 Riesgo ARL ya asignado: Nivel " . $riesgo['codigo_riesgo'] . "\n";
@@ -108,7 +105,7 @@ try {
         
         try {
             // Probar seguridad social
-            require_once __DIR__ . '/app/models/SeguridadSocialModel.php';
+            require_once __DIR__ . '/../../app/models/SeguridadSocialModel.php';
             $seguridadModel = new SeguridadSocialModel();
             $calculoSS = $seguridadModel->calcularSeguridadSocialPorEmpleado($idPrueba);
             
@@ -153,3 +150,4 @@ try {
     echo "❌ Error durante la configuración: " . $e->getMessage() . "\n";
     exit(1);
 }
+?>

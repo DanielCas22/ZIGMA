@@ -89,13 +89,14 @@ class Empleado extends Model {
     public function create($data) {
         $hasFlag = $this->hasColumn('es_usuario_sistema');
         if ($hasFlag) {
+            $es_usuario = isset($data['es_usuario_sistema']) ? (int)$data['es_usuario_sistema'] : 1; // Por defecto 1 (usuario del sistema)
             $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual, es_usuario_sistema) VALUES (?, ?, ?, ?)';
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([
                 $data['nombre'],
                 $data['apellido'],
                 isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00,
-                isset($data['es_usuario_sistema']) ? (bool)$data['es_usuario_sistema'] : false
+                $es_usuario
             ]);
         } else {
             $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual) VALUES (?, ?, ?)';
@@ -236,26 +237,28 @@ class Empleado extends Model {
         try {
             $filterBySystem = $this->hasColumn('es_usuario_sistema');
             $sql = 'SELECT e.*, 
-                           GROUP_CONCAT(DISTINCT r.nombre ORDER BY 
-                               CASE r.nombre 
-                                   WHEN "admin" THEN 1 
-                                   WHEN "rrhh" THEN 2 
-                                   WHEN "empleado" THEN 3 
-                                   ELSE 4 
-                               END) as roles_concatenados,
-                           CASE 
-                               WHEN GROUP_CONCAT(DISTINCT r.nombre) LIKE "%admin%" THEN "admin"
-                               WHEN GROUP_CONCAT(DISTINCT r.nombre) LIKE "%rrhh%" THEN "rrhh"
-                               ELSE "empleado"
-                           END as rol_principal
-                    FROM empleados e
-                    LEFT JOIN user u ON e.id_empleados = u.empleado_id
-                    LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id 
-                    LEFT JOIN rol r ON rhu.rol_id = r.id_rol';
+                       GROUP_CONCAT(DISTINCT r.nombre ORDER BY 
+                           CASE r.nombre 
+                               WHEN "admin" THEN 1 
+                               WHEN "rrhh" THEN 2 
+                               WHEN "empleado" THEN 3 
+                               ELSE 4 
+                           END) as roles_concatenados,
+                       CASE 
+                           WHEN GROUP_CONCAT(DISTINCT r.nombre) LIKE "%admin%" THEN "admin"
+                           WHEN GROUP_CONCAT(DISTINCT r.nombre) LIKE "%rrhh%" THEN "rrhh"
+                           ELSE "empleado"
+                       END as rol_principal
+                FROM empleados e
+                LEFT JOIN user u ON e.id_empleados = u.empleado_id
+                LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id 
+                LEFT JOIN rol r ON rhu.rol_id = r.id_rol';
             $conditions = [];
             if ($filterBySystem) {
-                $conditions[] = '(e.es_usuario_sistema IS NULL OR e.es_usuario_sistema = 0)';
+                $conditions[] = '(e.es_usuario_sistema IS NULL OR e.es_usuario_sistema = 1)';
             }
+            // Excluir empleados que son solo roles
+            $conditions[] = "TRIM(CONCAT(e.nombre, ' ', e.apellido)) NOT IN ('Administrador del Sistema','Coordinador RRHH','Empleado General')";
             // Excluir placeholders/roles por nombre (usa solo nombre y apellido existentes)
             $conditions[] = "NOT (
                 UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
@@ -313,5 +316,15 @@ class Empleado extends Model {
             return $auxilio_transporte;
         }
         return 0;
+    }
+
+    /**
+     * Obtener empleados válidos (excluye roles y empleados de prueba)
+     */
+    public function getValidEmployees() {
+        $sql = "SELECT * FROM empleados WHERE nombre NOT IN ('Administrador', 'Coordinador', 'Empleado') AND nombre NOT LIKE 'empleado test%' AND nombre NOT LIKE 'empleado tes quiriku%' ORDER BY nombre";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

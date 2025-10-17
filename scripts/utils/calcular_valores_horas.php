@@ -1,8 +1,8 @@
 <?php
 // Script para calcular valores automáticos de horas extras
-require_once 'app/models/Model.php';
-require_once 'app/models/HorasExtras.php';
-require_once 'app/models/TarifaHora.php';
+require_once __DIR__ . '/../../app/models/Model.php';
+require_once __DIR__ . '/../../app/models/HorasExtras.php';
+require_once __DIR__ . '/../../app/models/TarifaHora.php';
 
 $pdo = new PDO('mysql:host=localhost;dbname=zigmaog;charset=utf8', 'root', '');
 

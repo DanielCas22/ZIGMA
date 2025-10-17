@@ -1,6 +1,6 @@
 <?php
 // Script para encontrar la columna correcta de ID en la tabla user
-require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/../../config/database.php';
 
 try {
     $database = new Database();

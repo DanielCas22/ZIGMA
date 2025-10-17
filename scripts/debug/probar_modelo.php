@@ -1,7 +1,7 @@
 <?php
 // Script para probar el modelo Empleado
-require_once __DIR__ . '/app/models/Model.php';
-require_once __DIR__ . '/app/models/Empleado.php';
+require_once __DIR__ . '/../../app/models/Model.php';
+require_once __DIR__ . '/../../app/models/Empleado.php';
 
 try {
     echo "<h2>Prueba del Modelo Empleado</h2>";
