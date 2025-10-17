@@ -312,7 +312,6 @@
                 </svg>
                 Prestaciones Sociales
               </h5>
-              <p class="card-text small">Cesantías, Intereses, Prima y Vacaciones</p>
               <a href="/ZIGMA/public/index.php?url=PrestacionesSociales" class="btn btn-outline-warning fw-bold">Ir</a>
             </div>
           </div>
@@ -414,40 +413,7 @@
   </div>
 </div>
 
-<div class="container my-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="card shadow border-info border-2">
-        <div class="card-body">
-          <h3 class="mb-4 text-info"><i class="fa fa-users me-2"></i>Empleados registrados</h3>
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead class="table-info">
-                <tr>
-                  <th>#</th>
-                  <th>Nombre</th>
-                  <th>Apellidos</th>
-                </tr>
-              </thead>
-              <tbody>
-                <?php if (!empty($empleados)) : foreach ($empleados as $i => $emp) : ?>
-                  <tr>
-                    <td><?= $i+1 ?></td>
-                    <td><?= htmlspecialchars($emp['nombre'] ?? '') ?></td>
-                    <td><?= htmlspecialchars(($emp['apellidos'] ?? null) !== null ? $emp['apellidos'] : ($emp['apellido'] ?? '')) ?></td>
-                  </tr>
-                <?php endforeach; else: ?>
-                  <tr><td colspan="3" class="text-center text-muted">No hay empleados registrados</td></tr>
-                <?php endif; ?>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
+<!-- Eliminada la sección de empleados registrados del dashboard principal -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
