@@ -129,7 +129,8 @@ class ParafiscalesController extends Controller {
                 
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                $empleados = $empleadoModel->getAll();
+                // Obtener empleados válidos (excluye roles)
+                $empleados = $empleadoModel->getValidEmployees();
                 
                 $this->view('parafiscales/generar', [
                     'title' => 'Generar Parafiscales',
@@ -141,7 +142,8 @@ class ParafiscalesController extends Controller {
         } else {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
-            $empleados = $empleadoModel->getAll();
+            // Obtener empleados válidos (excluye roles)
+            $empleados = $empleadoModel->getValidEmployees();
             
             $this->view('parafiscales/generar', [
                 'title' => 'Generar Parafiscales',

@@ -155,7 +155,7 @@ class PrestacionesSocialesModel extends Model {
      */
     public function calcularPrestacionesTodosEmpleados($diasTrabajados = 360) {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getAll();
+        $empleados = $empleadoModel->getValidEmployees();
         
         $resultados = [];
         $totales = [

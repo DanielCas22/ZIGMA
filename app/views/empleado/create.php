@@ -25,6 +25,21 @@
                         <h2 class="mb-0 text-zigma-primary fw-bold">Registrar Empleado</h2>
                         <p class="text-muted">Agrega un nuevo empleado al sistema</p>
                     </div>
+                    
+                    <?php if (isset($_GET['error']) && $_GET['error'] === 'usuario_duplicado'): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong> <?php echo htmlspecialchars(urldecode($_GET['message'] ?? 'El nombre de usuario ya está en uso.')); ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php elseif (isset($_GET['error']) && $_GET['error'] === '1'): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Error:</strong> Ocurrió un error al registrar el empleado. Inténtelo nuevamente.
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    <?php endif; ?>
+                    
                     <form method="post" action="/ZIGMA/public/index.php?url=Empleado/store">
                         <div class="mb-3">
                             <label class="form-label">Nombres</label>
@@ -79,6 +94,20 @@
                                 <i class="fas fa-shield-alt text-warning me-1"></i>
                                 El nivel de riesgo determina el porcentaje de ARL que se aplicará sobre el salario
                             </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Usuario <span class="text-danger">*</span></label>
+                            <input type="text" name="usuario" class="form-control" placeholder="Nombre de usuario" required autocomplete="username">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="password" name="contrasena" class="form-control" placeholder="Contraseña para el usuario" required autocomplete="new-password" id="contrasenaInput">
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()" tabindex="-1">
+                                    <i class="fa fa-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">La contraseña debe ser segura y solo el empleado la conocerá.</div>
                         </div>
                         <div class="d-flex justify-content-between">
                             <button type="submit" class="btn-zigma-success px-4">
@@ -169,6 +198,20 @@ document.addEventListener('DOMContentLoaded', function() {
         this.classList.remove('text-success', 'fw-bold');
     });
 });
+
+function togglePassword() {
+    const input = document.getElementById('contrasenaInput');
+    const icon = document.getElementById('toggleIcon');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
 </script>
 </body>
 </html>

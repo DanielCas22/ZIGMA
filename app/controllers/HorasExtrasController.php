@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../models/RolePermissions.php';
+
 class HorasExtrasController extends Controller {
     private function baseUrl() {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
@@ -11,10 +13,29 @@ class HorasExtrasController extends Controller {
             exit;
         }
         
+        // Verificar permisos
+        if (!RolePermissions::canAccess('horas_extras', 'read') && !RolePermissions::canAccess('horas_extras', 'read_own')) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
+            exit;
+        }
+        
         $empleadoModel = $this->model('Empleado');
         $horasExtrasModel = $this->model('HorasExtras');
         
-        $empleados = $empleadoModel->getAllWithRoles();
+        // Obtener empleados según el rol
+        if (RolePermissions::canAccessAllEmployees('horas_extras')) {
+            // Admin y RRHH pueden ver todos los empleados
+            $empleados = $empleadoModel->getAllWithRoles();
+        } else {
+            // Empleados solo pueden ver sus propios registros
+            $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
+            if ($currentEmployeeId) {
+                $empleado = $empleadoModel->find($currentEmployeeId);
+                $empleados = $empleado ? [$empleado] : [];
+            } else {
+                $empleados = [];
+            }
+        }
         
         // Roles específicos para filtrar
         $roles = [
@@ -51,8 +72,8 @@ class HorasExtrasController extends Controller {
             $empleado['tipo_frecuente'] = !empty($tipos) ? array_count_values($tipos) : [];
             $empleado['tipo_frecuente'] = !empty($empleado['tipo_frecuente']) ? array_keys($empleado['tipo_frecuente'], max($empleado['tipo_frecuente']))[0] : 'N/A';
             
-            // Asignar rol (ya viene del query)
-            $empleado['rol'] = $empleado['rol_nombre'];
+            // Asignar rol (verificar si existe)
+            $empleado['rol'] = $empleado['rol_nombre'] ?? 'Sin rol';
         }
         
         // Aplicar filtros
@@ -119,8 +140,26 @@ class HorasExtrasController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
+        
+        // Verificar permisos de creación
+        RolePermissions::redirectIfNoPermission('horas_extras', 'create');
+        
         $empleadoModel = $this->model('Empleado');
-        $empleados = $empleadoModel->getAll();
+        
+        // Obtener empleados según el rol
+        if (RolePermissions::canAccessAllEmployees('horas_extras')) {
+            // Admin y RRHH pueden crear horas extras para cualquier empleado
+            $empleados = $empleadoModel->getAllWithRoles();
+        } else {
+            // Empleados solo pueden crear horas extras para sí mismos
+            $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
+            if ($currentEmployeeId) {
+                $empleado = $empleadoModel->find($currentEmployeeId);
+                $empleados = $empleado ? [$empleado] : [];
+            } else {
+                $empleados = [];
+            }
+        }
         
         // Cargar tipos de horas extras disponibles
         $tipoModel = $this->model('TipoHoraExtra');
@@ -128,8 +167,18 @@ class HorasExtrasController extends Controller {
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
+                $empleado_id = intval($_POST['empleado_id']);
+                
+                // Validar que el empleado puede crear horas extras para el empleado seleccionado
+                if (!RolePermissions::canAccessAllEmployees('horas_extras')) {
+                    $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
+                    if ($empleado_id !== $currentEmployeeId) {
+                        throw new Exception('No tiene permisos para crear horas extras para este empleado.');
+                    }
+                }
+                
                 $data = [
-                    'empleado_id' => $_POST['empleado_id'],
+                    'empleado_id' => $empleado_id,
                     'cantidad' => $_POST['cantidad'],
                     'tipo' => $_POST['tipo'],
                     'dia' => $_POST['dia'],
@@ -232,5 +281,146 @@ class HorasExtrasController extends Controller {
         $horasExtrasModel->delete($id);
         header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras');
         exit;
+    }
+    
+    /**
+     * Ver horas extras pendientes de aprobación
+     */
+    public function pendientes() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        // Verificar permisos de aprobación
+        RolePermissions::redirectIfNoPermission('horas_extras', 'approve');
+        
+        $horasExtrasModel = $this->model('HorasExtras');
+        $pendientes = $horasExtrasModel->getPendientes();
+        
+        $this->view('horas_extras/pendientes', [
+            'pendientes' => $pendientes,
+            'title' => 'Horas Extras Pendientes de Aprobación'
+        ]);
+    }
+    
+    /**
+     * Aprobar horas extras
+     */
+    public function aprobar() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        // Verificar permisos de aprobación
+        RolePermissions::redirectIfNoPermission('horas_extras', 'approve');
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = intval($_POST['id']);
+            $comentario = $_POST['comentario'] ?? null;
+            $aprobado_por = $_SESSION['user']['id_doc'] ?? null;
+            
+            if ($aprobado_por) {
+                $horasExtrasModel = $this->model('HorasExtras');
+                $resultado = $horasExtrasModel->aprobar($id, $aprobado_por, $comentario);
+                
+                if ($resultado) {
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&success=aprobada');
+                } else {
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&error=1');
+                }
+            } else {
+                header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&error=usuario');
+            }
+        } else {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes');
+        }
+        exit;
+    }
+    
+    /**
+     * Rechazar horas extras
+     */
+    public function rechazar() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        // Verificar permisos de rechazo
+        RolePermissions::redirectIfNoPermission('horas_extras', 'reject');
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = intval($_POST['id']);
+            $comentario = $_POST['comentario'] ?? null;
+            $aprobado_por = $_SESSION['user']['id_doc'] ?? null;
+            
+            if ($aprobado_por) {
+                $horasExtrasModel = $this->model('HorasExtras');
+                $resultado = $horasExtrasModel->rechazar($id, $aprobado_por, $comentario);
+                
+                if ($resultado) {
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&success=rechazada');
+                } else {
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&error=1');
+                }
+            } else {
+                header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&error=usuario');
+            }
+        } else {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes');
+        }
+        exit;
+    }
+    
+    /**
+     * Ver historial de horas extras con información de aprobación
+     */
+    public function historial($empleado_id = null) {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        
+        // Verificar permisos
+        if (!RolePermissions::canAccess('horas_extras', 'read') && !RolePermissions::canAccess('horas_extras', 'read_own')) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
+            exit;
+        }
+        
+        $empleadoModel = $this->model('Empleado');
+        $horasExtrasModel = $this->model('HorasExtras');
+        
+        // Si no se especifica empleado y es un empleado general, usar su propio ID
+        if (!$empleado_id && RolePermissions::getCurrentUserRole() === 'empleado') {
+            $empleado_id = RolePermissions::getCurrentEmployeeId();
+        }
+        
+        // Verificar permisos de acceso al empleado específico
+        if ($empleado_id && !RolePermissions::canAccessEmployee($empleado_id)) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
+            exit;
+        }
+        
+        if ($empleado_id) {
+            // Mostrar historial de un empleado específico
+            $empleado = $empleadoModel->find($empleado_id);
+            $historial = $horasExtrasModel->getByEmpleadoConAprobacion($empleado_id);
+        } else {
+            // Mostrar todos los empleados (solo para admin/RRHH)
+            if (!RolePermissions::canAccessAllEmployees('horas_extras')) {
+                header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
+                exit;
+            }
+            $empleado = null;
+            $historial = $horasExtrasModel->getAllConAprobacion();
+        }
+        
+        $this->view('horas_extras/historial', [
+            'empleado' => $empleado,
+            'historial' => $historial,
+            'title' => $empleado ? 'Historial de Horas Extras - ' . $empleado['nombre'] . ' ' . $empleado['apellido'] : 'Historial de Todas las Horas Extras'
+        ]);
     }
 }

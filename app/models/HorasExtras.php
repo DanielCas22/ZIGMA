@@ -69,7 +69,12 @@ class HorasExtras extends Model {
             $data['porcentaje'] = isset($tipoData['porcentaje']) ? $tipoData['porcentaje'] : 0;
         }
 
-        $sql = 'INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        // Determinar estado según el rol del usuario actual
+        $estado = 'pendiente'; // Por defecto pendiente para todos
+        // Los empleados siempre crean horas extras pendientes que requieren aprobación
+        // Solo admin y RRHH pueden aprobar/rechazar, no crear directamente aprobadas
+
+        $sql = 'INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio, estado, fecha_creacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             $data['empleado_id'],
@@ -79,7 +84,8 @@ class HorasExtras extends Model {
             $data['porcentaje'],
             $data['dia'],
             $data['mes'],
-            $data['anio']
+            $data['anio'],
+            $estado
         ]);
     }
 
@@ -124,4 +130,85 @@ class HorasExtras extends Model {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$id]);
     }
+
+    /**
+     * Aprobar horas extras
+     */
+    public function aprobar($id, $aprobado_por, $comentario = null) {
+        $sql = 'UPDATE horas_extras SET 
+                estado = "aprobada", 
+                fecha_aprobacion = NOW(), 
+                aprobado_por = ?, 
+                comentario_aprobacion = ? 
+                WHERE id = ?';
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$aprobado_por, $comentario, $id]);
+    }
+    
+    /**
+     * Rechazar horas extras
+     */
+    public function rechazar($id, $aprobado_por, $comentario = null) {
+        $sql = 'UPDATE horas_extras SET 
+                estado = "rechazada", 
+                fecha_aprobacion = NOW(), 
+                aprobado_por = ?, 
+                comentario_aprobacion = ? 
+                WHERE id = ?';
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$aprobado_por, $comentario, $id]);
+    }
+    
+    /**
+     * Obtener horas extras pendientes de aprobación
+     */
+    public function getPendientes() {
+        $sql = 'SELECT he.*, e.nombre, e.apellido, e.documento,
+                       DATE_FORMAT(he.fecha_creacion, "%d/%m/%Y %H:%i") as fecha_creacion_formatted
+                FROM horas_extras he 
+                INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
+                WHERE he.estado = "pendiente" 
+                ORDER BY he.fecha_creacion ASC';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Obtener horas extras con información de aprobación
+     */
+    public function getByEmpleadoConAprobacion($empleado_id) {
+        $sql = 'SELECT he.*, e.nombre as empleado_nombre, 
+                       u.username as aprobado_por_usuario,
+                       DATE_FORMAT(he.fecha_aprobacion, "%d/%m/%Y %H:%i") as fecha_aprobacion_formatted,
+                       DATE_FORMAT(he.fecha_creacion, "%d/%m/%Y %H:%i") as fecha_creacion_formatted
+                FROM horas_extras he 
+                JOIN empleados e ON he.empleado_id = e.id_empleados
+                LEFT JOIN user u ON he.aprobado_por = u.id_doc
+                WHERE he.empleado_id = ?
+                ORDER BY he.fecha_creacion DESC';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$empleado_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Obtener todas las horas extras con información de aprobación
+     */
+    public function getAllConAprobacion() {
+        $sql = 'SELECT he.*, 
+                       CONCAT(e.nombre, " ", e.apellido) as empleado_nombre,
+                       e.documento as empleado_documento,
+                       u.username as aprobado_por_usuario,
+                       DATE_FORMAT(he.fecha_aprobacion, "%d/%m/%Y %H:%i") as fecha_aprobacion_formatted,
+                       DATE_FORMAT(he.fecha_creacion, "%d/%m/%Y %H:%i") as fecha_creacion_formatted
+                FROM horas_extras he 
+                JOIN empleados e ON he.empleado_id = e.id_empleados
+                LEFT JOIN user u ON he.aprobado_por = u.id_doc
+                ORDER BY he.fecha_creacion DESC';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
+?>

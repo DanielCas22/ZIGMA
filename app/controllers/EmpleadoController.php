@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/Empleado.php';
 require_once __DIR__ . '/../models/Rol.php';
 require_once __DIR__ . '/../models/SalarioPorRol.php';
 require_once __DIR__ . '/../models/ARLModel.php';
+require_once __DIR__ . '/../models/RolePermissions.php';
 
 class EmpleadoController extends Controller {
     private function baseUrl() {
@@ -17,8 +18,12 @@ class EmpleadoController extends Controller {
             exit;
         }
         
+        // Verificar permisos de lectura
+        RolePermissions::redirectIfNoPermission('empleados', 'read');
+        
         // Mostrar dashboard de empleados con roles
         $empleadoModel = $this->model('Empleado');
+        // Obtener empleados válidos (excluye roles)
         $empleados = $empleadoModel->getAllWithRoles();
         
         // Procesar roles para cada empleado
@@ -35,6 +40,9 @@ class EmpleadoController extends Controller {
             exit;
         }
         
+        // Verificar permisos de creación
+        RolePermissions::redirectIfNoPermission('empleados', 'create');
+        
         // Mostrar formulario de registro con roles
         $rolModel = $this->model('Rol');
         $roles = $rolModel->getAll();
@@ -47,22 +55,24 @@ class EmpleadoController extends Controller {
             exit;
         }
         
+        // Verificar permisos de creación
+        RolePermissions::redirectIfNoPermission('empleados', 'create');
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre = $_POST['nombres'] ?? '';
             $apellido = $_POST['apellido'] ?? '';
             $rol_especifico = $_POST['rol'] ?? 'empleado';
             $riesgo_arl = isset($_POST['riesgo_arl']) ? intval($_POST['riesgo_arl']) : 2; // Por defecto Clase II
             $salario_manual = isset($_POST['sueldo_actual']) && !empty($_POST['sueldo_actual']) ? floatval($_POST['sueldo_actual']) : null;
+            $usuario = $_POST['usuario'] ?? '';
+            $contrasena = $_POST['contrasena'] ?? '';
 
             // Determinar el salario a usar
             $salario_final = $salario_manual;
-            
             if (!$salario_final) {
                 // Si no hay salario manual, obtener salario automático según el rol
                 $salarioModel = $this->model('SalarioPorRol');
                 $salario_final = $salarioModel->getSalarioByRol($rol_especifico);
-                
-                // Si no se encuentra salario para el rol, usar salario de empleado base
                 if (!$salario_final) {
                     $salario_final = $salarioModel->getSalarioByRol('empleado');
                 }
@@ -72,52 +82,37 @@ class EmpleadoController extends Controller {
             $data = [
                 'nombre' => $nombre,
                 'apellido' => $apellido,
-                'sueldo_actual' => $salario_final
+                'sueldo_actual' => $salario_final,
+                'usuario' => $usuario,
+                'contrasena' => $contrasena
             ];
-            $resultado = $empleadoModel->create($data);
+            
+            try {
+                $resultado = $empleadoModel->create($data);
 
-            if ($resultado) {
-                // Obtener el id del empleado recién insertado
-                $empleado_id = $empleadoModel->getLastInsertId();
+                if ($resultado) {
+                    // Obtener el id del empleado recién insertado
+                    $empleado_id = $empleadoModel->getLastInsertId();
 
-                // Asignar riesgo ARL al empleado
-                try {
-                    $arlModel = $this->model('ARLModel');
-                    $arlModel->asignarRiesgoEmpleado($empleado_id, $riesgo_arl);
-                } catch (Exception $e) {
-                    // Si hay error al asignar ARL, continuar (se usará el valor por defecto)
-                    error_log("Error al asignar riesgo ARL: " . $e->getMessage());
-                }
-
-                // Crear usuario automáticamente
-                $userModel = $this->model('User');
-                $rolModel = $this->model('Rol');
-                $rolHasUserModel = $this->model('RolHasUser');
-                
-                $username = strtolower(explode(' ', $nombre)[0]) . $empleado_id;
-                $password = password_hash('123456', PASSWORD_DEFAULT);
-                $user_id = $userModel->create($username, $password, $empleado_id);
-
-                // Siempre asignar rol empleado primero
-                $rolEmpleado = $rolModel->getByName('empleado');
-                if ($rolEmpleado) {
-                    $rolHasUserModel->assign($user_id, $rolEmpleado['id_rol']);
-                }
-
-                // Si seleccionó un rol específico diferente a empleado, asignarlo también
-                if ($rol_especifico && $rol_especifico !== 'empleado') {
-                    $rolEspecifico = $rolModel->getByName($rol_especifico);
-                    if ($rolEspecifico) {
-                        $rolHasUserModel->assign($user_id, $rolEspecifico['id_rol']);
+                    // Asignar riesgo ARL al empleado
+                    try {
+                        $arlModel = $this->model('ARLModel');
+                        $arlModel->asignarRiesgoEmpleado($empleado_id, $riesgo_arl);
+                    } catch (Exception $e) {
+                        error_log("Error al asignar riesgo ARL: " . $e->getMessage());
                     }
-                }
 
-                // Redirigir al dashboard de empleados
-                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
-                exit();
-            } else {
-                // Error al crear empleado
-                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=1');
+                    // Redirigir al dashboard de empleados
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
+                    exit();
+                } else {
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=1');
+                    exit();
+                }
+            } catch (Exception $e) {
+                // Capturar error de usuario duplicado u otros errores
+                $errorMessage = urlencode($e->getMessage());
+                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=usuario_duplicado&message=' . $errorMessage);
                 exit();
             }
         }
@@ -128,6 +123,9 @@ class EmpleadoController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
+        
+        // Verificar permisos de actualización
+        RolePermissions::redirectIfNoPermission('empleados', 'update');
         
         if (!isset($_GET['id'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
@@ -174,6 +172,9 @@ class EmpleadoController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
+        
+        // Verificar permisos de actualización
+        RolePermissions::redirectIfNoPermission('empleados', 'update');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id']);
@@ -299,6 +300,9 @@ class EmpleadoController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
+        
+        // Verificar permisos de eliminación (solo admin)
+        RolePermissions::redirectIfNoPermission('empleados', 'delete');
         
         if (isset($_GET['id'])) {
             $id = intval($_GET['id']);

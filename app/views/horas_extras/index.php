@@ -86,9 +86,27 @@
                             <h4 class="mb-0 text-zigma-navy">
                                 <i class="fa fa-clock me-2"></i>Gestión de Horas Extras
                             </h4>
-                            <a href="/ZIGMA/public/index.php?url=HorasExtras/create" class="btn-zigma-primary">
-                                <i class="fa fa-plus me-2"></i> Agregar Horas Extras
-                            </a>
+                            <div class="d-flex gap-2">
+                                <?php require_once __DIR__ . '/../../models/RolePermissions.php'; ?>
+                                <?php if (RolePermissions::canAccessAllEmployees('horas_extras')): ?>
+                                <a href="/ZIGMA/public/index.php?url=HorasExtras/historial" class="btn-zigma-secondary">
+                                    <i class="fa fa-history me-2"></i> Historial Completo
+                                </a>
+                                <?php endif; ?>
+                                <?php if (RolePermissions::canAccess('horas_extras', 'approve')): ?>
+                                <a href="/ZIGMA/public/index.php?url=HorasExtras/pendientes" class="btn btn-warning">
+                                    <i class="fa fa-bell me-2"></i> Pendientes
+                                    <?php 
+                                    $pendingCount = RolePermissions::getPendingHoursCount();
+                                    if ($pendingCount > 0): ?>
+                                        <span class="badge bg-danger"><?php echo $pendingCount; ?></span>
+                                    <?php endif; ?>
+                                </a>
+                                <?php endif; ?>
+                                <a href="/ZIGMA/public/index.php?url=HorasExtras/create" class="btn-zigma-primary">
+                                    <i class="fa fa-plus me-2"></i> Agregar Horas Extras
+                                </a>
+                            </div>
                         </div>
                     <form class="row g-2 align-items-center mb-3" method="get" action="/ZIGMA/public/index.php">
                         <input type="hidden" name="url" value="HorasExtras">
@@ -236,6 +254,10 @@
                                                     <a href="/ZIGMA/public/index.php?url=HorasExtras/detalle/<?= urlencode($emp_id) ?>" 
                                                        class="btn btn-zigma-primary btn-sm" title="Ver detalle de horas extras">
                                                         <i class="fa fa-eye"></i>
+                                                    </a>
+                                                    <a href="/ZIGMA/public/index.php?url=HorasExtras/historial/<?= urlencode($emp_id) ?>" 
+                                                       class="btn btn-info btn-sm" title="Ver historial con aprobaciones">
+                                                        <i class="fa fa-history"></i>
                                                     </a>
                                                     <a href="/ZIGMA/public/index.php?url=HorasExtras/create&empleado_id=<?= urlencode($emp_id) ?>" 
                                                        class="btn btn-zigma-secondary btn-sm" title="Agregar nuevas horas extras">

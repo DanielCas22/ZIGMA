@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../models/RolePermissions.php';
+
 class DashboardController extends Controller {
     private function baseUrl() {
         // Obtiene la URL base del proyecto
@@ -6,16 +8,25 @@ class DashboardController extends Controller {
         $base = explode('/public', $scriptName)[0];
         return $base;
     }
+    
     public function index() {
         if (!isset($_SESSION['user'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
+        
         $empleadoModel = $this->model('Empleado');
         $empleados = $empleadoModel->getAll();
+        
+        // Obtener notificaciones de horas extras pendientes para admin y RRHH
+        $pendingCount = RolePermissions::getPendingHoursCount();
+        $pendingHours = RolePermissions::getPendingHours();
+        
         $this->view('dashboard/index', [
             'user' => $_SESSION['user'],
-            'empleados' => $empleados
+            'empleados' => $empleados,
+            'pendingHoursCount' => $pendingCount,
+            'pendingHours' => $pendingHours
         ]);
     }
 }

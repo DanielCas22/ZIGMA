@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../../models/RolePermissions.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -200,6 +201,21 @@
             Horas Extras
           </a>
         </li>
+        <?php if (RolePermissions::canAccess('horas_extras', 'approve')): ?>
+        <li class="nav-item mb-2 ms-3">
+          <a class="nav-link fw-bold d-flex align-items-center position-relative" href="/ZIGMA/public/index.php?url=HorasExtras/pendientes">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bell me-2" viewBox="0 0 16 16">
+              <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+            </svg>
+            Pendientes
+            <?php if (isset($pendingHoursCount) && $pendingHoursCount > 0): ?>
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                <?php echo $pendingHoursCount; ?>
+              </span>
+            <?php endif; ?>
+          </a>
+        </li>
+        <?php endif; ?>
         <li class="nav-item mb-2">
           <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=Empleado/index">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-people me-2" viewBox="0 0 16 16">
@@ -273,6 +289,48 @@
       </ul>
     </div>
     <div class="col-md-10 p-5">
+      <?php if (isset($_GET['error']) && $_GET['error'] === 'no_permission'): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Acceso Denegado:</strong> No tienes permisos para acceder a esa funcionalidad.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <?php endif; ?>
+      
+      <!-- Notificaciones de Horas Extras Pendientes -->
+      <?php if (isset($pendingHoursCount) && $pendingHoursCount > 0): ?>
+        <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm" role="alert">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-bell text-warning me-3" style="font-size: 1.5rem;"></i>
+            <div class="flex-grow-1">
+              <h6 class="alert-heading mb-1">
+                <strong>¡Tienes <?php echo $pendingHoursCount; ?> solicitud<?php echo $pendingHoursCount > 1 ? 'es' : ''; ?> de horas extras pendiente<?php echo $pendingHoursCount > 1 ? 's' : ''; ?>!</strong>
+              </h6>
+              <p class="mb-2">Los siguientes empleados necesitan aprobación de sus horas extras:</p>
+              <div class="mb-3">
+                <?php foreach ($pendingHours as $hora): ?>
+                  <span class="badge bg-warning text-dark me-2 mb-1">
+                    <i class="fas fa-user me-1"></i>
+                    <?php echo htmlspecialchars($hora['nombre'] . ' ' . $hora['apellido']); ?>
+                    (<?php echo number_format($hora['cantidad'], 2); ?> hrs)
+                  </span>
+                <?php endforeach; ?>
+                <?php if ($pendingHoursCount > count($pendingHours)): ?>
+                  <span class="badge bg-secondary">
+                    +<?php echo ($pendingHoursCount - count($pendingHours)); ?> más...
+                  </span>
+                <?php endif; ?>
+              </div>
+              <a href="/ZIGMA/public/index.php?url=HorasExtras/pendientes" class="btn btn-warning btn-sm">
+                <i class="fas fa-clock me-1"></i>
+                Ver todas las solicitudes pendientes
+              </a>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <?php endif; ?>
+      
       <h2>Accesos rápidos</h2>
       <div class="row g-4 mt-2">
         <div class="col-md-4">

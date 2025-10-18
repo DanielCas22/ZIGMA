@@ -210,7 +210,7 @@ class DevengadoModel extends Model {
      */
     public function calcularDevengadoTodosEmpleados() {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getAll();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $resultados = [];
         $totales = [

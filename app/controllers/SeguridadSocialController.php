@@ -290,7 +290,8 @@ class SeguridadSocialController extends Controller {
             
             // Obtener empleados con sus riesgos actuales
             $empleadoModel = new Empleado();
-            $empleados = $empleadoModel->getAll();
+            // Obtener empleados válidos (excluye roles)
+            $empleados = $empleadoModel->getValidEmployees();
             
             $empleadosConRiesgo = [];
             foreach ($empleados as $empleado) {

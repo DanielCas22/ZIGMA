@@ -141,7 +141,7 @@ class TotalDeducidoController extends Controller {
                 
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                $empleados = $empleadoModel->getAll();
+                $empleados = $empleadoModel->getValidEmployees();
                 
                 $this->view('total_deducido/generar', [
                     'title' => 'Generar Total Deducido',
@@ -152,7 +152,8 @@ class TotalDeducidoController extends Controller {
         } else {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
-            $empleados = $empleadoModel->getAll();
+            // Obtener empleados válidos (excluye roles)
+            $empleados = $empleadoModel->getValidEmployees();
             
             $this->view('total_deducido/generar', [
                 'title' => 'Generar Total Deducido',

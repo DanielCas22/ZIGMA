@@ -221,7 +221,7 @@ class TotalDeducidoModel extends Model {
      */
     public function calcularTotalDeducidoTodosEmpleados() {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getAll();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $resultados = [];
         $totales = [

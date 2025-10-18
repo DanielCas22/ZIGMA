@@ -88,24 +88,68 @@ class Empleado extends Model {
 
     public function create($data) {
         $hasFlag = $this->hasColumn('es_usuario_sistema');
-        if ($hasFlag) {
-            $es_usuario = isset($data['es_usuario_sistema']) ? (int)$data['es_usuario_sistema'] : 1; // Por defecto 1 (usuario del sistema)
-            $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual, es_usuario_sistema) VALUES (?, ?, ?, ?)';
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([
-                $data['nombre'],
-                $data['apellido'],
-                isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00,
-                $es_usuario
-            ]);
-        } else {
-            $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual) VALUES (?, ?, ?)';
-            $stmt = $this->db->prepare($sql);
-            return $stmt->execute([
-                $data['nombre'],
-                $data['apellido'],
-                isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00
-            ]);
+        $db = $this->db;
+        try {
+            $db->beginTransaction();
+            if ($hasFlag) {
+                $es_usuario = isset($data['es_usuario_sistema']) ? (int)$data['es_usuario_sistema'] : 1; // Por defecto 1 (usuario del sistema)
+                $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual, es_usuario_sistema) VALUES (?, ?, ?, ?)';
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    $data['nombre'],
+                    $data['apellido'],
+                    isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00,
+                    $es_usuario
+                ]);
+            } else {
+                $sql = 'INSERT INTO empleados (nombre, apellido, sueldo_actual) VALUES (?, ?, ?)';
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    $data['nombre'],
+                    $data['apellido'],
+                    isset($data['sueldo_actual']) ? floatval($data['sueldo_actual']) : 0.00
+                ]);
+            }
+            $empleado_id = $db->lastInsertId();
+
+            // Si se reciben usuario y contraseña, crear el usuario asociado
+            if (!empty($data['usuario']) && !empty($data['contrasena'])) {
+                $usuario = $data['usuario'];
+                
+                // Verificar si el nombre de usuario ya existe
+                $sqlCheckUser = 'SELECT COUNT(*) FROM user WHERE username = ?';
+                $stmtCheckUser = $db->prepare($sqlCheckUser);
+                $stmtCheckUser->execute([$usuario]);
+                $userExists = $stmtCheckUser->fetchColumn() > 0;
+                
+                if ($userExists) {
+                    $db->rollBack();
+                    throw new Exception("El nombre de usuario '$usuario' ya está en uso. Por favor, elija otro nombre de usuario.");
+                }
+                
+                $contrasena = password_hash($data['contrasena'], PASSWORD_DEFAULT);
+                $sqlUser = 'INSERT INTO user (username, password, empleado_id) VALUES (?, ?, ?)';
+                $stmtUser = $db->prepare($sqlUser);
+                $stmtUser->execute([$usuario, $contrasena, $empleado_id]);
+                $user_id = $db->lastInsertId();
+                
+                // Asignar automáticamente el rol "empleado"
+                $sqlRol = 'SELECT id_rol FROM rol WHERE nombre = ?';
+                $stmtRol = $db->prepare($sqlRol);
+                $stmtRol->execute(['empleado']);
+                $rol = $stmtRol->fetch(PDO::FETCH_ASSOC);
+                
+                if ($rol) {
+                    $sqlRolUser = 'INSERT INTO rol_has_user (user_id, rol_id) VALUES (?, ?)';
+                    $stmtRolUser = $db->prepare($sqlRolUser);
+                    $stmtRolUser->execute([$user_id, $rol['id_rol']]);
+                }
+            }
+            $db->commit();
+            return true;
+        } catch (Exception $e) {
+            $db->rollBack();
+            throw $e;
         }
     }
 
@@ -319,10 +363,14 @@ class Empleado extends Model {
     }
 
     /**
-     * Obtener empleados válidos (excluye roles y empleados de prueba)
+     * Obtener empleados válidos (excluye solo los placeholders de rol exactos)
      */
     public function getValidEmployees() {
-        $sql = "SELECT * FROM empleados WHERE nombre NOT IN ('Administrador', 'Coordinador', 'Empleado') AND nombre NOT LIKE 'empleado test%' AND nombre NOT LIKE 'empleado tes quiriku%' ORDER BY nombre";
+        $sql = "SELECT * FROM empleados WHERE NOT (
+            (nombre = 'Administrador' AND apellido = 'del Sistema') OR
+            (nombre = 'Coordinador' AND apellido = 'RRHH') OR
+            (nombre = 'Empleado' AND apellido = 'General')
+        ) ORDER BY nombre";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

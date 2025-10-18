@@ -99,9 +99,10 @@ class NominaModel extends Model {
     /**
      * Calcular nómina para todos los empleados
      */
+
     public function calcularNominaGeneral() {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getAll();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $nominaEmpleados = [];
         $totalesEmpresa = [
