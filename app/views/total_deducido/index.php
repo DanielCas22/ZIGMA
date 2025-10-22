@@ -7,6 +7,25 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
+    <style>
+        @media (max-width: 576px) {
+            .card-estadistica, .card, .table, .deducido-table, .devengado-table {
+                font-size: clamp(11px, 3vw, 13px) !important;
+            }
+            .card-header, h1, h2, h4, .display-6 {
+                font-size: clamp(1rem, 4vw, 1.2rem) !important;
+            }
+            .btn, .btn-sm, .btn-primary, .btn-danger, .btn-info, .btn-success {
+                font-size: clamp(12px, 3vw, 14px) !important;
+                padding: 6px 12px !important;
+                min-width: 80px;
+                max-width: 140px;
+            }
+            .table th, .table td {
+                padding: 6px !important;
+            }
+        }
+    </style>
 </head>
 <body>
 

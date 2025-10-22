@@ -140,6 +140,20 @@
             background-color: #d4edda;
             font-weight: bold;
         }
+        @media (max-width: 576px) {
+            .table-responsive {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .table, .table th, .table td {
+                min-width: 120px !important;
+                font-size: clamp(11px, 3vw, 13px) !important;
+                padding: 6px !important;
+                white-space: nowrap !important;
+            }
+        }
     </style>
 </head>
 <body>

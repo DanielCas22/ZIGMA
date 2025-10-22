@@ -8,7 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
     <style>
+        @media (max-width: 576px) {
+            .table-responsive {
+                width: 100vw !important;
+                max-width: 100vw !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .table, .table th, .table td {
+                min-width: 120px !important;
+                font-size: clamp(11px, 3vw, 13px) !important;
+                padding: 6px !important;
+                white-space: nowrap !important;
+            }
         }
+
         .form-section {
             background-color: #f8f9fa;
             padding: 15px;
@@ -135,111 +149,113 @@
         <?php if (!empty($calculos_empleados)): ?>
             <!-- Tabla de cálculos por empleado -->
             <h2>📊 Cálculos de Seguridad Social + ARL por Empleado</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Empleado</th>
-                        <th>Roles</th>
-                        <th>Salario Individual</th>
-                        <th>Días Trabajados</th>
-                        <th>Salario Proporcional</th>
-                        <th>Salud (4%)</th>
-                        <th>Pensión (4%)</th>
-                        <th style="background-color: #fff3cd;">Riesgo ARL</th>
-                        <th style="background-color: #fff3cd;">ARL (%)</th>
-                        <th style="background-color: #fff3cd;">Valor ARL</th>
-                        <th style="background-color: #e8f5e8; font-weight: bold;">Total S.S. + ARL</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($calculos_empleados as $calculo): ?>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td><?php echo htmlspecialchars($calculo['empleado']['id']); ?></td>
-                            <td>
-                                <strong><?php echo htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']); ?></strong>
-                            </td>
-                            <td>
-                                <?php 
-                                    $roles = $calculo['empleado']['roles'];
-                                    $rolesFormateados = [];
-                                    
-                                    // Verificar si roles es array
-                                    if (is_array($roles)) {
-                                        // Siempre incluir empleado primero
-                                        $rolesFormateados[] = 'empleado';
-                                        
-                                        // Agregar otros roles (excluyendo empleado para evitar duplicación)
-                                        foreach ($roles as $rol) {
-                                            if (strtolower(trim($rol)) !== 'empleado') {
-                                                $rolesFormateados[] = trim($rol);
-                                            }
-                                        }
-                                    } else {
-                                        // Si no es array, mostrar como string
-                                        $rolesFormateados[] = is_string($roles) ? $roles : 'empleado';
-                                    }
-                                    
-                                    // Mostrar badges diferenciados por color
-                                    foreach ($rolesFormateados as $rol) {
-                                        $rol_lower = strtolower($rol);
-                                        $badge_class = 'badge-role-default';
-                                        if (strpos($rol_lower, 'admin') !== false) {
-                                            $badge_class = 'badge-role-admin';
-                                        } elseif (strpos($rol_lower, 'rrhh') !== false || strpos($rol_lower, 'recursos humanos') !== false) {
-                                            $badge_class = 'badge-role-rrhh';
-                                        } elseif (strpos($rol_lower, 'empleado') !== false) {
-                                            $badge_class = 'badge-role-empleado';
-                                        }
-                                        echo '<span class="badge ' . $badge_class . '">' . htmlspecialchars($rol) . '</span> ';
-                                    }
-                                ?>
-                            </td>
-                            <td class="text-right currency">
-                                $<?php echo number_format($calculo['total_devengado'] ?? 0, 2); ?>
-                            </td>
-                            <td class="text-right">
-                                30 <!-- Días fijos según nueva lógica -->
-                            </td>
-                            <td class="text-right currency">
-                                $<?php echo number_format($calculo['base_calculo'] ?? 0, 2); ?>
-                            </td>
-                            <td class="text-right currency">
-                                $<?php echo number_format(($calculo['seguridad_social']['empleado']['salud']['valor'] ?? 0), 2); ?>
-                            </td>
-                            <td class="text-right currency">
-                                $<?php echo number_format(($calculo['seguridad_social']['empleado']['pension']['valor'] ?? 0), 2); ?>
-                            </td>
-                            <td class="text-right" style="background-color: #fff3cd;">
-                                <span style="padding: 2px 6px; border-radius: 3px; background-color: 
-                                    <?php 
-                                        $colors = ['#e8f5e8', '#fff3cd', '#ffeaa7', '#fab1a0', '#e17055'];
-                                        echo $colors[($calculo['arl']['codigo_riesgo'] ?? 2) - 1];
-                                    ?>; font-size: 11px; font-weight: bold;">
-                                    Clase <?php echo ['I', 'II', 'III', 'IV', 'V'][($calculo['arl']['codigo_riesgo'] ?? 2) - 1]; ?>
-                                </span>
-                            </td>
-                            <td class="text-right currency" style="background-color: #fff3cd;">
-                                <?php 
-                                    $porcentaje = 0;
-                                    if (isset($calculo['arl']['nivel_riesgo']['porcentaje'])) {
-                                        $porcentaje = $calculo['arl']['nivel_riesgo']['porcentaje'];
-                                    } elseif (isset($calculo['arl']['porcentaje_arl'])) {
-                                        $porcentaje = $calculo['arl']['porcentaje_arl'];
-                                    }
-                                    echo number_format($porcentaje, 3);
-                                ?>%
-                            </td>
-                            <td class="text-right currency" style="background-color: #fff3cd;">
-                                $<?php echo number_format(($calculo['arl']['valor_arl'] ?? 0), 2); ?>
-                            </td>
-                            <td class="text-right currency" style="background-color: #e8f5e8; font-weight: bold;">
-                                <strong>$<?php echo number_format(($calculo['totales']['total_empleado'] ?? 0), 2); ?></strong>
-                            </td>
+                            <th>ID</th>
+                            <th>Empleado</th>
+                            <th>Roles</th>
+                            <th>Salario Individual</th>
+                            <th>Días Trabajados</th>
+                            <th>Salario Proporcional</th>
+                            <th>Salud (4%)</th>
+                            <th>Pensión (4%)</th>
+                            <th style="background-color: #fff3cd;">Riesgo ARL</th>
+                            <th style="background-color: #fff3cd;">ARL (%)</th>
+                            <th style="background-color: #fff3cd;">Valor ARL</th>
+                            <th style="background-color: #e8f5e8; font-weight: bold;">Total S.S. + ARL</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($calculos_empleados as $calculo): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($calculo['empleado']['id']); ?></td>
+                                <td>
+                                    <strong><?php echo htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']); ?></strong>
+                                </td>
+                                <td>
+                                    <?php 
+                                        $roles = $calculo['empleado']['roles'];
+                                        $rolesFormateados = [];
+                                        
+                                        // Verificar si roles es array
+                                        if (is_array($roles)) {
+                                            // Siempre incluir empleado primero
+                                            $rolesFormateados[] = 'empleado';
+                                            
+                                            // Agregar otros roles (excluyendo empleado para evitar duplicación)
+                                            foreach ($roles as $rol) {
+                                                if (strtolower(trim($rol)) !== 'empleado') {
+                                                    $rolesFormateados[] = trim($rol);
+                                                }
+                                            }
+                                        } else {
+                                            // Si no es array, mostrar como string
+                                            $rolesFormateados[] = is_string($roles) ? $roles : 'empleado';
+                                        }
+                                        
+                                        // Mostrar badges diferenciados por color
+                                        foreach ($rolesFormateados as $rol) {
+                                            $rol_lower = strtolower($rol);
+                                            $badge_class = 'badge-role-default';
+                                            if (strpos($rol_lower, 'admin') !== false) {
+                                                $badge_class = 'badge-role-admin';
+                                            } elseif (strpos($rol_lower, 'rrhh') !== false || strpos($rol_lower, 'recursos humanos') !== false) {
+                                                $badge_class = 'badge-role-rrhh';
+                                            } elseif (strpos($rol_lower, 'empleado') !== false) {
+                                                $badge_class = 'badge-role-empleado';
+                                            }
+                                            echo '<span class="badge ' . $badge_class . '">' . htmlspecialchars($rol) . '</span> ';
+                                        }
+                                    ?>
+                                </td>
+                                <td class="text-right currency">
+                                    $<?php echo number_format($calculo['total_devengado'] ?? 0, 2); ?>
+                                </td>
+                                <td class="text-right">
+                                    30 <!-- Días fijos según nueva lógica -->
+                                </td>
+                                <td class="text-right currency">
+                                    $<?php echo number_format($calculo['base_calculo'] ?? 0, 2); ?>
+                                </td>
+                                <td class="text-right currency">
+                                    $<?php echo number_format(($calculo['seguridad_social']['empleado']['salud']['valor'] ?? 0), 2); ?>
+                                </td>
+                                <td class="text-right currency">
+                                    $<?php echo number_format(($calculo['seguridad_social']['empleado']['pension']['valor'] ?? 0), 2); ?>
+                                </td>
+                                <td class="text-right" style="background-color: #fff3cd;">
+                                    <span style="padding: 2px 6px; border-radius: 3px; background-color: 
+                                        <?php 
+                                            $colors = ['#e8f5e8', '#fff3cd', '#ffeaa7', '#fab1a0', '#e17055'];
+                                            echo $colors[($calculo['arl']['codigo_riesgo'] ?? 2) - 1];
+                                        ?>; font-size: 11px; font-weight: bold;">
+                                        Clase <?php echo ['I', 'II', 'III', 'IV', 'V'][($calculo['arl']['codigo_riesgo'] ?? 2) - 1]; ?>
+                                    </span>
+                                </td>
+                                <td class="text-right currency" style="background-color: #fff3cd;">
+                                    <?php 
+                                        $porcentaje = 0;
+                                        if (isset($calculo['arl']['nivel_riesgo']['porcentaje'])) {
+                                            $porcentaje = $calculo['arl']['nivel_riesgo']['porcentaje'];
+                                        } elseif (isset($calculo['arl']['porcentaje_arl'])) {
+                                            $porcentaje = $calculo['arl']['porcentaje_arl'];
+                                        }
+                                        echo number_format($porcentaje, 3);
+                                    ?>%
+                                </td>
+                                <td class="text-right currency" style="background-color: #fff3cd;">
+                                    $<?php echo number_format(($calculo['arl']['valor_arl'] ?? 0), 2); ?>
+                                </td>
+                                <td class="text-right currency" style="background-color: #e8f5e8; font-weight: bold;">
+                                    <strong>$<?php echo number_format(($calculo['totales']['total_empleado'] ?? 0), 2); ?></strong>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Resumen total -->
             <?php if (!empty($resumen_total)): ?>

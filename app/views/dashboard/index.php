@@ -172,13 +172,33 @@
         .text-danger {
             color: #d946ef !important;
         }
+
+        @media (max-width: 576px) {
+            .sidebar { display: none !important; }
+            .container-fluid, .row, .col-12, .card, .card-body { padding: 0.5rem !important; }
+            .navbar { font-size: 13px !important; }
+            h2, h5 { font-size: 1.1rem !important; }
+            .btn, .btn-zigma-success, .btn-zigma-secondary {
+                font-size: clamp(12px, 3vw, 14px) !important;
+                padding: 6px 12px !important;
+                min-width: 80px;
+                max-width: 140px;
+            }
+        }
+        @media (min-width: 577px) {
+            .btn, .btn-zigma-success, .btn-zigma-secondary {
+                font-size: 15px !important;
+                padding: 8px 18px !important;
+                min-width: 100px;
+                max-width: 180px;
+            }
+        }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center" href="#">
-      <img src="/ZIGMA/public/img/logo_zigma.jpg" alt="Logo ZIGMA" style="height:40px; width:auto; margin-right:10px;">
       <span>ZIGMA</span>
     </a>
     <div class="d-flex">

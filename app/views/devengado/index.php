@@ -46,6 +46,23 @@
         .badge-concepto {
             font-size: 0.7rem;
         }
+        @media (max-width: 576px) {
+            .devengado-table, .card-estadistica, .card, .table {
+                font-size: clamp(11px, 3vw, 13px) !important;
+            }
+            .card-header, h1, h2, h4, .display-6 {
+                font-size: clamp(1rem, 4vw, 1.2rem) !important;
+            }
+            .btn, .btn-sm, .btn-primary, .btn-danger, .btn-info, .btn-success {
+                font-size: clamp(12px, 3vw, 14px) !important;
+                padding: 6px 12px !important;
+                min-width: 80px;
+                max-width: 140px;
+            }
+            .table th, .table td {
+                padding: 6px !important;
+            }
+        }
     </style>
 </head>
 <body>

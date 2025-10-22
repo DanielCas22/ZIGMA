@@ -3,15 +3,9 @@
 class DesprendibleController extends Controller {
     
     public function __construct() {
-        // Asegurar que la sesión esté iniciada
+        // Solo asegurar que la sesión esté iniciada
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
-        }
-        
-        // Verificar que el usuario esté autenticado
-        if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
-            header('Location: /ZIGMA/public/index.php');
-            exit;
         }
     }
     
@@ -38,54 +32,64 @@ class DesprendibleController extends Controller {
             header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
-        
+        require_once __DIR__ . '/../models/RolePermissions.php';
+        $currentRole = RolePermissions::getCurrentUserRole();
+        $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
+        // Solo admin/rrhh pueden ver cualquier desprendible, empleados solo el suyo
+        if ($currentRole === 'empleado' && $empleadoId != $currentEmployeeId) {
+            header('Location: /ZIGMA/public/index.php?url=dashboard&error=no_permission');
+            exit;
+        }
         $desprendibleModel = $this->model('DesprendibleModel');
         $desprendible = $desprendibleModel->obtenerDesprendible($empleadoId, $mes, $anio);
-        
         if (!$desprendible) {
             $_SESSION['error'] = 'No se encontró información para generar el desprendible';
             header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
-        
         $data = [
             'title' => 'Desprendible de Nómina',
             'desprendible' => $desprendible
         ];
-        
         $this->view('desprendible/mostrar', $data);
     }
-    
+
     /**
-     * Generar PDF del desprendible
+     * Generar PDF del desprendible (solo admin/rrhh)
      */
     public function pdf($empleadoId = null, $mes = null, $anio = null) {
+        // Verificar autenticación
+        if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
+            header('Location: /ZIGMA/public/index.php');
+            exit;
+        }
+        require_once __DIR__ . '/../models/RolePermissions.php';
+        $currentRole = RolePermissions::getCurrentUserRole();
+        if (!in_array($currentRole, ['admin', 'rrhh'])) {
+            header('Location: /ZIGMA/public/index.php?url=dashboard&error=no_permission');
+            exit;
+        }
         if (!$empleadoId) {
             header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
-        
         $desprendibleModel = $this->model('DesprendibleModel');
         $desprendible = $desprendibleModel->obtenerDesprendible($empleadoId, $mes, $anio);
-        
         if (!$desprendible) {
             $_SESSION['error'] = 'No se encontró información para generar el desprendible';
             header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
-        
+        // Registrar notificación para el empleado
+        $desprendibleModel->registrarNotificacionDesprendible($empleadoId, $mes, $anio);
         // Configurar headers para PDF
         header('Content-Type: application/pdf');
         header('Content-Disposition: attachment; filename="desprendible_' . $desprendible['empleado']['nombre'] . '_' . date('Y-m') . '.pdf"');
-        
-        // Por ahora mostramos la vista HTML
-        // En producción se usaría una librería como TCPDF o mPDF
         $data = [
             'title' => 'Desprendible de Nómina - PDF',
             'desprendible' => $desprendible,
             'formato_pdf' => true
         ];
-        
         $this->view('desprendible/pdf', $data);
     }
     
@@ -119,5 +123,31 @@ class DesprendibleController extends Controller {
             'success' => $success,
             'message' => $success ? 'Desprendible enviado correctamente' : 'Error al enviar el desprendible'
         ]);
+    }
+
+    /**
+     * Eliminar desprendible (solo admin/rrhh)
+     */
+    public function eliminar($empleadoId = null) {
+        require_once __DIR__ . '/../models/RolePermissions.php';
+        $currentRole = RolePermissions::getCurrentUserRole();
+        if (!in_array($currentRole, ['admin', 'rrhh'])) {
+            header('Location: /ZIGMA/public/index.php?url=dashboard&error=no_permission');
+            exit;
+        }
+        if (!$empleadoId) {
+            $_SESSION['error'] = 'Empleado no especificado.';
+            header('Location: /ZIGMA/public/index.php?url=Desprendible');
+            exit;
+        }
+        $desprendibleModel = $this->model('DesprendibleModel');
+        $exito = $desprendibleModel->eliminarDesprendible($empleadoId);
+        if ($exito) {
+            $_SESSION['success'] = 'Desprendible eliminado correctamente.';
+        } else {
+            $_SESSION['error'] = 'No se pudo eliminar el desprendible.';
+        }
+        header('Location: /ZIGMA/public/index.php?url=Desprendible');
+        exit;
     }
 }

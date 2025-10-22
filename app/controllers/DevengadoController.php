@@ -17,23 +17,15 @@ class DevengadoController extends Controller {
             exit;
         }
         try {
-            $empleadoModel = $this->model('Empleado');
-            $empleadosValidos = $empleadoModel->getValidEmployees();
             $devengadoModel = $this->model('DevengadoModel');
             $calculoCompleto = $devengadoModel->calcularDevengadoTodosEmpleados();
-            // Filtrar resultados para mostrar solo empleados válidos
-            $idsValidos = array_column($empleadosValidos, 'id_empleados');
-            $calculosFiltrados = array_filter($calculoCompleto['empleados'], function($emp) use ($idsValidos) {
-                // Compatibilidad: usar 'id_empleados' si existe, si no usar 'id' o 'empleado_id'
-                $id = $emp['id_empleados'] ?? $emp['id'] ?? $emp['empleado_id'] ?? null;
-                return $id && in_array($id, $idsValidos);
-            });
+            // Mostrar todos los empleados calculados, sin filtrar
             $this->view('devengado/index', [
                 'title' => 'Total Devengado - Nómina',
-                'calculos_empleados' => $calculosFiltrados,
+                'calculos_empleados' => $calculoCompleto['empleados'],
                 'totales_empresa' => $calculoCompleto['totales_empresa'],
                 'promedios' => $calculoCompleto['promedios'],
-                'total_empleados' => count($calculosFiltrados)
+                'total_empleados' => count($calculoCompleto['empleados'])
             ]);
         } catch (Exception $e) {
             $this->view('devengado/index', [

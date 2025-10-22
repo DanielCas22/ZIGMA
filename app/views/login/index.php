@@ -128,9 +128,6 @@
 <body>
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card shadow p-4" style="min-width:400px; max-width:450px;">
-            <div class="text-center mb-4 logo-container">
-                <img src="/ZIGMA/public/img/logo_zigma.jpg" alt="Logo ZIGMA" style="max-width: 150px; height: auto; border-radius: 10px;">
-            </div>
             <h2 class="mb-4 text-center">Iniciar Sesión</h2>
             <?php if (!empty($data['error'])): ?>
                 <div class="alert alert-danger"><?php echo $data['error']; ?></div>

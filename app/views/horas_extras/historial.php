@@ -7,6 +7,37 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
+    <style>
+        @media (max-width: 576px) {
+            .table, .table-responsive, .table th, .table td {
+                font-size: clamp(11px, 3vw, 13px) !important;
+                padding: 6px !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+            }
+            .table-responsive {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            .btn, .btn-sm {
+                font-size: clamp(12px, 3vw, 14px) !important;
+                padding: 6px 12px !important;
+                min-width: 80px;
+                max-width: 140px;
+            }
+            h1, h2, h3, h4, h5, h6 {
+                font-size: clamp(1rem, 4vw, 1.2rem) !important;
+            }
+        }
+        @media (min-width: 577px) {
+            .btn, .btn-zigma-success, .btn-zigma-secondary {
+                font-size: 15px !important;
+                padding: 8px 18px !important;
+                min-width: 100px;
+                max-width: 180px;
+            }
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar -->

@@ -7,6 +7,67 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
+    <style>
+        @media (max-width: 576px) {
+            body, html {
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100vw !important;
+                overflow-x: hidden !important;
+            }
+            .container, .container-fluid {
+                padding: 0 2vw !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+            }
+            .row, .col-lg-8, .col-md-3, .col-12 {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+            }
+            .card-zigma, .card, .card-body, .card-header {
+                border-radius: 10px !important;
+                box-shadow: 0 2px 12px rgba(30,58,138,0.10);
+                padding: 1rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .form-label, .form-control, .form-select, .input-group-text {
+                font-size: clamp(12px, 3vw, 14px) !important;
+            }
+            h1, h2, h3, h4, h5, h6, .display-6 {
+                font-size: clamp(1rem, 4vw, 1.2rem) !important;
+            }
+            .btn, .btn-zigma-success, .btn-zigma-secondary, .btn-zigma-info, .btn-zigma-danger {
+                font-size: clamp(12px, 3vw, 14px) !important;
+                padding: 6px 12px !important;
+                min-width: 80px;
+                max-width: 140px;
+            }
+            .table, .table-zigma, .deducido-table, .devengado-table {
+                font-size: clamp(11px, 3vw, 13px) !important;
+            }
+            .table th, .table td {
+                padding: 6px !important;
+            }
+            .navbar, .navbar-brand, .navbar-text {
+                font-size: clamp(13px, 4vw, 15px) !important;
+                padding: 0.5rem 1rem !important;
+            }
+            .page-header-zigma {
+                padding: 1rem 0.5rem !important;
+                margin-bottom: 1rem !important;
+            }
+        }
+        @media (min-width: 577px) {
+            .btn, .btn-zigma-success, .btn-zigma-secondary {
+                font-size: 15px !important;
+                padding: 8px 18px !important;
+                min-width: 100px;
+                max-width: 180px;
+            }
+        }
+    </style>
 </head>
 <body>
 <!-- Navbar -->

@@ -142,7 +142,15 @@ class HorasExtras extends Model {
                 comentario_aprobacion = ? 
                 WHERE id = ?';
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$aprobado_por, $comentario, $id]);
+        $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
+
+        // Registrar notificación
+        if ($resultado) {
+            $horasExtras = $this->find($id);
+            $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'aprobada');
+        }
+
+        return $resultado;
     }
     
     /**
@@ -156,14 +164,22 @@ class HorasExtras extends Model {
                 comentario_aprobacion = ? 
                 WHERE id = ?';
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$aprobado_por, $comentario, $id]);
+        $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
+
+        // Registrar notificación
+        if ($resultado) {
+            $horasExtras = $this->find($id);
+            $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'rechazada', $comentario);
+        }
+
+        return $resultado;
     }
     
     /**
      * Obtener horas extras pendientes de aprobación
      */
     public function getPendientes() {
-        $sql = 'SELECT he.*, e.nombre, e.apellido, e.documento,
+        $sql = 'SELECT he.*, e.nombre, e.apellido,
                        DATE_FORMAT(he.fecha_creacion, "%d/%m/%Y %H:%i") as fecha_creacion_formatted
                 FROM horas_extras he 
                 INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
@@ -198,7 +214,6 @@ class HorasExtras extends Model {
     public function getAllConAprobacion() {
         $sql = 'SELECT he.*, 
                        CONCAT(e.nombre, " ", e.apellido) as empleado_nombre,
-                       e.documento as empleado_documento,
                        u.username as aprobado_por_usuario,
                        DATE_FORMAT(he.fecha_aprobacion, "%d/%m/%Y %H:%i") as fecha_aprobacion_formatted,
                        DATE_FORMAT(he.fecha_creacion, "%d/%m/%Y %H:%i") as fecha_creacion_formatted
@@ -209,6 +224,16 @@ class HorasExtras extends Model {
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function registrarNotificacionHorasExtras($empleadoId, $estado, $comentario = null) {
+        require_once __DIR__ . '/NotificacionModel.php';
+        $noti = new NotificacionModel();
+        $mensaje = $estado === 'aprobada' ?
+            "Tus horas extras han sido aprobadas." :
+            "Tus horas extras han sido rechazadas. Comentario: $comentario";
+        $url = "/ZIGMA/public/index.php?url=HorasExtras/historial/$empleadoId";
+        $noti->registrar($empleadoId, 'horas_extras', $mensaje, $url);
     }
 }
 ?>

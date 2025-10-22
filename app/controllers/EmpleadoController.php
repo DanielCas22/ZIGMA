@@ -66,6 +66,14 @@ class EmpleadoController extends Controller {
             $salario_manual = isset($_POST['sueldo_actual']) && !empty($_POST['sueldo_actual']) ? floatval($_POST['sueldo_actual']) : null;
             $usuario = $_POST['usuario'] ?? '';
             $contrasena = $_POST['contrasena'] ?? '';
+            //$tipo_documento = $_POST['tipo_documento'] ?? '';
+            //$numero_documento = $_POST['numero_documento'] ?? '';
+
+            // Eliminar validación y uso de tipo_documento y numero_documento
+            //if (empty($tipo_documento) || empty($numero_documento)) {
+            //    header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=1');
+            //    exit();
+            //}
 
             // Determinar el salario a usar
             $salario_final = $salario_manual;
@@ -85,6 +93,8 @@ class EmpleadoController extends Controller {
                 'sueldo_actual' => $salario_final,
                 'usuario' => $usuario,
                 'contrasena' => $contrasena
+                // 'tipo_documento' => $tipo_documento,
+                // 'numero_documento' => $numero_documento
             ];
             
             try {

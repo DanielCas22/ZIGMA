@@ -111,11 +111,21 @@ class DesprendibleModel {
                 LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id
                 LEFT JOIN rol r ON rhu.rol_id = r.id_rol
                 WHERE e.id_empleados NOT IN (1, 2, 3)
-                ORDER BY e.nombre, e.apellido';
-        
+                ORDER BY e.nombre, e.apellido, r.id_rol DESC';
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Unificar por documento y seleccionar el rol más alto
+        $prioridad = ['ADMIN' => 3, 'RRHH' => 2, 'EMPLEADO' => 1];
+        $unificados = [];
+        foreach ($empleados as $emp) {
+            $doc = $emp['id_doc'];
+            $rol = strtoupper($emp['rol_nombre']);
+            if (!isset($unificados[$doc]) || $prioridad[$rol] > $prioridad[strtoupper($unificados[$doc]['rol_nombre'])]) {
+                $unificados[$doc] = $emp;
+            }
+        }
+        return array_values($unificados);
     }
     
     /**
@@ -125,5 +135,26 @@ class DesprendibleModel {
         // Aquí se validaría si existe información de nómina para ese período
         // Por ahora retornamos true
         return true;
+    }
+    
+    /**
+     * Registrar notificación de desprendible generado
+     */
+    public function registrarNotificacionDesprendible($empleadoId, $mes, $anio) {
+        require_once __DIR__ . '/NotificacionModel.php';
+        $noti = new NotificacionModel();
+        $mensaje = "Se ha generado un desprendible de nómina para el periodo $mes/$anio.";
+        $url = "/ZIGMA/public/index.php?url=Desprendible/mostrar/$empleadoId/$mes/$anio";
+        $noti->registrar($empleadoId, 'desprendible', $mensaje, $url);
+    }
+    
+    /**
+     * Eliminar desprendible de la base de datos
+     */
+    public function eliminarDesprendible($empleadoId) {
+        // Eliminar desprendible de la tabla nomina
+        $sql = 'DELETE FROM nomina WHERE empleado_id = ?';
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$empleadoId]);
     }
 }

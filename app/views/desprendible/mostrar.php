@@ -76,6 +76,25 @@
             margin-top: 20px;
             padding-top: 10px;
         }
+        
+        @media (max-width: 576px) {
+            .btn, .btn-group .btn {
+                font-size: clamp(12px, 3vw, 14px) !important;
+                padding: 6px 12px !important;
+                min-width: 80px;
+                max-width: 140px;
+            }
+            .desprendible-table th, .desprendible-table td { font-size: clamp(10px, 3vw, 12px) !important; padding: 5px !important; }
+            .header-empresa { font-size: clamp(12px, 3vw, 13px) !important; }
+        }
+        @media (min-width: 577px) {
+            .btn, .btn-group .btn {
+                font-size: 15px !important;
+                padding: 8px 18px !important;
+                min-width: 100px;
+                max-width: 180px;
+            }
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -87,6 +106,7 @@
                     <a href="<?= URL_ROOT ?>=Desprendible" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Volver
                     </a>
+                    <?php if (in_array(RolePermissions::getCurrentUserRole(), ['admin', 'rrhh'])): ?>
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary" onclick="window.print()">
                             <i class="fas fa-print me-1"></i> Imprimir
@@ -98,6 +118,7 @@
                             <i class="fas fa-envelope me-1"></i> Enviar por Correo
                         </button>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -227,7 +248,9 @@
                                 <small class="text-muted">Recibí a satisfacción y acepto en todas sus partes este pago.</small>
                             </div>
                             <div class="col-6 text-end">
-                                <small class="text-muted">Larause <?= $data['desprendible']['numero_desprendible'] ?></small><br>
+                                <small class="text-muted">
+                                    Larause <?= $data['desprendible']['numero_desprendible'] ?>
+                                </small><br>
                                 <strong>Firma y C.C. EMPLEADO</strong>
                             </div>
                         </div>

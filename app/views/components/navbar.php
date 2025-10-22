@@ -1,21 +1,33 @@
 <!-- Header Component ZIGMA -->
 <?php 
 require_once __DIR__ . '/../../models/RolePermissions.php';
+require_once __DIR__ . '/../../models/NotificacionModel.php';
 $notificationCount = RolePermissions::getPendingHoursCount(); 
+$notiCount = 0;
+if (isset($_SESSION['user']['id_doc'])) {
+    $notiModel = new NotificacionModel();
+    $notiCount = $notiModel->obtenerNoLeidasCount($_SESSION['user']['id_doc']);
+}
 ?>
 <nav class="navbar navbar-expand-lg navbar-dark navbar-zigma">
     <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="/ZIGMA/public/index.php?url=Dashboard/index">
-            <img src="/ZIGMA/public/img/logo_zigma.jpg" alt="Logo ZIGMA" style="height:40px; width:auto; margin-right:10px; border-radius:5px;">
-            <span>ZIGMA</span>
-        </a>
+        <!-- Logo eliminado -->
         <div class="d-flex align-items-center">
             <?php if (isset($pageTitle)): ?>
                 <span class="navbar-text me-3 text-white">
                     <i class="fas fa-chevron-right me-2"></i><?= $pageTitle ?>
                 </span>
             <?php endif; ?>
-            
+            <!-- Icono de bandeja de notificaciones -->
+            <a href="/ZIGMA/public/index.php?url=Notificacion/index" class="btn btn-info btn-sm me-2 position-relative" title="Notificaciones">
+                <i class="fas fa-bell"></i>
+                <?php if ($notiCount > 0): ?>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    <?= $notiCount ?>
+                    <span class="visually-hidden">notificaciones no leídas</span>
+                </span>
+                <?php endif; ?>
+            </a>
             <!-- Notificaciones de horas extras pendientes -->
             <?php if ($notificationCount > 0 && RolePermissions::canAccess('horas_extras', 'approve')): ?>
                 <a href="/ZIGMA/public/index.php?url=HorasExtras/pendientes" 
@@ -28,7 +40,6 @@ $notificationCount = RolePermissions::getPendingHoursCount();
                     </span>
                 </a>
             <?php endif; ?>
-            
             <a href="/ZIGMA/public/index.php?url=Dashboard/index" class="btn btn-outline-light btn-sm">
                 <i class="fas fa-arrow-left me-1"></i> Dashboard
             </a>

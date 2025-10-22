@@ -320,10 +320,14 @@ class HorasExtrasController extends Controller {
             $id = intval($_POST['id']);
             $comentario = $_POST['comentario'] ?? null;
             $aprobado_por = $_SESSION['user']['id_doc'] ?? null;
-            
             if ($aprobado_por) {
                 $horasExtrasModel = $this->model('HorasExtras');
                 $resultado = $horasExtrasModel->aprobar($id, $aprobado_por, $comentario);
+                // Registrar notificación para el empleado
+                $he = $horasExtrasModel->find($id);
+                if ($he && isset($he['empleado_id'])) {
+                    $horasExtrasModel->registrarNotificacionHorasExtras($he['empleado_id'], 'aprobada');
+                }
                 
                 if ($resultado) {
                     header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&success=aprobada');
@@ -355,10 +359,14 @@ class HorasExtrasController extends Controller {
             $id = intval($_POST['id']);
             $comentario = $_POST['comentario'] ?? null;
             $aprobado_por = $_SESSION['user']['id_doc'] ?? null;
-            
             if ($aprobado_por) {
                 $horasExtrasModel = $this->model('HorasExtras');
                 $resultado = $horasExtrasModel->rechazar($id, $aprobado_por, $comentario);
+                // Registrar notificación para el empleado
+                $he = $horasExtrasModel->find($id);
+                if ($he && isset($he['empleado_id'])) {
+                    $horasExtrasModel->registrarNotificacionHorasExtras($he['empleado_id'], 'rechazada', $comentario);
+                }
                 
                 if ($resultado) {
                     header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&success=rechazada');

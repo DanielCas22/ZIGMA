@@ -77,6 +77,13 @@
             width: 35%;
             text-align: right;
         }
+
+        @media (max-width: 576px) {
+            body { padding: 5px !important; font-size: 11px !important; }
+            .desprendible-table { font-size: 10px !important; }
+            .desprendible-table th, .desprendible-table td { padding: 4px !important; }
+            .header-empresa { font-size: 12px !important; }
+        }
     </style>
 </head>
 <body>
