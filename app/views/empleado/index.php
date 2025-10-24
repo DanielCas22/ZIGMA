@@ -169,6 +169,7 @@
                             <tbody>
                                 <?php if (!empty($empleados)): ?>
                                     <?php foreach ($empleados as $emp): ?>
+                                        <?php if (in_array($emp['id_empleados'], [1,2,3])) continue; ?>
                                         <tr>
                                             <td><?= $emp['id_empleados'] ?></td>
                                             <td><?= $emp['nombre'] ?></td>
@@ -178,46 +179,7 @@
                                                     $<?= number_format(isset($emp['sueldo_actual']) ? floatval($emp['sueldo_actual']) : 0, 0, ',', '.') ?>
                                                 </strong>
                                             </td>
-                                            <td>
-                                                <?php 
-                                                $rol_principal = $emp['rol'] ?? 'Sin rol';
-                                                $todos_roles = $emp['roles'] ?? '';
-                                                
-                                                // Determinar badge del rol principal
-                                                $rol_badge_class = '';
-                                                $rol_display = '';
-                                                switch($rol_principal) {
-                                                    case 'admin': 
-                                                        $rol_badge_class = 'badge-role-admin'; 
-                                                        $rol_display = 'Admin';
-                                                        break;
-                                                    case 'rrhh': 
-                                                        $rol_badge_class = 'badge-role-rrhh'; 
-                                                        $rol_display = 'RRHH';
-                                                        break;
-                                                    case 'empleado': 
-                                                        $rol_badge_class = 'badge-role-empleado'; 
-                                                        $rol_display = 'Empleado';
-                                                        break;
-                                                    default: 
-                                                        $rol_badge_class = 'badge-role-default'; 
-                                                        $rol_display = 'Sin rol';
-                                                        break;
-                                                }
-                                                
-                                                // Agregar tooltip con todos los roles si tiene múltiples
-                                                $tooltip = '';
-                                                if ($todos_roles && strpos($todos_roles, ',') !== false) {
-                                                    $tooltip = 'title="Roles: ' . htmlspecialchars(str_replace(',', ', ', $todos_roles)) . '" data-bs-toggle="tooltip"';
-                                                }
-                                                ?>
-                                                <span class="<?= $rol_badge_class ?>" <?= $tooltip ?>><?= htmlspecialchars($rol_display) ?></span>
-                                                <?php if ($todos_roles && strpos($todos_roles, ',') !== false): ?>
-                                                    <small class="text-muted ms-1">
-                                                        <i class="fa fa-info-circle" title="Tiene múltiples roles"></i>
-                                                    </small>
-                                                <?php endif; ?>
-                                            </td>
+                                            <td><?= $emp['rol_nombre'] ?? $emp['rol'] ?? 'Sin rol' ?></td>
                                             <td>
                                                 <div class="d-flex gap-2">
                                                     <a href="/ZIGMA/public/index.php?url=Empleado/detalle&id=<?= $emp['id_empleados'] ?>" 
@@ -228,12 +190,14 @@
                                                        class="btn-zigma-warning btn-sm" title="Editar empleado">
                                                         <i class="fa fa-edit"></i> Editar
                                                     </a>
+                                                    <?php if (RolePermissions::hasPermission($_SESSION['user']['rol'], 'empleados', 'delete')): ?>
                                                     <a href="/ZIGMA/public/index.php?url=Empleado/delete&id=<?= $emp['id_empleados'] ?>" 
                                                        class="btn-zigma-danger btn-sm" 
                                                        onclick="return confirm('⚠️ ATENCIÓN: Esta acción eliminará:\n\n• El empleado y su información\n• Su usuario y credenciales de acceso\n• Todos sus roles asignados\n• Todas sus horas extras registradas\n\n¿Está seguro de continuar? Esta acción NO se puede deshacer.');"
                                                        title="Eliminar empleado">
                                                         <i class="fa fa-trash"></i> Eliminar
                                                     </a>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>

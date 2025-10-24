@@ -133,12 +133,12 @@ class Empleado extends Model {
                 $stmtUser->execute([$usuario, $contrasena, $empleado_id]);
                 $user_id = $db->lastInsertId();
                 
-                // Asignar automáticamente el rol "empleado"
+                // Asignar automáticamente el rol seleccionado
+                $rol_nombre = isset($data['rol']) ? $data['rol'] : 'empleado';
                 $sqlRol = 'SELECT id_rol FROM rol WHERE nombre = ?';
                 $stmtRol = $db->prepare($sqlRol);
-                $stmtRol->execute(['empleado']);
+                $stmtRol->execute([$rol_nombre]);
                 $rol = $stmtRol->fetch(PDO::FETCH_ASSOC);
-                
                 if ($rol) {
                     $sqlRolUser = 'INSERT INTO rol_has_user (user_id, rol_id) VALUES (?, ?)';
                     $stmtRolUser = $db->prepare($sqlRolUser);

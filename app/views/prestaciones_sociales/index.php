@@ -159,6 +159,7 @@
                                 </thead>
                                 <tbody>
                                     <?php foreach ($calculos_empleados as $calculo): ?>
+                                        <?php if (in_array($calculo['empleado']['id'], [1,2,3])) continue; ?>
                                         <tr>
                                             <td>
                                                 <strong><?= htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']) ?></strong>

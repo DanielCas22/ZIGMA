@@ -145,11 +145,11 @@
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <button type="button" class="btn btn-success btn-sm" 
-                                                            onclick="aprobar(<?php echo $hora['id']; ?>, <?php echo json_encode($hora['nombre'] . ' ' . $hora['apellido']); ?>)">
+                                                            onclick="aprobar(<?php echo (int)$hora['id']; ?>, <?php echo json_encode($hora['nombre'] . ' ' . $hora['apellido']); ?>)">
                                                         <i class="fas fa-check"></i> Aprobar
                                                     </button>
                                                     <button type="button" class="btn btn-danger btn-sm" 
-                                                            onclick="rechazar(<?php echo $hora['id']; ?>, <?php echo json_encode($hora['nombre'] . ' ' . $hora['apellido']); ?>)">
+                                                            onclick="rechazar(<?php echo (int)$hora['id']; ?>, <?php echo json_encode($hora['nombre'] . ' ' . $hora['apellido']); ?>)">
                                                         <i class="fas fa-times"></i> Rechazar
                                                     </button>
                                                 </div>

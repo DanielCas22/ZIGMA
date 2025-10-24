@@ -74,13 +74,14 @@
                             <tbody>
                                 <?php if (!empty($empleados)): ?>
                                     <?php foreach ($empleados as $emp): ?>
+                                        <?php if (in_array($emp['id_empleados'], [1,2,3])) continue; ?>
                                         <tr>
                                             <td><?= htmlspecialchars($emp['id_empleados']) ?></td>
                                             <td><?= htmlspecialchars($emp['nombre']) ?></td>
                                             <td><?= htmlspecialchars(($emp['apellidos'] ?? null) !== null ? $emp['apellidos'] : ($emp['apellido'] ?? '')) ?></td>
                                             <td>
                                                 <?php
-                                                $rol_nombre = strtolower($emp['rol'] ?? 'Sin rol');
+                                                $rol_nombre = strtolower($emp['rol_nombre'] ?? $emp['rol'] ?? 'Sin rol');
                                                 $badge_class = 'badge-role-default';
                                                 if (strpos($rol_nombre, 'admin') !== false) {
                                                     $badge_class = 'badge-role-admin';
@@ -90,7 +91,7 @@
                                                     $badge_class = 'badge-role-empleado';
                                                 }
                                                 ?>
-                                                <span class="badge <?= $badge_class ?>"><?= htmlspecialchars(isset($emp['rol']) && $emp['rol'] !== '' ? $emp['rol'] : 'Sin rol') ?></span>
+                                                <span class="badge <?= $badge_class ?>"><?= htmlspecialchars($rol_nombre) ?></span>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

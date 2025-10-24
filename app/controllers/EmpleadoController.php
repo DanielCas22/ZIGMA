@@ -65,7 +65,7 @@ class EmpleadoController extends Controller {
             $riesgo_arl = isset($_POST['riesgo_arl']) ? intval($_POST['riesgo_arl']) : 2; // Por defecto Clase II
             $salario_manual = isset($_POST['sueldo_actual']) && !empty($_POST['sueldo_actual']) ? floatval($_POST['sueldo_actual']) : null;
             $usuario = $_POST['usuario'] ?? '';
-            $contrasena = $_POST['contrasena'] ?? '';
+            $contrasena = $_POST['password'] ?? '';
             //$tipo_documento = $_POST['tipo_documento'] ?? '';
             //$numero_documento = $_POST['numero_documento'] ?? '';
 
@@ -92,9 +92,8 @@ class EmpleadoController extends Controller {
                 'apellido' => $apellido,
                 'sueldo_actual' => $salario_final,
                 'usuario' => $usuario,
-                'contrasena' => $contrasena
-                // 'tipo_documento' => $tipo_documento,
-                // 'numero_documento' => $numero_documento
+                'contrasena' => $contrasena,
+                'rol' => $rol_especifico
             ];
             
             try {
