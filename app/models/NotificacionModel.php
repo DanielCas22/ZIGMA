@@ -3,6 +3,33 @@ class NotificacionModel {
     protected $db;
     public function __construct() {
         $this->db = require __DIR__ . '/../../config/database.php';
+        // Asegurarse de que la tabla `notificaciones` exista. Si no existe, crearla.
+        try {
+            $stmt = $this->db->query("SHOW TABLES LIKE 'notificaciones'");
+            $exists = $stmt && $stmt->rowCount() > 0;
+            if (!$exists) {
+                $createSql = "CREATE TABLE IF NOT EXISTS notificaciones (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    usuario_id INT NOT NULL,
+                    tipo VARCHAR(50) NOT NULL,
+                    mensaje TEXT NOT NULL,
+                    url VARCHAR(255),
+                    leida TINYINT(1) DEFAULT 0,
+                    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+                // Ejecutar la creación de la tabla
+                $this->db->exec($createSql);
+                // Crear índice (si no existe, el intento puede fallar y lo capturamos)
+                try {
+                    $this->db->exec("CREATE INDEX idx_notificaciones_usuario_leida ON notificaciones(usuario_id, leida)");
+                } catch (PDOException $ie) {
+                    // índice posiblemente ya existe o DB no lo permite; ignorar
+                }
+            }
+        } catch (PDOException $e) {
+            // No interrumpir la ejecución por este chequeo; dejar que otros errores se manejen normalmente.
+            error_log('NotificacionModel table check error: ' . $e->getMessage());
+        }
     }
     // Registrar una notificación
     public function registrar($usuario_id, $tipo, $mensaje, $url = null) {

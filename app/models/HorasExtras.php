@@ -5,6 +5,8 @@ require_once __DIR__ . '/TipoHoraExtra.php';
 class HorasExtras extends Model {
     protected $table = 'horas_extras';
 
+    // ...existing code...
+
     public function getByEmpleado($empleado_id) {
         $sql = 'SELECT he.*, e.nombre as empleado_nombre FROM horas_extras he 
                 JOIN empleados e ON he.empleado_id = e.id_empleados
@@ -135,12 +137,12 @@ class HorasExtras extends Model {
      * Aprobar horas extras
      */
     public function aprobar($id, $aprobado_por, $comentario = null) {
-        $sql = 'UPDATE horas_extras SET 
-                estado = "aprobada", 
-                fecha_aprobacion = NOW(), 
-                aprobado_por = ?, 
-                comentario_aprobacion = ? 
-                WHERE id = ?';
+    $sql = 'UPDATE horas_extras SET 
+        estado = "aprobada", 
+        fecha_aprobacion = NOW(), 
+        aprobado_por = ?, 
+        comentario_aprobacion = ? 
+        WHERE id_extras = ?';
         $stmt = $this->db->prepare($sql);
         $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
 
@@ -157,12 +159,12 @@ class HorasExtras extends Model {
      * Rechazar horas extras
      */
     public function rechazar($id, $aprobado_por, $comentario = null) {
-        $sql = 'UPDATE horas_extras SET 
-                estado = "rechazada", 
-                fecha_aprobacion = NOW(), 
-                aprobado_por = ?, 
-                comentario_aprobacion = ? 
-                WHERE id = ?';
+    $sql = 'UPDATE horas_extras SET 
+        estado = "rechazada", 
+        fecha_aprobacion = NOW(), 
+        aprobado_por = ?, 
+        comentario_aprobacion = ? 
+        WHERE id_extras = ?';
         $stmt = $this->db->prepare($sql);
         $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
 
