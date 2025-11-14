@@ -13,14 +13,41 @@ class PrestacionesSocialesController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
-        
+
         try {
             $prestacionesModel = $this->model('PrestacionesSocialesModel');
             $diasTrabajados = isset($_GET['dias_trabajados']) ? intval($_GET['dias_trabajados']) : 360;
-            
-            // Calcular prestaciones para todos los empleados
+
+            // Filtrar por empleado si el usuario es 'empleado'
+            $user = $_SESSION['user'];
+            $rol = isset($user['rol']) ? strtolower($user['rol']) : '';
+            $idEmpleado = isset($user['empleado_id']) ? $user['empleado_id'] : null;
+            if ($rol === 'empleado' && $idEmpleado) {
+                // Solo mostrar el cálculo para el empleado actual
+                $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado);
+                // Construir totales_empresa con las mismas claves que el caso múltiple
+                $totales_empresa = [
+                    'cesantias' => $calculo['prestaciones']['cesantias']['valor_cesantias'],
+                    'intereses' => $calculo['prestaciones']['intereses_cesantias']['valor_intereses'],
+                    'prima' => $calculo['prestaciones']['prima_servicios']['valor_prima'],
+                    'vacaciones' => $calculo['prestaciones']['vacaciones']['valor_vacaciones'],
+                    'total_general' => $calculo['resumen']['total_prestaciones'],
+                    'dias_trabajados' => $diasTrabajados
+                ];
+                $this->view('prestaciones_sociales/index', [
+                    'title' => 'Prestaciones Sociales',
+                    'calculos_empleados' => [$calculo],
+                    'totales_empresa' => $totales_empresa,
+                    'promedios' => [],
+                    'total_empleados' => 1,
+                    'dias_trabajados' => $diasTrabajados
+                ]);
+                return;
+            }
+
+            // Calcular prestaciones para todos los empleados (admin/rrhh)
             $calculoCompleto = $prestacionesModel->calcularPrestacionesTodosEmpleados($diasTrabajados);
-            
+
             $this->view('prestaciones_sociales/index', [
                 'title' => 'Prestaciones Sociales',
                 'calculos_empleados' => $calculoCompleto['empleados'],
@@ -29,7 +56,7 @@ class PrestacionesSocialesController extends Controller {
                 'total_empleados' => $calculoCompleto['total_empleados'],
                 'dias_trabajados' => $diasTrabajados
             ]);
-            
+
         } catch (Exception $e) {
             $this->view('prestaciones_sociales/index', [
                 'title' => 'Prestaciones Sociales',

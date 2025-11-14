@@ -23,11 +23,7 @@ class HorasExtrasController extends Controller {
         $horasExtrasModel = $this->model('HorasExtras');
         
         // Obtener empleados según el rol
-        if (RolePermissions::canAccessAllEmployees('horas_extras')) {
-            // Admin y RRHH pueden ver todos los empleados
-            $empleados = $empleadoModel->getAllWithRoles();
-        } else {
-            // Empleados solo pueden ver sus propios registros
+        if (RolePermissions::getCurrentUserRole() === 'empleado') {
             $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
             if ($currentEmployeeId) {
                 $empleado = $empleadoModel->find($currentEmployeeId);
@@ -35,6 +31,8 @@ class HorasExtrasController extends Controller {
             } else {
                 $empleados = [];
             }
+        } else {
+            $empleados = $empleadoModel->getAllWithRoles();
         }
         
         // Roles específicos para filtrar
@@ -296,8 +294,16 @@ class HorasExtrasController extends Controller {
         RolePermissions::redirectIfNoPermission('horas_extras', 'approve');
         
         $horasExtrasModel = $this->model('HorasExtras');
-        $pendientes = $horasExtrasModel->getPendientes();
-        
+        $pendientes = [];
+        // Si el usuario es empleado, filtrar por su propio empleado_id
+        if (RolePermissions::getCurrentUserRole() === 'empleado') {
+            $empleadoId = RolePermissions::getCurrentEmployeeId();
+            if ($empleadoId) {
+                $pendientes = $horasExtrasModel->getPendientes($empleadoId);
+            }
+        } else {
+            $pendientes = $horasExtrasModel->getPendientes();
+        }
         $this->view('horas_extras/pendientes', [
             'pendientes' => $pendientes,
             'title' => 'Horas Extras Pendientes de Aprobación'

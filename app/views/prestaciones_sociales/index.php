@@ -24,6 +24,14 @@
             font-size: 0.75em;
             padding: 0.25em 0.5em;
         }
+        .totales-card {
+            background: #fff;
+            color: #000 !important;
+        }
+        .totales-card h4,
+        .totales-card small {
+            color: #000 !important;
+        }
     </style>
 </head>
 <body>
@@ -176,7 +184,7 @@
                                                     <span class="badge bg-secondary prestacion-badge">No aplica</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td><?= $calculo['parametros']['dias_trabajados'] ?></td>
+                                            <td><?= isset($calculo['parametros']['dias_trabajados']) ? $calculo['parametros']['dias_trabajados'] : ($dias_trabajados ?? 360) ?></td>
                                             <td class="currency text-info">
                                                 $<?= number_format($calculo['prestaciones']['cesantias']['valor_cesantias'], 0) ?>
                                             </td>

@@ -140,14 +140,16 @@ class HorasExtras extends Model {
                 fecha_aprobacion = NOW(), 
                 aprobado_por = ?, 
                 comentario_aprobacion = ? 
-                WHERE id = ?';
+                WHERE id_extras = ?';
         $stmt = $this->db->prepare($sql);
         $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
 
         // Registrar notificación
         if ($resultado) {
             $horasExtras = $this->find($id);
-            $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'aprobada');
+            if ($horasExtras && isset($horasExtras['empleado_id']) && $horasExtras['empleado_id']) {
+                $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'aprobada');
+            }
         }
 
         return $resultado;
@@ -162,14 +164,16 @@ class HorasExtras extends Model {
                 fecha_aprobacion = NOW(), 
                 aprobado_por = ?, 
                 comentario_aprobacion = ? 
-                WHERE id = ?';
+                WHERE id_extras = ?';
         $stmt = $this->db->prepare($sql);
         $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
 
         // Registrar notificación
         if ($resultado) {
             $horasExtras = $this->find($id);
-            $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'rechazada', $comentario);
+            if ($horasExtras && isset($horasExtras['empleado_id']) && $horasExtras['empleado_id']) {
+                $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'rechazada');
+            }
         }
 
         return $resultado;
@@ -178,15 +182,22 @@ class HorasExtras extends Model {
     /**
      * Obtener horas extras pendientes de aprobación
      */
-    public function getPendientes() {
-        $sql = 'SELECT he.*, e.nombre, e.apellido,
+    public function getPendientes($empleadoId = null) {
+        $sql = 'SELECT he.*, e.nombre, e.apellido, r.nombre as rol,
                        DATE_FORMAT(he.fecha_creacion, "%d/%m/%Y %H:%i") as fecha_creacion_formatted
                 FROM horas_extras he 
                 INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
-                WHERE he.estado = "pendiente" 
-                ORDER BY he.fecha_creacion ASC';
+                LEFT JOIN rol_has_user ru ON ru.user_id = (SELECT id_doc FROM user WHERE empleado_id = e.id_empleados)
+                LEFT JOIN rol r ON ru.rol_id = r.id_rol
+                WHERE he.estado = "pendiente"';
+        $params = [];
+        if ($empleadoId) {
+            $sql .= ' AND he.empleado_id = ?';
+            $params[] = $empleadoId;
+        }
+        $sql .= ' ORDER BY he.fecha_creacion ASC';
         $stmt = $this->db->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
@@ -229,11 +240,21 @@ class HorasExtras extends Model {
     public function registrarNotificacionHorasExtras($empleadoId, $estado, $comentario = null) {
         require_once __DIR__ . '/NotificacionModel.php';
         $noti = new NotificacionModel();
+        // Buscar el usuario con ese empleado_id
+        $sql = 'SELECT id_doc FROM user WHERE empleado_id = ? LIMIT 1';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$empleadoId]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$usuario || !isset($usuario['id_doc'])) {
+            // No se encontró usuario, no registrar notificación
+            return false;
+        }
+        $usuarioId = $usuario['id_doc'];
         $mensaje = $estado === 'aprobada' ?
             "Tus horas extras han sido aprobadas." :
             "Tus horas extras han sido rechazadas. Comentario: $comentario";
         $url = "/ZIGMA/public/index.php?url=HorasExtras/historial/$empleadoId";
-        $noti->registrar($empleadoId, 'horas_extras', $mensaje, $url);
+        return $noti->registrar($usuarioId, 'horas_extras', $mensaje, $url);
     }
 }
 ?>

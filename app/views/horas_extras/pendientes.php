@@ -105,6 +105,7 @@
                                         <th><i class="fas fa-tag me-2"></i>Tipo</th>
                                         <th><i class="fas fa-dollar-sign me-2"></i>Valor</th>
                                         <th><i class="fas fa-calendar-plus me-2"></i>Solicitada</th>
+                                        <th><i class="fas fa-user-tag me-2"></i>Rol</th>
                                         <th><i class="fas fa-cogs me-2"></i>Acciones</th>
                                     </tr>
                                 </thead>
@@ -143,15 +144,29 @@
                                                 </small>
                                             </td>
                                             <td>
+                                                <span class="badge bg-secondary">
+                                                    <?php echo !empty($hora['rol']) ? htmlspecialchars($hora['rol']) : 'Sin rol'; ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <?php $idHora = isset($hora['id_extras']) ? (int)$hora['id_extras'] : null; ?>
                                                 <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-success btn-sm" 
-                                                            onclick="aprobar(<?php echo (int)$hora['id']; ?>, <?php echo json_encode($hora['nombre'] . ' ' . $hora['apellido']); ?>)">
+                                                    <?php if ($idHora): ?>
+                                                    <button type="button" class="btn btn-success btn-sm"
+                                                        onclick="aprobar(
+                                                            <?php echo $idHora; ?>,
+                                                            <?php echo isset($hora['nombre'], $hora['apellido']) ? htmlspecialchars(json_encode($hora['nombre'] . ' ' . $hora['apellido']), ENT_QUOTES, 'UTF-8') : json_encode(''); ?>
+                                                        )">
                                                         <i class="fas fa-check"></i> Aprobar
                                                     </button>
-                                                    <button type="button" class="btn btn-danger btn-sm" 
-                                                            onclick="rechazar(<?php echo (int)$hora['id']; ?>, <?php echo json_encode($hora['nombre'] . ' ' . $hora['apellido']); ?>)">
+                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                        onclick="rechazar(
+                                                            <?php echo $idHora; ?>,
+                                                            <?php echo isset($hora['nombre'], $hora['apellido']) ? htmlspecialchars(json_encode($hora['nombre'] . ' ' . $hora['apellido']), ENT_QUOTES, 'UTF-8') : json_encode(''); ?>
+                                                        )">
                                                         <i class="fas fa-times"></i> Rechazar
                                                     </button>
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>
@@ -229,13 +244,37 @@
 function aprobar(id, empleado) {
     document.getElementById('aprobar_id').value = id;
     document.getElementById('aprobar_empleado').textContent = empleado;
-    new bootstrap.Modal(document.getElementById('modalAprobar')).show();
+    document.getElementById('comentario_aprobar').value = '';
+    var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalAprobar'));
+    modal.show();
 }
 
 function rechazar(id, empleado) {
     document.getElementById('rechazar_id').value = id;
     document.getElementById('rechazar_empleado').textContent = empleado;
-    new bootstrap.Modal(document.getElementById('modalRechazar')).show();
+    document.getElementById('comentario_rechazar').value = '';
+    var modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalRechazar'));
+    modal.show();
+}
+
+// Validar que el id se envía correctamente
+const aprobarForm = document.querySelector('form[action*="HorasExtras/aprobar"]');
+if (aprobarForm) {
+    aprobarForm.addEventListener('submit', function(e) {
+        if (!document.getElementById('aprobar_id').value) {
+            e.preventDefault();
+            alert('Error: No se encontró el ID de la hora extra a aprobar.');
+        }
+    });
+}
+const rechazarForm = document.querySelector('form[action*="HorasExtras/rechazar"]');
+if (rechazarForm) {
+    rechazarForm.addEventListener('submit', function(e) {
+        if (!document.getElementById('rechazar_id').value) {
+            e.preventDefault();
+            alert('Error: No se encontró el ID de la hora extra a rechazar.');
+        }
+    });
 }
 </script>
 </body>
