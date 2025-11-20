@@ -348,14 +348,15 @@ class Empleado extends Model {
     }
 
     /**
-     * Calcula el auxilio de transporte según el sueldo actual
-     * Si el sueldo es menor o igual a dos salarios mínimos, retorna 200000; si es mayor, retorna 0.
-     * Un salario mínimo: 1.423.000
-     * Auxilio de transporte: 200.000
+     * Calcula el auxilio de transporte según el sueldo actual y el SMLV vigente
+     * Si el sueldo es menor o igual a dos salarios mínimos vigentes, retorna el auxilio vigente; si es mayor, retorna 0.
      */
     public function getAuxilioTransporte($sueldo_actual) {
-        $salario_minimo = 1423000;
-        $auxilio_transporte = 200000;
+        require_once __DIR__ . '/ParametrosModel.php';
+        $paramModel = new ParametrosModel();
+        $parametros = $paramModel->getParametrosVigentes();
+        $salario_minimo = isset($parametros['smlv']) ? floatval($parametros['smlv']) : 1423000;
+        $auxilio_transporte = isset($parametros['auxilio_transporte']) ? floatval($parametros['auxilio_transporte']) : 200000;
         if ($sueldo_actual <= 2 * $salario_minimo) {
             return $auxilio_transporte;
         }
@@ -374,5 +375,11 @@ class Empleado extends Model {
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function actualizarSalarioTodos($nuevoSMLV) {
+        $sql = "UPDATE empleados SET sueldo_actual = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$nuevoSMLV]);
     }
 }

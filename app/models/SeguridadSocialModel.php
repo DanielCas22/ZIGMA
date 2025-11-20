@@ -215,7 +215,7 @@ class SeguridadSocialModel extends Model {
      */
     public function calcularSeguridadSocialTodosEmpleados($diasTrabajados = 30) {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getValidEmployees();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $resultados = [];
         
@@ -313,7 +313,7 @@ class SeguridadSocialModel extends Model {
      */
     public function calcularSeguridadSocialConARLTodos($diasTrabajados = 30) {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getValidEmployees();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $resultados = [];
         
@@ -389,7 +389,7 @@ class SeguridadSocialModel extends Model {
      */
     public function calcularSeguridadSocialConARLTodosEmpleados($diasTrabajados = 30) {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getValidEmployees();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $resultados = [];
         
@@ -413,7 +413,7 @@ class SeguridadSocialModel extends Model {
      */
     public function calcularSeguridadSocialConARLTodosEmpleadosTemporal($diasTrabajados = 30) {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getValidEmployees();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $resultados = [];
         

@@ -192,6 +192,9 @@
                                 <?php endif; ?>
                             </div>
                         </div>
+                        <div class="alert alert-info mt-2 p-2 small">
+                            <b>Nota:</b> El auxilio de transporte solo se otorga si el salario mensual es menor o igual a 2 SMLV vigentes (actualmente $2,846,000). Si el salario supera este valor, no se asigna auxilio, sin importar el cargo o rol.
+                        </div>
                     </div>
                 </div>
             </div>

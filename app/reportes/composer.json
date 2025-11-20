@@ -1,0 +1,12 @@
+{
+    "name": "zigma/reportes",
+    "description": "Módulo de reportes para ZIGMA",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Zigma\\Reportes\\": "src/"
+        }
+    }
+}

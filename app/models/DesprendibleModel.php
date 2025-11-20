@@ -103,29 +103,8 @@ class DesprendibleModel {
      * Obtener lista de empleados para selección
      */
     public function obtenerEmpleadosParaDesprendible() {
-        // Obtener empleados con información completa incluyendo id_doc y rol
-        // Excluir empleados con ID 1, 2 y 3 que son únicamente roles
-        $sql = 'SELECT e.*, u.id_doc, r.nombre as rol_nombre
-                FROM empleados e 
-                LEFT JOIN user u ON e.id_empleados = u.empleado_id 
-                LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id
-                LEFT JOIN rol r ON rhu.rol_id = r.id_rol
-                WHERE e.id_empleados NOT IN (1, 2, 3)
-                ORDER BY e.nombre, e.apellido, r.id_rol DESC';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        $empleados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        // Unificar por documento y seleccionar el rol más alto
-        $prioridad = ['ADMIN' => 3, 'RRHH' => 2, 'EMPLEADO' => 1];
-        $unificados = [];
-        foreach ($empleados as $emp) {
-            $doc = $emp['id_doc'];
-            $rol = strtoupper($emp['rol_nombre']);
-            if (!isset($unificados[$doc]) || $prioridad[$rol] > $prioridad[strtoupper($unificados[$doc]['rol_nombre'])]) {
-                $unificados[$doc] = $emp;
-            }
-        }
-        return array_values($unificados);
+        $empleadoModel = new Empleado();
+        return $empleadoModel->getAllWithRoles();
     }
     
     /**

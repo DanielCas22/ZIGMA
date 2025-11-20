@@ -110,7 +110,7 @@ class ParafiscalesModel extends Model {
      */
     public function calcularParafiscalesGeneral() {
         $empleadoModel = new Empleado();
-        $empleados = $empleadoModel->getValidEmployees();
+        $empleados = $empleadoModel->getAllWithRoles();
         
         $calculosEmpleados = [];
         $totalEmpresa = [

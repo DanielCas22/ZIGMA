@@ -11,13 +11,20 @@ class DevengadoModel extends Model {
     const SALARIO_MINIMO = 1423000;
     
     /**
-     * Calcular el auxilio de transporte para un empleado
+     * Obtener parámetros vigentes desde la base de datos
+     */
+    private function getParametrosVigentes() {
+        require_once 'ParametrosModel.php';
+        $paramModel = new ParametrosModel();
+        return $paramModel->getParametrosVigentes();
+    }
+
+    /**
+     * Calcular el auxilio de transporte para un empleado usando la lógica centralizada en Empleado
      */
     public function calcularAuxilioTransporte($salarioMensual) {
-        if ($salarioMensual <= self::AUXILIO_TRANSPORTE_LIMITE) {
-            return self::AUXILIO_TRANSPORTE_VALOR;
-        }
-        return 0;
+        $empleadoModel = new Empleado();
+        return $empleadoModel->getAuxilioTransporte($salarioMensual);
     }
     
     /**
@@ -140,6 +147,9 @@ class DevengadoModel extends Model {
                          $auxilioTransporte + 
                          $otros['valor_total'];
         
+        $parametros = $this->getParametrosVigentes();
+        $salarioMinimo = isset($parametros['smlv']) ? $parametros['smlv'] : self::SALARIO_MINIMO;
+        
         return [
             'empleado' => [
                 'id' => $empleado['id_empleados'],
@@ -197,9 +207,9 @@ class DevengadoModel extends Model {
                 ]
             ],
             'parametros' => [
-                'salario_minimo' => self::SALARIO_MINIMO,
-                'auxilio_transporte_limite' => self::AUXILIO_TRANSPORTE_LIMITE,
-                'auxilio_transporte_valor' => self::AUXILIO_TRANSPORTE_VALOR,
+                'salario_minimo' => $salarioMinimo,
+                'auxilio_transporte_limite' => isset($parametros['smlv']) ? $parametros['smlv'] * 2 : self::AUXILIO_TRANSPORTE_LIMITE,
+                'auxilio_transporte_valor' => isset($parametros['auxilio_transporte']) ? $parametros['auxilio_transporte'] : self::AUXILIO_TRANSPORTE_VALOR,
                 'fecha_calculo' => date('Y-m-d H:i:s')
             ]
         ];

@@ -78,12 +78,11 @@ class EmpleadoController extends Controller {
             // Determinar el salario a usar
             $salario_final = $salario_manual;
             if (!$salario_final) {
-                // Si no hay salario manual, obtener salario automático según el rol
-                $salarioModel = $this->model('SalarioPorRol');
-                $salario_final = $salarioModel->getSalarioByRol($rol_especifico);
-                if (!$salario_final) {
-                    $salario_final = $salarioModel->getSalarioByRol('empleado');
-                }
+                // Si no hay salario manual, obtener SMLV vigente de la base de datos
+                require_once __DIR__ . '/../models/ParametrosModel.php';
+                $paramModel = new ParametrosModel();
+                $parametros = $paramModel->getParametrosVigentes();
+                $salario_final = isset($parametros['smlv']) ? $parametros['smlv'] : 0;
             }
 
             $empleadoModel = $this->model('Empleado');

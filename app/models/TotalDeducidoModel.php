@@ -24,10 +24,21 @@ class TotalDeducidoModel extends Model {
     ];
     
     /**
+     * Obtener salario mínimo vigente desde la base de datos
+     */
+    private function getSalarioMinimoVigente() {
+        require_once 'ParametrosModel.php';
+        $paramModel = new ParametrosModel();
+        $parametros = $paramModel->getParametrosVigentes();
+        return isset($parametros['smlv']) ? $parametros['smlv'] : self::SALARIO_MINIMO;
+    }
+
+    /**
      * Calcular el fondo de solidaridad según la tabla de rangos
      */
     public function calcularFondoSolidaridad($salario) {
-        $salarioEnSMLV = $salario / self::SALARIO_MINIMO;
+        $salarioMinimo = $this->getSalarioMinimoVigente();
+        $salarioEnSMLV = $salario / $salarioMinimo;
         
         foreach (self::FONDO_SOLIDARIDAD_RANGOS as $rango) {
             if ($salarioEnSMLV > $rango['desde_smlv'] && $salarioEnSMLV <= $rango['hasta_smlv']) {
