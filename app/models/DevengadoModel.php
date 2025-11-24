@@ -221,6 +221,7 @@ class DevengadoModel extends Model {
     public function calcularDevengadoTodosEmpleados() {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
         
         $resultados = [];
         $totales = [
@@ -333,5 +334,21 @@ class DevengadoModel extends Model {
         $stmt->execute([$idEmpleado, $limite]);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Filtrar empleados especiales (placeholders) de la lista de empleados
+     */
+    private function filtrarEmpleadosEspeciales($empleados) {
+        return array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
     }
 }

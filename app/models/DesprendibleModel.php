@@ -104,7 +104,22 @@ class DesprendibleModel {
      */
     public function obtenerEmpleadosParaDesprendible() {
         $empleadoModel = new Empleado();
-        return $empleadoModel->getAllWithRoles();
+        $empleados = $empleadoModel->getAllWithRoles();
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
+        return $empleados;
+    }
+    
+    private function filtrarEmpleadosEspeciales($empleados) {
+        return array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
     }
     
     /**

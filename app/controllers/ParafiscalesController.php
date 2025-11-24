@@ -1,5 +1,7 @@
 <?php
-require_once 'Controller.php';
+namespace App\Controllers;
+require_once __DIR__ . '/Controller.php';
+use App\Controllers\Controller;
 
 class ParafiscalesController extends Controller {
     
@@ -130,7 +132,7 @@ class ParafiscalesController extends Controller {
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
                 // Obtener empleados válidos (excluye roles)
-                $empleados = $empleadoModel->getValidEmployees();
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('parafiscales/generar', [
                     'title' => 'Generar Parafiscales',
@@ -143,7 +145,7 @@ class ParafiscalesController extends Controller {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
             // Obtener empleados válidos (excluye roles)
-            $empleados = $empleadoModel->getValidEmployees();
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('parafiscales/generar', [
                 'title' => 'Generar Parafiscales',

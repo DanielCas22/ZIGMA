@@ -90,7 +90,30 @@
                         <td><?= htmlspecialchars($h['fecha']) ?></td>
                         <td><?= htmlspecialchars($h['actualizado_por']) ?></td>
                         <td><?= htmlspecialchars($h['accion']) ?></td>
-                        <td><pre><?= htmlspecialchars($h['detalle']) ?></pre></td>
+                        <td>
+                            <?php
+                            $detalle = json_decode($h['detalle'], true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($detalle)) {
+                                echo '<ul style="margin:0; padding-left:18px;">';
+                                foreach ($detalle as $k => $v) {
+                                    $k = ($k === 'anio') ? 'año' : $k;
+                                    if (is_array($v)) {
+                                        echo "<li><b>$k:</b><ul>";
+                                        foreach ($v as $kk => $vv) {
+                                            $kk = ($kk === 'anio') ? 'año' : $kk;
+                                            echo "<li><b>$kk:</b> $vv</li>";
+                                        }
+                                        echo "</ul></li>";
+                                    } else {
+                                        echo "<li><b>$k:</b> $v</li>";
+                                    }
+                                }
+                                echo '</ul>';
+                            } else {
+                                echo '<pre>' . htmlspecialchars(str_replace('"anio"', '"año"', $h['detalle'])) . '</pre>';
+                            }
+                            ?>
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

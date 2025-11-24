@@ -1,4 +1,7 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
 require_once __DIR__ . '/../models/RolePermissions.php';
 
 class DashboardController extends Controller {
@@ -19,8 +22,8 @@ class DashboardController extends Controller {
         $empleados = $empleadoModel->getAll();
         
         // Obtener notificaciones de horas extras pendientes para admin y RRHH
-        $pendingCount = RolePermissions::getPendingHoursCount();
-        $pendingHours = RolePermissions::getPendingHours();
+        $pendingCount = \RolePermissions::getPendingHoursCount();
+        $pendingHours = \RolePermissions::getPendingHours();
         
         $this->view('dashboard/index', [
             'user' => $_SESSION['user'],

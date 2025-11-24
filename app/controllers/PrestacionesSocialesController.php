@@ -1,10 +1,13 @@
 <?php
+namespace App\Controllers;
+require_once __DIR__ . '/Controller.php';
+use App\Controllers\Controller;
 
 class PrestacionesSocialesController extends Controller {
     
     private function baseUrl() {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
-        $base = exploded('/public', $scriptName)[0];
+        $base = explode('/public', $scriptName)[0];
         return $base;
     }
     
@@ -57,7 +60,7 @@ class PrestacionesSocialesController extends Controller {
                 'dias_trabajados' => $diasTrabajados
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('prestaciones_sociales/index', [
                 'title' => 'Prestaciones Sociales',
                 'error' => 'Error al calcular prestaciones sociales: ' . $e->getMessage(),
@@ -87,7 +90,7 @@ class PrestacionesSocialesController extends Controller {
                 'success' => 'Cálculo realizado correctamente'
             ]);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('prestaciones_sociales/detalle', [
                 'title' => 'Detalle de Prestaciones Sociales',
                 'error' => 'Error al calcular prestaciones sociales: ' . $e->getMessage(),
@@ -108,7 +111,7 @@ class PrestacionesSocialesController extends Controller {
                 $idEmpleado = intval($_POST['empleado_id'] ?? 0);
                 
                 if ($idEmpleado <= 0) {
-                    throw new InvalidArgumentException('Debe seleccionar un empleado válido');
+                    throw new \InvalidArgumentException('Debe seleccionar un empleado válido');
                 }
                 
                 $calculo = $prestacionesModel->calcularPrestacionesCompletas($idEmpleado);
@@ -127,9 +130,9 @@ class PrestacionesSocialesController extends Controller {
                     'success' => $mensaje
                 ]);
                 
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                $empleados = $empleadoModel->getAll();
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('prestaciones_sociales/calcular', [
                     'title' => 'Calcular Prestaciones Sociales',
@@ -140,7 +143,7 @@ class PrestacionesSocialesController extends Controller {
         } else {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
-            $empleados = $empleadoModel->getAll();
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('prestaciones_sociales/calcular', [
                 'title' => 'Calcular Prestaciones Sociales',
@@ -169,7 +172,7 @@ class PrestacionesSocialesController extends Controller {
                 'fecha_reporte' => date('Y-m-d H:i:s')
             ]);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('prestaciones_sociales/reporte_anual', [
                 'title' => 'Reporte Anual de Prestaciones Sociales',
                 'error' => 'Error al generar el reporte: ' . $e->getMessage(),
@@ -189,9 +192,9 @@ class PrestacionesSocialesController extends Controller {
         $this->view('prestaciones_sociales/configuracion', [
             'title' => 'Configuración de Prestaciones Sociales',
             'parametros' => [
-                'salario_minimo' => PrestacionesSocialesModel::SALARIO_MINIMO,
-                'dias_laborales_anio' => PrestacionesSocialesModel::DIAS_LABORALES_ANIO,
-                'interes_cesantias' => PrestacionesSocialesModel::INTERES_CESANTIAS * 100
+                'salario_minimo' => \PrestacionesSocialesModel::SALARIO_MINIMO,
+                'dias_laborales_anio' => \PrestacionesSocialesModel::DIAS_LABORALES_ANIO,
+                'interes_cesantias' => \PrestacionesSocialesModel::INTERES_CESANTIAS * 100
             ],
             'formulas' => [
                 'cesantias' => '(Salario + Auxilio Transporte) × Días Trabajados ÷ 360',

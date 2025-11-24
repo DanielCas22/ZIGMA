@@ -97,8 +97,8 @@ class DevengadoController extends Controller {
                 
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                // Obtener empleados válidos (excluye roles)
-                $empleados = $empleadoModel->getValidEmployees();
+                // Obtener todos los empleados registrados, sin filtros
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('devengado/generar', [
                     'title' => 'Generar Devengado',
@@ -109,8 +109,8 @@ class DevengadoController extends Controller {
         } else {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
-            // Obtener empleados válidos (excluye roles)
-            $empleados = $empleadoModel->getValidEmployees();
+            // Obtener todos los empleados registrados, sin filtros
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('devengado/generar', [
                 'title' => 'Generar Devengado',

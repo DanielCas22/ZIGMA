@@ -103,6 +103,7 @@ class NominaModel extends Model {
     public function calcularNominaGeneral() {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
         
         $nominaEmpleados = [];
         $totalesEmpresa = [
@@ -196,6 +197,19 @@ class NominaModel extends Model {
                 'prestaciones' => $nominaGeneral['totales_empresa']['total_prestaciones']
             ]
         ];
+    }
+    
+    private function filtrarEmpleadosEspeciales($empleados) {
+        return array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
     }
 }
 ?>

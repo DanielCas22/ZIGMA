@@ -1,10 +1,12 @@
 <?php
+namespace App\Controllers;
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Empleado.php';
 require_once __DIR__ . '/../models/Rol.php';
 require_once __DIR__ . '/../models/SalarioPorRol.php';
 require_once __DIR__ . '/../models/ARLModel.php';
 require_once __DIR__ . '/../models/RolePermissions.php';
+use App\Controllers\Controller;
 
 class EmpleadoController extends Controller {
     private function baseUrl() {
@@ -19,7 +21,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de lectura
-        RolePermissions::redirectIfNoPermission('empleados', 'read');
+        \RolePermissions::redirectIfNoPermission('empleados', 'read');
         
         // Mostrar dashboard de empleados con roles
         $empleadoModel = $this->model('Empleado');
@@ -41,7 +43,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de creación
-        RolePermissions::redirectIfNoPermission('empleados', 'create');
+        \RolePermissions::redirectIfNoPermission('empleados', 'create');
         
         // Mostrar formulario de registro con roles
         $rolModel = $this->model('Rol');
@@ -56,7 +58,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de creación
-        RolePermissions::redirectIfNoPermission('empleados', 'create');
+        \RolePermissions::redirectIfNoPermission('empleados', 'create');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre = $_POST['nombres'] ?? '';
@@ -80,7 +82,7 @@ class EmpleadoController extends Controller {
             if (!$salario_final) {
                 // Si no hay salario manual, obtener SMLV vigente de la base de datos
                 require_once __DIR__ . '/../models/ParametrosModel.php';
-                $paramModel = new ParametrosModel();
+                $paramModel = new \ParametrosModel();
                 $parametros = $paramModel->getParametrosVigentes();
                 $salario_final = isset($parametros['smlv']) ? $parametros['smlv'] : 0;
             }
@@ -117,7 +119,7 @@ class EmpleadoController extends Controller {
                     header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=1');
                     exit();
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 // Capturar error de usuario duplicado u otros errores
                 $errorMessage = urlencode($e->getMessage());
                 header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=usuario_duplicado&message=' . $errorMessage);
@@ -133,7 +135,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de actualización
-        RolePermissions::redirectIfNoPermission('empleados', 'update');
+        \RolePermissions::redirectIfNoPermission('empleados', 'update');
         
         if (!isset($_GET['id'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
@@ -156,7 +158,7 @@ class EmpleadoController extends Controller {
             if ($riesgoEmpleado) {
                 $empleado['riesgo_arl'] = $riesgoEmpleado['codigo_riesgo'];
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Si hay error, continuar sin riesgo asignado
             error_log("Error al obtener riesgo ARL: " . $e->getMessage());
         }

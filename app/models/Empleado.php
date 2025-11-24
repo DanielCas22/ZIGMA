@@ -279,7 +279,7 @@ class Empleado extends Model {
 
     public function getAllWithRoles() {
         try {
-            $filterBySystem = $this->hasColumn('es_usuario_sistema');
+            // Eliminar filtro por es_usuario_sistema para mostrar todos los empleados reales
             $sql = 'SELECT e.*, 
                        GROUP_CONCAT(DISTINCT r.nombre ORDER BY 
                            CASE r.nombre 
@@ -297,46 +297,16 @@ class Empleado extends Model {
                 LEFT JOIN user u ON e.id_empleados = u.empleado_id
                 LEFT JOIN rol_has_user rhu ON u.id_doc = rhu.user_id 
                 LEFT JOIN rol r ON rhu.rol_id = r.id_rol';
-            $conditions = [];
-            if ($filterBySystem) {
-                $conditions[] = '(e.es_usuario_sistema IS NULL OR e.es_usuario_sistema = 1)';
-            }
-            // Excluir empleados que son solo roles
-            $conditions[] = "TRIM(CONCAT(e.nombre, ' ', e.apellido)) NOT IN ('Administrador del Sistema','Coordinador RRHH','Empleado General')";
-            // Excluir placeholders/roles por nombre (usa solo nombre y apellido existentes)
-            $conditions[] = "NOT (
-                UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
-                OR UPPER(TRIM(e.nombre)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
-                OR UPPER(TRIM(e.apellido)) IN ('ADMINISTRADOR','RRHH','EMPLEADO','COORDINADOR DE RRHH','COORDINADOR RRHH','COORDINADOR','COORDINADORA RRHH','COORDINADORA')
-                OR (
-                    UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%COORD%' AND (
-                        UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RRHH%' OR
-                        UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RH%' OR
-                        UPPER(TRIM(CONCAT(COALESCE(e.nombre, ''), ' ', COALESCE(e.apellido, '')))) LIKE '%RECURSOS%HUMANOS%'
-                    )
-                )
-                OR (
-                    UPPER(TRIM(e.nombre)) LIKE '%COORD%' AND (
-                        UPPER(TRIM(e.nombre)) LIKE '%RRHH%' OR
-                        UPPER(TRIM(e.nombre)) LIKE '%RH%' OR
-                        UPPER(TRIM(e.nombre)) LIKE '%RECURSOS%HUMANOS%'
-                    )
-                )
-            )";
-            if (!empty($conditions)) {
-                $sql .= ' WHERE ' . implode(' AND ', $conditions);
-            }
+            // No se agrega condición por es_usuario_sistema
             $sql .= ' GROUP BY e.id_empleados, e.nombre, e.apellido ORDER BY e.nombre';
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
             // Procesar los resultados para establecer el rol principal y todos los roles
             foreach ($result as &$empleado) {
                 $empleado['rol_nombre'] = $empleado['rol_principal'] ?? 'Sin rol';
                 $empleado['todos_los_roles'] = $empleado['roles_concatenados'] ?? '';
             }
-            
             return $result ? $result : [];
         } catch (Exception $e) {
             return [];

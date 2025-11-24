@@ -13,6 +13,6 @@ class ReportesController extends Controller
             exit();
         }
         // Carga la vista de reportes
-        $this->render('reportes/index');
+        $this->view('reportes/index');
     }
 }

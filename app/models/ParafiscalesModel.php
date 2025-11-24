@@ -10,6 +10,19 @@ class ParafiscalesModel extends Model {
     const PORC_CAJA_COMP = 4.0;      // 4%
     const PORC_TOTAL = 9.0;          // 9% total
     
+    private function filtrarEmpleadosEspeciales($empleados) {
+        return array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
+    }
+    
     /**
      * Calcular parafiscales completos para un empleado
      */
@@ -111,6 +124,7 @@ class ParafiscalesModel extends Model {
     public function calcularParafiscalesGeneral() {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
         
         $calculosEmpleados = [];
         $totalEmpresa = [

@@ -161,12 +161,31 @@
                                 <td>
                                     <strong><?= htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']) ?></strong>
                                     <br>
-                                    <small class="text-muted"><?= htmlspecialchars($calculo['empleado']['documento']) ?></small>
+                                    <small class="text-muted"><?= htmlspecialchars($calculo['empleado']['documento'] ?? '') ?></small>
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <div class="alert alert-warning p-1 mt-2 mb-0" style="font-size:12px;">
+                                            <i class="fas fa-exclamation-triangle"></i> <?= htmlspecialchars($calculo['error']) ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
-                                <td>$<?= number_format($calculo['deducciones']['salud_empleado']['valor']) ?></td>
-                                <td>$<?= number_format($calculo['deducciones']['pension_empleado']['valor']) ?></td>
                                 <td>
-                                    <?php if ($calculo['deducciones']['fondo_solidaridad']['aplica']): ?>
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <span class="text-danger">-</span>
+                                    <?php else: ?>
+                                        $<?= number_format($calculo['deducciones']['salud_empleado']['valor']) ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <span class="text-danger">-</span>
+                                    <?php else: ?>
+                                        $<?= number_format($calculo['deducciones']['pension_empleado']['valor']) ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <span class="text-danger">-</span>
+                                    <?php elseif ($calculo['deducciones']['fondo_solidaridad']['aplica']): ?>
                                         <span class="badge bg-warning text-dark" 
                                               data-bs-toggle="tooltip" 
                                               title="<?= $calculo['deducciones']['fondo_solidaridad']['rango'] ?> - <?= $calculo['deducciones']['fondo_solidaridad']['porcentaje'] ?>%">
@@ -177,7 +196,9 @@
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($calculo['deducciones']['retencion_fuente']['valor'] > 0): ?>
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <span class="text-danger">-</span>
+                                    <?php elseif ($calculo['deducciones']['retencion_fuente']['valor'] > 0): ?>
                                         <span class="badge bg-success" 
                                               data-bs-toggle="tooltip" 
                                               title="Base: $<?= number_format($calculo['deducciones']['retencion_fuente']['base_retencion']) ?>">
@@ -187,30 +208,42 @@
                                         <span class="text-muted">$0</span>
                                     <?php endif; ?>
                                 </td>
-                                <td style="cursor: pointer;" 
-                                    class="otros-concepto" 
-                                    data-empleado-id="<?= $calculo['empleado']['id'] ?>"
+                                <td style="cursor: pointer;"
+                                    class="otros-concepto"
+                                    data-empleado-id="<?= $calculo['empleado']['id'] ?? '' ?>"
                                     data-empleado-nombre="<?= htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']) ?>"
-                                    data-bs-toggle="tooltip" 
-                                    data-bs-placement="top" 
-                                    title="<?= $calculo['deducciones']['otros_deducibles']['descripcion'] ?> - Haga clic para gestionar">
-                                    <span class="badge bg-secondary">
-                                        $<?= number_format($calculo['deducciones']['otros_deducibles']['valor']) ?>
-                                    </span>
-                                    <?php if ($calculo['deducciones']['otros_deducibles']['valor'] > 0): ?>
-                                        <small class="d-block text-muted mt-1">
-                                            <?= count($calculo['deducciones']['otros_deducibles']['detalle']) ?> concepto(s)
-                                        </small>
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="<?= $calculo['deducciones']['otros_deducibles']['descripcion'] ?? '' ?> - Haga clic para gestionar">
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <span class="text-danger">-</span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary">
+                                            $<?= number_format($calculo['deducciones']['otros_deducibles']['valor']) ?>
+                                        </span>
+                                        <?php if ($calculo['deducciones']['otros_deducibles']['valor'] > 0): ?>
+                                            <small class="d-block text-muted mt-1">
+                                                <?= count($calculo['deducciones']['otros_deducibles']['detalle']) ?> concepto(s)
+                                            </small>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
                                 <td class="valor-destacado">
-                                    <strong>$<?= number_format($calculo['resumen']['total_deducciones']) ?></strong>
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <span class="text-danger">-</span>
+                                    <?php else: ?>
+                                        <strong>$<?= number_format($calculo['resumen']['total_deducciones']) ?></strong>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="?url=TotalDeducido/detalle/<?= $calculo['empleado']['id'] ?>" 
-                                       class="btn btn-outline-danger btn-detalle" title="Ver detalle de deducciones">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
+                                    <?php if (!empty($calculo['error'])): ?>
+                                        <span class="badge bg-warning">Sin cálculo</span>
+                                    <?php else: ?>
+                                        <a href="?url=TotalDeducido/detalle/<?= $calculo['empleado']['id'] ?? '' ?>" 
+                                           class="btn btn-outline-danger btn-detalle" title="Ver detalle de deducciones">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

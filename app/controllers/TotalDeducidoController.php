@@ -1,13 +1,16 @@
 <?php
-require_once '../app/models/Empleado.php';
-require_once '../app/models/TotalDeducidoModel.php';
-require_once '../app/models/ConceptosAdicionalesDeduciblesModel.php';
+namespace App\Controllers;
+require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../models/Empleado.php';
+require_once __DIR__ . '/../models/TotalDeducidoModel.php';
+require_once __DIR__ . '/../models/ConceptosAdicionalesDeduciblesModel.php';
+use App\Controllers\Controller;
 
 class TotalDeducidoController extends Controller {
     
     private function baseUrl() {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
-        $base = exploded('/public', $scriptName)[0];
+        $base = explode('/public', $scriptName)[0];
         return $base;
     }
     
@@ -33,7 +36,7 @@ class TotalDeducidoController extends Controller {
                 'total_empleados' => $calculoCompleto['total_empleados']
             ]);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('total_deducido/index', [
                 'title' => 'Total Deducido - Nómina',
                 'error' => 'Error al calcular el total deducido: ' . $e->getMessage(),
@@ -82,7 +85,7 @@ class TotalDeducidoController extends Controller {
                 'success' => 'Cálculo realizado correctamente'
             ]);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('total_deducido/detalle', [
                 'title' => 'Detalle Total Deducido',
                 'error' => 'Error al calcular el total deducido: ' . $e->getMessage(),
@@ -120,7 +123,7 @@ class TotalDeducidoController extends Controller {
                 $idEmpleado = intval($_POST['empleado_id'] ?? 0);
                 
                 if ($idEmpleado <= 0) {
-                    throw new InvalidArgumentException('Debe seleccionar un empleado válido');
+                    throw new \InvalidArgumentException('Debe seleccionar un empleado válido');
                 }
                 
                 $calculo = $deducidoModel->calcularTotalDeducidoCompleto($idEmpleado);
@@ -139,9 +142,9 @@ class TotalDeducidoController extends Controller {
                     'success' => $mensaje
                 ]);
                 
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                $empleados = $empleadoModel->getValidEmployees();
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('total_deducido/generar', [
                     'title' => 'Generar Total Deducido',
@@ -153,7 +156,7 @@ class TotalDeducidoController extends Controller {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
             // Obtener empleados válidos (excluye roles)
-            $empleados = $empleadoModel->getValidEmployees();
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('total_deducido/generar', [
                 'title' => 'Generar Total Deducido',
@@ -181,7 +184,7 @@ class TotalDeducidoController extends Controller {
                 'total_empleados' => $calculoCompleto['total_empleados']
             ]);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('total_deducido/resumen', [
                 'title' => 'Resumen General Total Deducido',
                 'error' => 'Error al generar el resumen: ' . $e->getMessage(),
@@ -231,7 +234,7 @@ class TotalDeducidoController extends Controller {
                 echo json_encode(['success' => false, 'message' => 'Error al agregar el concepto deducible']);
             }
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Error del servidor: ' . $e->getMessage()]);
         }
         
@@ -260,7 +263,7 @@ class TotalDeducidoController extends Controller {
                 'cantidad' => $resumen['cantidad']
             ]);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Error del servidor: ' . $e->getMessage()]);
         }
         
@@ -288,7 +291,7 @@ class TotalDeducidoController extends Controller {
                 echo json_encode(['success' => false, 'message' => 'Error al eliminar el concepto deducible']);
             }
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Error del servidor: ' . $e->getMessage()]);
         }
         

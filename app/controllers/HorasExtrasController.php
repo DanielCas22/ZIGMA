@@ -1,5 +1,8 @@
 <?php
+namespace App\Controllers;
+require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/RolePermissions.php';
+use App\Controllers\Controller;
 
 class HorasExtrasController extends Controller {
     private function baseUrl() {
@@ -14,7 +17,7 @@ class HorasExtrasController extends Controller {
         }
         
         // Verificar permisos
-        if (!RolePermissions::canAccess('horas_extras', 'read') && !RolePermissions::canAccess('horas_extras', 'read_own')) {
+        if (!\RolePermissions::canAccess('horas_extras', 'read') && !\RolePermissions::canAccess('horas_extras', 'read_own')) {
             header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
             exit;
         }
@@ -23,8 +26,8 @@ class HorasExtrasController extends Controller {
         $horasExtrasModel = $this->model('HorasExtras');
         
         // Obtener empleados según el rol
-        if (RolePermissions::getCurrentUserRole() === 'empleado') {
-            $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
+        if (\RolePermissions::getCurrentUserRole() === 'empleado') {
+            $currentEmployeeId = \RolePermissions::getCurrentEmployeeId();
             if ($currentEmployeeId) {
                 $empleado = $empleadoModel->find($currentEmployeeId);
                 $empleados = $empleado ? [$empleado] : [];
@@ -140,17 +143,17 @@ class HorasExtrasController extends Controller {
         }
         
         // Verificar permisos de creación
-        RolePermissions::redirectIfNoPermission('horas_extras', 'create');
+        \RolePermissions::redirectIfNoPermission('horas_extras', 'create');
         
         $empleadoModel = $this->model('Empleado');
         
         // Obtener empleados según el rol
-        if (RolePermissions::canAccessAllEmployees('horas_extras')) {
+        if (\RolePermissions::canAccessAllEmployees('horas_extras')) {
             // Admin y RRHH pueden crear horas extras para cualquier empleado
             $empleados = $empleadoModel->getAllWithRoles();
         } else {
             // Empleados solo pueden crear horas extras para sí mismos
-            $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
+            $currentEmployeeId = \RolePermissions::getCurrentEmployeeId();
             if ($currentEmployeeId) {
                 $empleado = $empleadoModel->find($currentEmployeeId);
                 $empleados = $empleado ? [$empleado] : [];
@@ -168,10 +171,10 @@ class HorasExtrasController extends Controller {
                 $empleado_id = intval($_POST['empleado_id']);
                 
                 // Validar que el empleado puede crear horas extras para el empleado seleccionado
-                if (!RolePermissions::canAccessAllEmployees('horas_extras')) {
-                    $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
+                if (!\RolePermissions::canAccessAllEmployees('horas_extras')) {
+                    $currentEmployeeId = \RolePermissions::getCurrentEmployeeId();
                     if ($empleado_id !== $currentEmployeeId) {
-                        throw new Exception('No tiene permisos para crear horas extras para este empleado.');
+                        throw new \Exception('No tiene permisos para crear horas extras para este empleado.');
                     }
                 }
                 
@@ -196,7 +199,7 @@ class HorasExtrasController extends Controller {
                     // Error en la creación
                     $error = "Error al crear las horas extras. Verifique los datos e intente nuevamente.";
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $error = "Error: " . $e->getMessage();
             }
         }
@@ -291,13 +294,13 @@ class HorasExtrasController extends Controller {
         }
         
         // Verificar permisos de aprobación
-        RolePermissions::redirectIfNoPermission('horas_extras', 'approve');
+        \RolePermissions::redirectIfNoPermission('horas_extras', 'approve');
         
         $horasExtrasModel = $this->model('HorasExtras');
         $pendientes = [];
         // Si el usuario es empleado, filtrar por su propio empleado_id
-        if (RolePermissions::getCurrentUserRole() === 'empleado') {
-            $empleadoId = RolePermissions::getCurrentEmployeeId();
+        if (\RolePermissions::getCurrentUserRole() === 'empleado') {
+            $empleadoId = \RolePermissions::getCurrentEmployeeId();
             if ($empleadoId) {
                 $pendientes = $horasExtrasModel->getPendientes($empleadoId);
             }
@@ -320,7 +323,7 @@ class HorasExtrasController extends Controller {
         }
         
         // Verificar permisos de aprobación
-        RolePermissions::redirectIfNoPermission('horas_extras', 'approve');
+        \RolePermissions::redirectIfNoPermission('horas_extras', 'approve');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id']);
@@ -359,7 +362,7 @@ class HorasExtrasController extends Controller {
         }
         
         // Verificar permisos de rechazo
-        RolePermissions::redirectIfNoPermission('horas_extras', 'reject');
+        \RolePermissions::redirectIfNoPermission('horas_extras', 'reject');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id']);
@@ -398,7 +401,7 @@ class HorasExtrasController extends Controller {
         }
         
         // Verificar permisos
-        if (!RolePermissions::canAccess('horas_extras', 'read') && !RolePermissions::canAccess('horas_extras', 'read_own')) {
+        if (!\RolePermissions::canAccess('horas_extras', 'read') && !\RolePermissions::canAccess('horas_extras', 'read_own')) {
             header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
             exit;
         }
@@ -407,12 +410,12 @@ class HorasExtrasController extends Controller {
         $horasExtrasModel = $this->model('HorasExtras');
         
         // Si no se especifica empleado y es un empleado general, usar su propio ID
-        if (!$empleado_id && RolePermissions::getCurrentUserRole() === 'empleado') {
-            $empleado_id = RolePermissions::getCurrentEmployeeId();
+        if (!$empleado_id && \RolePermissions::getCurrentUserRole() === 'empleado') {
+            $empleado_id = \RolePermissions::getCurrentEmployeeId();
         }
         
         // Verificar permisos de acceso al empleado específico
-        if ($empleado_id && !RolePermissions::canAccessEmployee($empleado_id)) {
+        if ($empleado_id && !\RolePermissions::canAccessEmployee($empleado_id)) {
             header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
             exit;
         }
@@ -423,7 +426,7 @@ class HorasExtrasController extends Controller {
             $historial = $horasExtrasModel->getByEmpleadoConAprobacion($empleado_id);
         } else {
             // Mostrar todos los empleados (solo para admin/RRHH)
-            if (!RolePermissions::canAccessAllEmployees('horas_extras')) {
+            if (!\RolePermissions::canAccessAllEmployees('horas_extras')) {
                 header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard&error=no_permission');
                 exit;
             }

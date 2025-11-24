@@ -233,6 +233,17 @@ class TotalDeducidoModel extends Model {
     public function calcularTotalDeducidoTodosEmpleados() {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
+        // Filtrar empleados especiales (placeholders)
+        $empleados = array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
         
         $resultados = [];
         $totales = [
@@ -275,7 +286,21 @@ class TotalDeducidoModel extends Model {
                 }
                 
             } catch (Exception $e) {
-                error_log("Error calculando total deducido para empleado {$empleado['id_empleados']}: " . $e->getMessage());
+                // Si ocurre un error, igual agregar el empleado con mensaje de error
+                $resultados[] = [
+                    'empleado' => $empleado,
+                    'error' => 'No se pudo calcular deducciones: ' . $e->getMessage(),
+                    'deducciones' => [
+                        'salud_empleado' => ['valor' => 0],
+                        'pension_empleado' => ['valor' => 0],
+                        'fondo_solidaridad' => ['valor' => 0, 'aplica' => false, 'rango' => '', 'porcentaje' => 0],
+                        'retencion_fuente' => ['valor' => 0, 'base_retencion' => 0],
+                        'otros_deducibles' => ['valor' => 0, 'detalle' => [], 'descripcion' => '']
+                    ],
+                    'resumen' => [
+                        'total_deducciones' => 0
+                    ]
+                ];
             }
         }
         
