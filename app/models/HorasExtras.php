@@ -5,6 +5,8 @@ require_once __DIR__ . '/TipoHoraExtra.php';
 class HorasExtras extends Model {
     protected $table = 'horas_extras';
 
+    // ...existing code...
+
     public function getByEmpleado($empleado_id) {
         $sql = 'SELECT he.*, e.nombre as empleado_nombre FROM horas_extras he 
                 JOIN empleados e ON he.empleado_id = e.id_empleados
