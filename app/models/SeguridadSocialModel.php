@@ -1,4 +1,5 @@
 <?php
+namespace App\Models;
 
 require_once __DIR__ . '/Model.php';
 require_once __DIR__ . '/ARLModel.php';
@@ -217,6 +218,8 @@ class SeguridadSocialModel extends Model {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
         
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
+        
         $resultados = [];
         
         foreach ($empleados as $empleado) {
@@ -315,6 +318,8 @@ class SeguridadSocialModel extends Model {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
         
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
+        
         $resultados = [];
         
         foreach ($empleados as $empleado) {
@@ -391,6 +396,8 @@ class SeguridadSocialModel extends Model {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
         
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
+        
         $resultados = [];
         
         foreach ($empleados as $empleado) {
@@ -414,6 +421,8 @@ class SeguridadSocialModel extends Model {
     public function calcularSeguridadSocialConARLTodosEmpleadosTemporal($diasTrabajados = 30) {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
+        
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
         
         $resultados = [];
         
@@ -455,5 +464,18 @@ class SeguridadSocialModel extends Model {
         }
         
         return $resultados;
+    }
+    
+    private function filtrarEmpleadosEspeciales($empleados) {
+        return array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
     }
 }

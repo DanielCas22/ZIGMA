@@ -231,8 +231,8 @@
                                     <strong class="text-success">$<?= number_format($calculo['resumen']['total_devengado']) ?></strong>
                                 </td>
                                 <td>
-                                    <a href="?url=PrestacionesSociales/detalle/<?= $calculo['empleado']['id'] ?>" 
-                                       class="btn btn-outline-success btn-detalle" title="Ver detalle de prestaciones">
+                                    <a href="?url=Devengado/detalle/<?= $calculo['empleado']['id'] ?>" 
+                                       class="btn btn-outline-success btn-detalle" title="Ver detalle de devengado">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
@@ -331,6 +331,7 @@
                     </div>
                     
                     <!-- Formulario para agregar concepto -->
+                    <?php if (!isset($currentRole) || $currentRole !== 'empleado'): ?>
                     <form id="formConcepto">
                         <input type="hidden" id="inputEmpleadoId" name="empleado_id">
                         <div class="row">
@@ -360,6 +361,11 @@
                             </div>
                         </div>
                     </form>
+                    <?php else: ?>
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>Como empleado solo puede visualizar los conceptos, no agregar nuevos.
+                    </div>
+                    <?php endif; ?>
                     
                     <hr>
                     

@@ -1,15 +1,13 @@
 <?php
+namespace App\Models;
+
+use PDO;
 
 class DesprendibleModel {
     private $db;
     
     public function __construct() {
-        // Cargar conexión a base de datos (siguiendo el patrón de Model.php)
         $this->db = require __DIR__ . '/../../config/database.php';
-        
-        // Cargar modelos necesarios
-        require_once __DIR__ . '/Empleado.php';
-        require_once __DIR__ . '/NominaModel.php';
     }
     
     /**
@@ -104,7 +102,22 @@ class DesprendibleModel {
      */
     public function obtenerEmpleadosParaDesprendible() {
         $empleadoModel = new Empleado();
-        return $empleadoModel->getAllWithRoles();
+        $empleados = $empleadoModel->getAllWithRoles();
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
+        return $empleados;
+    }
+    
+    private function filtrarEmpleadosEspeciales($empleados) {
+        return array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
     }
     
     /**

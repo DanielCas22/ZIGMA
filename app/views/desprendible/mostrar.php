@@ -106,16 +106,10 @@
                     <a href="<?= URL_ROOT ?>=Desprendible" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Volver
                     </a>
-                    <?php if (in_array(RolePermissions::getCurrentUserRole(), ['admin', 'rrhh'])): ?>
+                    <?php if (in_array($currentRole, ['admin', 'rrhh'])): ?>
                     <div class="btn-group">
                         <button type="button" class="btn btn-primary" onclick="window.print()">
                             <i class="fas fa-print me-1"></i> Imprimir
-                        </button>
-                        <button type="button" class="btn btn-success" onclick="descargarPDF()">
-                            <i class="fas fa-file-pdf me-1"></i> Descargar PDF
-                        </button>
-                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCorreo">
-                            <i class="fas fa-envelope me-1"></i> Enviar por Correo
                         </button>
                     </div>
                     <?php endif; ?>
@@ -249,7 +243,7 @@
                             </div>
                             <div class="col-6 text-end">
                                 <small class="text-muted">
-                                    Larause <?= $data['desprendible']['numero_desprendible'] ?>
+                                    <strong>Numero de desprendible:</strong> <?= $data['desprendible']['numero_desprendible'] ?>
                                 </small><br>
                                 <strong>Firma y C.C. EMPLEADO</strong>
                             </div>

@@ -217,8 +217,7 @@
                                     </tr>
                                     <?php endif; ?>
 
-                                    <!-- Retención en la Fuente (si aplica) -->
-                                    <?php if ($datos['retencion_fuente'] > 0): ?>
+                                    <!-- Retención en la Fuente (mostrar siempre) -->
                                     <tr>
                                         <td>
                                             <i class="fas fa-receipt text-secondary me-2"></i>
@@ -228,13 +227,54 @@
                                         <td>Variable</td>
                                         <td class="text-end">
                                             <span class="badge bg-secondary">
-                                                $<?= number_format($datos['retencion_fuente'], 0, ',', '.') ?>
+                                                $<?= number_format($datos['retencion_fuente'] ?? 0, 0, ',', '.') ?>
                                             </span>
                                         </td>
                                         <td class="text-center">
-                                            <i class="fas fa-info-circle info-tooltip" 
-                                               data-bs-toggle="tooltip" 
-                                               title="Retención aplicada según tabla de retención en la fuente"></i>
+                                            <?php if (($datos['retencion_fuente'] ?? 0) > 0): ?>
+                                                <i class="fas fa-info-circle info-tooltip" 
+                                                   data-bs-toggle="tooltip" 
+                                                   title="Retención aplicada según tabla de retención en la fuente"></i>
+                                            <?php else: ?>
+                                                <span class="text-muted small">No aplica</span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Detalle Retención en la Fuente (si aplica) -->
+                                    <?php if ($datos['retencion_fuente'] > 0 && !empty($datos['retencion_fuente_detalle'])): ?>
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="alert alert-secondary mt-3 mb-0">
+                                                <strong>Desglose Retención en la Fuente (Art. 383):</strong>
+                                                <div class="table-responsive mt-2">
+                                                    <table class="table table-bordered table-sm mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th>Concepto</th>
+                                                                <th>Valor</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr><td>Salario</td><td>$<?= number_format($datos['retencion_fuente_detalle']['salario'] ?? $datos['base_calculo'], 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Límite 30% Salario</td><td>$<?= number_format($datos['retencion_fuente_detalle']['limite_30_salario'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Pensión</td><td>$<?= number_format($datos['retencion_fuente_detalle']['pension'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>FSP</td><td>$<?= number_format($datos['retencion_fuente_detalle']['fondo_solidaridad'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Pensión Voluntaria</td><td>$<?= number_format($datos['retencion_fuente_detalle']['pension_voluntaria'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>AFC</td><td>$<?= number_format($datos['retencion_fuente_detalle']['afc'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Subtotal 1</td><td>$<?= number_format($datos['retencion_fuente_detalle']['subtotal_1'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Dependientes 32 UVT</td><td>$<?= number_format($datos['retencion_fuente_detalle']['dependientes_uvt_32'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Salud Prepagada 16 UVT</td><td>$<?= number_format($datos['retencion_fuente_detalle']['salud_prepagada_16_uvt'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Intereses Vivienda 100 UVT</td><td>$<?= number_format($datos['retencion_fuente_detalle']['intereses_vivienda_100_uvt'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Subtotal 2</td><td>$<?= number_format($datos['retencion_fuente_detalle']['subtotal_2'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Renta Exenta</td><td>$<?= number_format($datos['retencion_fuente_detalle']['renta_exenta'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Base para Retención en la Fuente</td><td>$<?= number_format($datos['retencion_fuente_detalle']['base_retencion'] ?? 0, 0, ',', '.') ?></td></tr>
+                                                            <tr><td>Base Retención en UVT</td><td><?= number_format($datos['retencion_fuente_detalle']['base_retencion_uvt'] ?? 0, 2, ',', '.') ?></td></tr>
+                                                            <tr><td>Retención Art. 383 en $</td><td><strong>$<?= number_format($datos['retencion_fuente_detalle']['retencion_art383'] ?? 0, 0, ',', '.') ?></strong></td></tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                     <?php endif; ?>

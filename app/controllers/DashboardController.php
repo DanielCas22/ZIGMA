@@ -1,4 +1,9 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+use App\Models\RolePermissions;
+
 require_once __DIR__ . '/../models/RolePermissions.php';
 
 class DashboardController extends Controller {

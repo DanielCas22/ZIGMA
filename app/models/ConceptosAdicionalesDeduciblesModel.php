@@ -1,4 +1,7 @@
 <?php
+namespace App\Models;
+
+use PDO;
 
 /**
  * Modelo para manejar conceptos adicionales DEDUCIBLES

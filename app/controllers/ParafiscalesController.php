@@ -1,5 +1,7 @@
 <?php
-require_once 'Controller.php';
+namespace App\Controllers;
+
+use App\Controllers\Controller;
 
 class ParafiscalesController extends Controller {
     
@@ -8,22 +10,62 @@ class ParafiscalesController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
-        
         try {
             $parafiscalesModel = $this->model('ParafiscalesModel');
-            $calculoCompleto = $parafiscalesModel->calcularParafiscalesGeneral();
-            
+            // Iniciar sesión si no está iniciada
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $user = $_SESSION['user'] ?? null;
+            $rol = $user['rol'] ?? null;
+            $empleado_id = $user['empleado_id'] ?? null;
+            if ($rol === 'empleado' && $empleado_id) {
+                // Solo mostrar datos del empleado logueado
+                $calculo = $parafiscalesModel->calcularParafiscalesCompleto($empleado_id);
+                $calculosEmpleados = [$calculo];
+                $totalEmpresa = [
+                    'sena' => $calculo['parafiscales']['sena']['valor'],
+                    'icbf' => $calculo['parafiscales']['icbf']['valor'],
+                    'caja_compensacion' => $calculo['parafiscales']['caja_compensacion']['valor'],
+                    'total' => $calculo['resumen']['total_parafiscales'],
+                    'base_total' => $calculo['base_calculo']['total_devengado']
+                ];
+                $promedios = [
+                    'sena' => $calculo['parafiscales']['sena']['valor'],
+                    'icbf' => $calculo['parafiscales']['icbf']['valor'],
+                    'caja_compensacion' => $calculo['parafiscales']['caja_compensacion']['valor'],
+                    'total_por_empleado' => $calculo['resumen']['total_parafiscales'],
+                    'base_devengado' => $calculo['base_calculo']['total_devengado']
+                ];
+                $estadisticas = [
+                    'empleados_procesados' => 1,
+                    'costo_total_empresa' => $calculo['resumen']['total_parafiscales'],
+                    'porcentaje_sobre_nomina' => $calculo['base_calculo']['total_devengado'] > 0 ? ($calculo['resumen']['total_parafiscales'] / $calculo['base_calculo']['total_devengado']) * 100 : 0,
+                    'distribucion_porcentual' => [
+                        'sena' => $calculo['resumen']['total_parafiscales'] > 0 ? ($calculo['parafiscales']['sena']['valor'] / $calculo['resumen']['total_parafiscales']) * 100 : 0,
+                        'icbf' => $calculo['resumen']['total_parafiscales'] > 0 ? ($calculo['parafiscales']['icbf']['valor'] / $calculo['resumen']['total_parafiscales']) * 100 : 0,
+                        'caja_compensacion' => $calculo['resumen']['total_parafiscales'] > 0 ? ($calculo['parafiscales']['caja_compensacion']['valor'] / $calculo['resumen']['total_parafiscales']) * 100 : 0
+                    ]
+                ];
+                $total_empleados = 1;
+            } else {
+                $calculoCompleto = $parafiscalesModel->calcularParafiscalesGeneral();
+                $calculosEmpleados = $calculoCompleto['calculos_empleados'];
+                $totalEmpresa = $calculoCompleto['totales_empresa'];
+                $promedios = $calculoCompleto['promedios'];
+                $estadisticas = $calculoCompleto['estadisticas'];
+                $total_empleados = $calculoCompleto['total_empleados'];
+            }
             $this->view('parafiscales/index', [
                 'title' => 'Parafiscales - Nómina',
-                'calculos_empleados' => $calculoCompleto['calculos_empleados'],
-                'totales_empresa' => $calculoCompleto['totales_empresa'],
-                'promedios' => $calculoCompleto['promedios'],
-                'estadisticas' => $calculoCompleto['estadisticas'],
-                'total_empleados' => $calculoCompleto['total_empleados'],
+                'calculos_empleados' => $calculosEmpleados,
+                'totales_empresa' => $totalEmpresa,
+                'promedios' => $promedios,
+                'estadisticas' => $estadisticas,
+                'total_empleados' => $total_empleados,
                 'success' => 'Cálculo de parafiscales realizado correctamente'
             ]);
-            
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('parafiscales/index', [
                 'title' => 'Parafiscales - Nómina',
                 'error' => 'Error al calcular parafiscales: ' . $e->getMessage(),
@@ -130,7 +172,7 @@ class ParafiscalesController extends Controller {
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
                 // Obtener empleados válidos (excluye roles)
-                $empleados = $empleadoModel->getValidEmployees();
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('parafiscales/generar', [
                     'title' => 'Generar Parafiscales',
@@ -143,7 +185,7 @@ class ParafiscalesController extends Controller {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
             // Obtener empleados válidos (excluye roles)
-            $empleados = $empleadoModel->getValidEmployees();
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('parafiscales/generar', [
                 'title' => 'Generar Parafiscales',

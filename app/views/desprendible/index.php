@@ -21,58 +21,19 @@
                 <div class="card-body p-4">
                     <h5 class="mb-4 text-zigma-navy">
                         <i class="fas fa-users me-2"></i>
-                        Seleccionar Empleado
+                        Buscar Empleado
                     </h5>
-                    <form id="formSeleccionEmpleado" method="GET" action="/ZIGMA/public/index.php?url=Desprendible/mostrar">
-                        <div class="row g-2">
-                            <div class="col-12 col-md-6 mb-3">
-                                <label for="empleado_id" class="form-label">
-                                    <i class="fas fa-user me-1"></i>
-                                    Empleado
-                                </label>
-                                <select class="form-select" id="empleado_id" name="empleado_id" required>
-                                    <option value="">Seleccione un empleado</option>
-                                    <?php foreach($data['empleados'] as $empleado): ?>
-                                        <option value="<?= $empleado['id_empleados'] ?? $empleado['id'] ?>">
-                                            <?= $empleado['id_doc'] ?? ($empleado['id_empleados'] ?? 'N/A') ?> - <?= ($empleado['nombre'] ?? '') . ' ' . ($empleado['apellido'] ?? '') ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-3 mb-3">
-                                <label for="mes" class="form-label">Mes</label>
-                                <select class="form-select" id="mes" name="mes" required>
-                                    <option value="">Mes actual</option>
-                                    <option value="01">Enero</option>
-                                    <option value="02">Febrero</option>
-                                    <option value="03">Marzo</option>
-                                    <option value="04">Abril</option>
-                                    <option value="05">Mayo</option>
-                                    <option value="06">Junio</option>
-                                    <option value="07">Julio</option>
-                                    <option value="08">Agosto</option>
-                                    <option value="09" selected>Septiembre</option>
-                                    <option value="10">Octubre</option>
-                                    <option value="11">Noviembre</option>
-                                    <option value="12">Diciembre</option>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-3 mb-3">
-                                <label for="anio" class="form-label">Año</label>
-                                <select class="form-select" id="anio" name="anio" required>
-                                    <option value="">Año actual</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2025" selected>2025</option>
-                                    <option value="2026">2026</option>
-                                </select>
-                            </div>
+                    <form id="formBusquedaNombre" method="GET" action="/ZIGMA/public/index.php?url=Desprendible/mostrar">
+                        <div class="mb-3">
+                            <label for="busqueda_nombre" class="form-label">
+                                <i class="fas fa-search me-1"></i>
+                                Buscar por nombre
+                            </label>
+                            <input type="text" class="form-control" id="busqueda_nombre" name="busqueda_nombre" placeholder="Ingrese el nombre del empleado..." required>
                         </div>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-2">
-                            <button type="submit" class="btn-zigma-success px-4 w-100 w-md-auto">
-                                <i class="fas fa-search me-2"></i> Consultar
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i> Buscar
+                        </button>
                     </form>
                 </div>
             </div>
@@ -127,7 +88,7 @@
                                                    title="Ver desprendible actual">
                                                     <i class="fas fa-file-invoice me-1"></i> Ver
                                                 </a>
-                                                <?php if (in_array(RolePermissions::getCurrentUserRole(), ['admin', 'rrhh'])): ?>
+                                                <?php if (in_array($currentRole, ['admin', 'rrhh'])): ?>
                                                     <form method="POST" action="<?= URL_ROOT ?>=Desprendible/eliminar/<?= $empleado['id_empleados'] ?? $empleado['id'] ?>" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar el desprendible?');">
                                                         <button type="submit" class="btn-zigma-danger btn-sm" title="Eliminar desprendible">
                                                             <i class="fas fa-trash-alt me-1"></i> Eliminar

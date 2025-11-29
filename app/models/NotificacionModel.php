@@ -1,4 +1,8 @@
 <?php
+namespace App\Models;
+
+use PDO;
+
 class NotificacionModel {
     protected $db;
     public function __construct() {

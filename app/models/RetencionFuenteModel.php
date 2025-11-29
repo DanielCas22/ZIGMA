@@ -1,4 +1,8 @@
 <?php
+namespace App\Models;
+
+use PDO;
+
 class RetencionFuenteModel extends Model {
     private $uvt;
     private $rangos;
@@ -122,16 +126,16 @@ class RetencionFuenteModel extends Model {
     }
 
     private function calcularProgresivoArt383($base_uvt) {
-        $r = $this->rangos; // [95,150,360]
-        $t = $this->tarifas; // [0,0.19,0.28,0.33]
+        $r = $this->rangos; // [95,150,360,640,945,2300]
+        $t = $this->tarifas; // [0,0.19,0.28,0.33,0.35,0.37,0.39]
         $b = max(0, floatval($base_uvt));
         if ($b <= $r[0]) return 0; // 0%
-        if ($b <= $r[1]) {
-            return ($b - $r[0]) * $t[1];
-        }
-        if ($b <= $r[2]) {
-            return ($r[1] - $r[0]) * $t[1] + ($b - $r[1]) * $t[2];
-        }
-        return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($b - $r[2]) * $t[3];
+        if ($b <= $r[1]) return ($b - $r[0]) * $t[1];
+        if ($b <= $r[2]) return ($r[1] - $r[0]) * $t[1] + ($b - $r[1]) * $t[2];
+        if ($b <= $r[3]) return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($b - $r[2]) * $t[3];
+        if ($b <= $r[4]) return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($r[3] - $r[2]) * $t[3] + ($b - $r[3]) * $t[4];
+        if ($b <= $r[5]) return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($r[3] - $r[2]) * $t[3] + ($r[4] - $r[3]) * $t[4] + ($b - $r[4]) * $t[5];
+        // Mayor a 2300 UVT
+        return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($r[3] - $r[2]) * $t[3] + ($r[4] - $r[3]) * $t[4] + ($r[5] - $r[4]) * $t[5] + ($b - $r[5]) * $t[6];
     }
 }

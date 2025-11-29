@@ -22,7 +22,7 @@ define('ARL_RIESGO_IV', 4.350);   // Riesgo IV - Alto
 define('ARL_RIESGO_V', 6.960);    // Riesgo V - Máximo
 
 // SALARIO MÍNIMO LEGAL VIGENTE (año 2025)
-define('SALARIO_MINIMO', 1423000);
+define('SALARIO_MINIMO', 2500000);
 
 // AUXILIO DE TRANSPORTE
 define('AUXILIO_TRANSPORTE', 200000);

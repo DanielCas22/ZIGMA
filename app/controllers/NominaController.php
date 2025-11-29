@@ -1,5 +1,7 @@
 <?php
-require_once 'Controller.php';
+namespace App\Controllers;
+
+use App\Controllers\Controller;
 
 class NominaController extends Controller {
     
@@ -11,16 +13,53 @@ class NominaController extends Controller {
         
         try {
             $nominaModel = $this->model('NominaModel');
-            $nominaCompleta = $nominaModel->calcularNominaGeneral();
-            
+            // Iniciar sesión si no está iniciada
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $user = $_SESSION['user'] ?? null;
+            $rol = $user['rol'] ?? null;
+            $empleado_id = $user['empleado_id'] ?? null;
+            if ($rol === 'empleado' && $empleado_id) {
+                // Solo mostrar datos del empleado logueado
+                $nominaEmpleado = $nominaModel->calcularNominaCompleta($empleado_id);
+                $nominaEmpleados = [$nominaEmpleado];
+                $totalesEmpresa = [
+                    'total_devengado' => $nominaEmpleado['resumen']['total_devengado'],
+                    'total_deducciones' => $nominaEmpleado['resumen']['total_deducciones'],
+                    'total_neto_pagar' => $nominaEmpleado['resumen']['neto_pagar'],
+                    'total_costo_empresa' => $nominaEmpleado['resumen']['total_costo_empresa'],
+                    'total_parafiscales' => $nominaEmpleado['aportes_parafiscales']['total_parafiscales'],
+                    'total_prestaciones' => $nominaEmpleado['prestaciones_sociales']['total_prestaciones']
+                ];
+                $estadisticas = [
+                    'empleados_procesados' => 1,
+                    'promedio_devengado' => $nominaEmpleado['resumen']['total_devengado'],
+                    'promedio_deducciones' => $nominaEmpleado['resumen']['total_deducciones'],
+                    'promedio_neto_pagar' => $nominaEmpleado['resumen']['neto_pagar'],
+                    'porcentaje_deducciones' => $nominaEmpleado['resumen']['total_devengado'] > 0 ? ($nominaEmpleado['resumen']['total_deducciones'] / $nominaEmpleado['resumen']['total_devengado']) * 100 : 0,
+                    'costo_total_empresa' => $nominaEmpleado['resumen']['total_costo_empresa']
+                ];
+                $total_empleados = 1;
+                $periodo = date('Y-m');
+                $fecha_generacion = date('Y-m-d H:i:s');
+            } else {
+                $nominaCompleta = $nominaModel->calcularNominaGeneral();
+                $nominaEmpleados = $nominaCompleta['nomina_empleados'];
+                $totalesEmpresa = $nominaCompleta['totales_empresa'];
+                $estadisticas = $nominaCompleta['estadisticas'];
+                $total_empleados = $nominaCompleta['total_empleados'];
+                $periodo = $nominaCompleta['periodo'];
+                $fecha_generacion = $nominaCompleta['fecha_generacion'];
+            }
             $this->view('nomina/index', [
                 'title' => 'Nómina - Sistema de Pago de Salarios',
-                'nomina_empleados' => $nominaCompleta['nomina_empleados'],
-                'totales_empresa' => $nominaCompleta['totales_empresa'],
-                'estadisticas' => $nominaCompleta['estadisticas'],
-                'total_empleados' => $nominaCompleta['total_empleados'],
-                'periodo' => $nominaCompleta['periodo'],
-                'fecha_generacion' => $nominaCompleta['fecha_generacion'],
+                'nomina_empleados' => $nominaEmpleados,
+                'totales_empresa' => $totalesEmpresa,
+                'estadisticas' => $estadisticas,
+                'total_empleados' => $total_empleados,
+                'periodo' => $periodo,
+                'fecha_generacion' => $fecha_generacion,
                 'success' => 'Nómina calculada correctamente'
             ]);
             

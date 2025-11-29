@@ -192,7 +192,7 @@
                                                    title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <?php if (RolePermissions::hasPermission($_SESSION['user']['rol'], 'horas_extras', 'delete')): ?>
+                                                <?php if (isset($hasDeletePermission) && $hasDeletePermission): ?>
                                                 <a href="/ZIGMA/public/index.php?url=HorasExtras/delete/<?= urlencode((string)($he['id_extras'] ?? '')) ?>" 
                                                    class="btn btn-sm btn-outline-danger" 
                                                    onclick="return confirm('¿Está seguro de eliminar este registro?')" 

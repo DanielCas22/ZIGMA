@@ -1,3 +1,6 @@
+<?php
+use App\Models\RolePermissions;
+?>
 <?php require_once __DIR__ . '/../../models/RolePermissions.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -496,6 +499,9 @@
         </div>
         <div class="col-md-4">
             <?php include __DIR__ . '/reportes_card.php'; ?>
+        </div>
+        <div class="col-md-4">
+            <?php include __DIR__ . '/parametros_card.php'; ?>
         </div>
             </div>
           </div>

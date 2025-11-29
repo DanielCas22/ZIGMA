@@ -1,4 +1,5 @@
 <?php
+namespace App\Models;
 
 class RolePermissions {
     
@@ -167,15 +168,16 @@ class RolePermissions {
         try {
             $db = require __DIR__ . '/../../config/database.php';
             
+            $limit = (int)$limit; // Asegura que sea un entero seguro
             $sql = "SELECT he.*, e.nombre, e.apellido 
                     FROM horas_extras he 
                     INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
                     WHERE he.estado = 'pendiente' 
                     ORDER BY he.fecha_creacion DESC 
-                    LIMIT ?";
+                    LIMIT $limit";
             $stmt = $db->prepare($sql);
-            $stmt->execute([$limit]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $stmt->execute();
+            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             return [];
         }

@@ -110,18 +110,15 @@
                                 <i class="fa fa-clock me-2"></i>Gestión de Horas Extras
                             </h4>
                             <div class="d-flex gap-2">
-                                <?php require_once __DIR__ . '/../../models/RolePermissions.php'; ?>
-                                <?php if (RolePermissions::canAccessAllEmployees('horas_extras')): ?>
+                                <?php if ($canAccessAllEmployees): ?>
                                 <a href="/ZIGMA/public/index.php?url=HorasExtras/historial" class="btn-zigma-secondary">
                                     <i class="fa fa-history me-2"></i> Historial Completo
                                 </a>
                                 <?php endif; ?>
-                                <?php if (RolePermissions::canAccess('horas_extras', 'approve')): ?>
+                                <?php if ($canApprove): ?>
                                 <a href="/ZIGMA/public/index.php?url=HorasExtras/pendientes" class="btn btn-warning">
                                     <i class="fa fa-bell me-2"></i> Pendientes
-                                    <?php 
-                                    $pendingCount = RolePermissions::getPendingHoursCount();
-                                    if ($pendingCount > 0): ?>
+                                    <?php if ($pendingCount > 0): ?>
                                         <span class="badge bg-danger"><?php echo $pendingCount; ?></span>
                                     <?php endif; ?>
                                 </a>
@@ -267,7 +264,7 @@
                                                        class="btn btn-zigma-secondary btn-sm" title="Agregar nuevas horas extras">
                                                         <i class="fa fa-plus"></i>
                                                     </a>
-                                                    <?php if (RolePermissions::hasPermission($_SESSION['user']['rol'], 'horas_extras', 'delete')): ?>
+                                                    <?php if ($emp['canDelete']): ?>
                                                     <a href="/ZIGMA/public/index.php?url=HorasExtras/delete&id=<?= urlencode($emp_id) ?>"
                                                        class="btn btn-danger btn-sm" title="Eliminar horas extras"
                                                        onclick="return confirm('¿Está seguro de eliminar todas las horas extras de este empleado? Esta acción no se puede deshacer.');">

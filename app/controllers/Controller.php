@@ -1,8 +1,10 @@
 <?php
+namespace App\Controllers;
+
 class Controller {
     public function model($model) {
-        require_once __DIR__ . '/../models/' . $model . '.php';
-        return new $model();
+        $modelClass = "App\\Models\\$model";
+        return new $modelClass();
     }
     public function view($view, $data = []) {
         // Extraer variables del array $data para que estén disponibles en la vista

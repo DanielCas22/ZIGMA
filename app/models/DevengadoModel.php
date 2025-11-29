@@ -1,7 +1,7 @@
 <?php
-require_once 'Empleado.php';
-require_once 'HorasExtras.php';
-require_once 'ConceptosAdicionalesModel.php';
+namespace App\Models;
+
+use PDO;
 
 class DevengadoModel extends Model {
     
@@ -14,7 +14,6 @@ class DevengadoModel extends Model {
      * Obtener parámetros vigentes desde la base de datos
      */
     private function getParametrosVigentes() {
-        require_once 'ParametrosModel.php';
         $paramModel = new ParametrosModel();
         return $paramModel->getParametrosVigentes();
     }
@@ -71,7 +70,7 @@ class DevengadoModel extends Model {
                 'total_horas' => $totalHoras
             ];
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log("Error obteniendo horas extras para empleado $idEmpleado: " . $e->getMessage());
             return [
                 'valor_total' => 0,
@@ -221,6 +220,7 @@ class DevengadoModel extends Model {
     public function calcularDevengadoTodosEmpleados() {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
+        $empleados = $this->filtrarEmpleadosEspeciales($empleados);
         
         $resultados = [];
         $totales = [
@@ -333,5 +333,21 @@ class DevengadoModel extends Model {
         $stmt->execute([$idEmpleado, $limite]);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    /**
+     * Filtrar empleados especiales (placeholders) de la lista de empleados
+     */
+    private function filtrarEmpleadosEspeciales($empleados) {
+        return array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
     }
 }

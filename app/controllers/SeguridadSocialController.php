@@ -1,12 +1,9 @@
 <?php
+namespace App\Controllers;
 
-require_once __DIR__ . '/../models/Model.php';
-require_once __DIR__ . '/../models/SeguridadSocialModel.php';
-require_once __DIR__ . '/../models/ARLModel.php';
-require_once __DIR__ . '/../models/Empleado.php';
-require_once __DIR__ . '/../models/SalarioPorRol.php';
-require_once __DIR__ . '/../models/RolHasUser.php';
-require_once __DIR__ . '/../models/User.php';
+use App\Controllers\Controller;
+use App\Models\SeguridadSocialModel;
+use App\Models\ARLModel;
 
 /**
  * Controlador para manejo de cálculos de Seguridad Social
@@ -27,10 +24,23 @@ class SeguridadSocialController extends Controller {
     public function index() {
         try {
             $diasTrabajados = 30; // Valor por defecto
-            
-            // Obtener cálculos de todos los empleados CON ARL
-            $calculosEmpleados = $this->seguridadSocialModel->calcularSeguridadSocialConARLTodosEmpleados($diasTrabajados);
-            $resumenTotal = $this->seguridadSocialModel->obtenerResumenTotalConARL($calculosEmpleados);
+            // Iniciar sesión si no está iniciada
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $user = $_SESSION['user'] ?? null;
+            $rol = $user['rol'] ?? null;
+            $empleado_id = $user['empleado_id'] ?? null;
+            if ($rol === 'empleado' && $empleado_id) {
+                // Solo mostrar datos del empleado logueado
+                $calculo = $this->seguridadSocialModel->calcularSeguridadSocialPorEmpleado($empleado_id, $diasTrabajados);
+                $calculosEmpleados = [$calculo];
+                $resumenTotal = $this->seguridadSocialModel->obtenerResumenTotalConARL($calculosEmpleados);
+            } else {
+                // Mostrar todos los empleados (admin, rrhh)
+                $calculosEmpleados = $this->seguridadSocialModel->calcularSeguridadSocialConARLTodosEmpleados($diasTrabajados);
+                $resumenTotal = $this->seguridadSocialModel->obtenerResumenTotalConARL($calculosEmpleados);
+            }
             
             $data = [
                 'title' => 'Cálculo de Seguridad Social + ARL por Empleado',
@@ -42,7 +52,7 @@ class SeguridadSocialController extends Controller {
             
             $this->view('seguridad_social/index', $data);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Cálculo de Seguridad Social + ARL por Empleado',
                 'error' => 'Error al calcular seguridad social: ' . $e->getMessage(),
@@ -291,7 +301,7 @@ class SeguridadSocialController extends Controller {
             // Obtener empleados con sus riesgos actuales
             $empleadoModel = new Empleado();
             // Obtener empleados válidos (excluye roles)
-            $empleados = $empleadoModel->getValidEmployees();
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $empleadosConRiesgo = [];
             foreach ($empleados as $empleado) {

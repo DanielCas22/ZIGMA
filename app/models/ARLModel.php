@@ -1,8 +1,7 @@
 <?php
+namespace App\Models;
 
-require_once __DIR__ . '/Model.php';
-require_once __DIR__ . '/User.php';
-require_once __DIR__ . '/Empleado.php';
+use PDO;
 
 /**
  * Modelo para cálculos de ARL (Administradora de Riesgos Laborales)
@@ -141,7 +140,12 @@ class ARLModel extends Model {
         if ($codigoRiesgo < 1 || $codigoRiesgo > 5) {
             throw new InvalidArgumentException('Código de riesgo inválido');
         }
-        
+        // Validar que el empleado exista antes de asignar riesgo
+        $empleadoModel = new Empleado();
+        $empleado = $empleadoModel->find($idEmpleado);
+        if (!$empleado) {
+            throw new \Exception('El empleado no existe. No se puede asignar riesgo ARL.');
+        }
         // Verificar si ya existe un registro
         $existente = $this->getRiesgoEmpleado($idEmpleado);
         
@@ -215,8 +219,8 @@ class ARLModel extends Model {
                 'porcentaje' => 1.044
             ];
             
-        } catch (Exception $e) {
-            error_log("Error obteniendo riesgo completo para empleado $idEmpleado: " . $e->getMessage());
+        } catch (\Exception $e) {
+            error_log("Error obteniendo riesgo para empleado $idEmpleado: " . $e->getMessage());
             return [
                 'codigo_riesgo' => 2,
                 'clase_riesgo' => 'Clase II', 

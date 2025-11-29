@@ -1,4 +1,8 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+use App\Models\RolePermissions;
 
 class DesprendibleController extends Controller {
     
@@ -15,10 +19,12 @@ class DesprendibleController extends Controller {
     public function index() {
         $desprendibleModel = $this->model('DesprendibleModel');
         $empleados = $desprendibleModel->obtenerEmpleadosParaDesprendible();
-        
+        // Obtener el rol actual del usuario
+        $currentRole = isset($_SESSION['user']['rol']) ? $_SESSION['user']['rol'] : 'empleado';
         $data = [
             'title' => 'Desprendibles de Nómina',
-            'empleados' => $empleados
+            'empleados' => $empleados,
+            'currentRole' => $currentRole
         ];
         
         $this->view('desprendible/index', $data);
@@ -32,7 +38,6 @@ class DesprendibleController extends Controller {
             header('Location: /ZIGMA/public/index.php?url=Desprendible');
             exit;
         }
-        require_once __DIR__ . '/../models/RolePermissions.php';
         $currentRole = RolePermissions::getCurrentUserRole();
         $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
         // Solo admin/rrhh pueden ver cualquier desprendible, empleados solo el suyo
@@ -49,7 +54,8 @@ class DesprendibleController extends Controller {
         }
         $data = [
             'title' => 'Desprendible de Nómina',
-            'desprendible' => $desprendible
+            'desprendible' => $desprendible,
+            'currentRole' => $currentRole
         ];
         $this->view('desprendible/mostrar', $data);
     }
@@ -148,6 +154,66 @@ class DesprendibleController extends Controller {
             $_SESSION['error'] = 'No se pudo eliminar el desprendible.';
         }
         header('Location: /ZIGMA/public/index.php?url=Desprendible');
+        exit;
+    }
+
+    /**
+     * Descargar desprendible en PDF
+     */
+    public function descargarDesprendiblePDF($empleadoId = null, $mes = null, $anio = null) {
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        $desprendibleModel = $this->model('DesprendibleModel');
+        $desprendible = $desprendibleModel->obtenerDesprendible($empleadoId, $mes, $anio);
+        if (!$desprendible) {
+            $_SESSION['error'] = 'No se encontró información para generar el desprendible';
+            header('Location: /ZIGMA/public/index.php?url=Desprendible');
+            exit;
+        }
+        $pdf = new \FPDF();
+        $pdf->AddPage();
+        if (file_exists('public/img/logo_zigma.jpg')) {
+            $pdf->Image('public/img/logo_zigma.jpg', 10, 8, 30);
+        }
+        $pdf->SetFont('Arial', 'B', 16);
+        $pdf->Cell(0, 10, utf8_decode('Desprendible de Nómina'), 0, 1, 'C');
+        $pdf->SetFont('Arial', '', 12);
+        $pdf->Cell(0, 8, 'Empleado: ' . $desprendible['empleado']['nombre'], 0, 1, 'L');
+        $pdf->Cell(0, 8, 'Periodo: ' . $mes . '/' . $anio, 0, 1, 'L');
+        // Puedes agregar más datos aquí según tu modelo
+        $pdf->SetY(-25);
+        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->SetTextColor(120, 120, 120);
+        $pdf->Cell(0, 10, utf8_decode('ZIGMA | Página ' . $pdf->PageNo()), 0, 0, 'C');
+        header('Content-Type: application/pdf');
+        $filename = 'desprendible_' . $empleadoId . '_' . $mes . '_' . $anio . '.pdf';
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        $pdf->Output('D', $filename);
+        exit;
+    }
+
+    /**
+     * Descargar desprendible en Excel
+     */
+    public function descargarDesprendibleExcel($empleadoId = null, $mes = null, $anio = null) {
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        $desprendibleModel = $this->model('DesprendibleModel');
+        $desprendible = $desprendibleModel->obtenerDesprendible($empleadoId, $mes, $anio);
+        if (!$desprendible) {
+            $_SESSION['error'] = 'No se encontró información para generar el desprendible';
+            header('Location: /ZIGMA/public/index.php?url=Desprendible');
+            exit;
+        }
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setCellValue('A1', 'Desprendible de Nómina');
+        $sheet->setCellValue('A2', 'Empleado: ' . $desprendible['empleado']['nombre']);
+        $sheet->setCellValue('A3', 'Periodo: ' . $mes . '/' . $anio);
+        // Puedes agregar más datos aquí según tu modelo
+        $filename = 'desprendible_' . $empleadoId . '_' . $mes . '_' . $anio . '.xlsx';
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        $writer->save('php://output');
         exit;
     }
 }

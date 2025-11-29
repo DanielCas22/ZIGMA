@@ -1,4 +1,7 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
 
 class PrestacionesSocialesController extends Controller {
     
@@ -129,7 +132,7 @@ class PrestacionesSocialesController extends Controller {
                 
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                $empleados = $empleadoModel->getAll();
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('prestaciones_sociales/calcular', [
                     'title' => 'Calcular Prestaciones Sociales',
@@ -140,7 +143,7 @@ class PrestacionesSocialesController extends Controller {
         } else {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
-            $empleados = $empleadoModel->getAll();
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('prestaciones_sociales/calcular', [
                 'title' => 'Calcular Prestaciones Sociales',

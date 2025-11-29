@@ -1,10 +1,11 @@
 <?php
-require_once __DIR__ . '/Controller.php';
-require_once __DIR__ . '/../models/Empleado.php';
-require_once __DIR__ . '/../models/Rol.php';
-require_once __DIR__ . '/../models/SalarioPorRol.php';
-require_once __DIR__ . '/../models/ARLModel.php';
-require_once __DIR__ . '/../models/RolePermissions.php';
+namespace App\Controllers;
+
+use App\Models\Empleado;
+use App\Models\Rol;
+use App\Models\SalarioPorRol;
+use App\Models\ARLModel;
+use App\Models\RolePermissions;
 
 class EmpleadoController extends Controller {
     private function baseUrl() {
@@ -26,10 +27,14 @@ class EmpleadoController extends Controller {
         // Obtener empleados válidos (excluye roles)
         $empleados = $empleadoModel->getAllWithRoles();
         
-        // Procesar roles para cada empleado
+        // Verificar si el usuario actual puede eliminar empleados
+        $canDelete = RolePermissions::hasPermission($_SESSION['user']['rol'], 'empleados', 'delete');
+        
+        // Procesar roles y permisos para cada empleado
         foreach ($empleados as &$empleado) {
             $empleado['rol'] = $empleado['rol_nombre'] ?? 'Sin rol';
             $empleado['roles'] = $empleado['todos_los_roles'] ?? '';
+            $empleado['canDelete'] = $canDelete;
         }
         
         $this->view('empleado/index', ['empleados' => $empleados]);
@@ -114,13 +119,13 @@ class EmpleadoController extends Controller {
                     header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
                     exit();
                 } else {
-                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=1');
+                    $_SESSION['error'] = 'No se pudo crear el empleado.';
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/nuevo');
                     exit();
                 }
-            } catch (Exception $e) {
-                // Capturar error de usuario duplicado u otros errores
-                $errorMessage = urlencode($e->getMessage());
-                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=usuario_duplicado&message=' . $errorMessage);
+            } catch (\Exception $e) {
+                $_SESSION['error'] = $e->getMessage();
+                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/nuevo');
                 exit();
             }
         }

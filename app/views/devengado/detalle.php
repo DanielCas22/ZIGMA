@@ -71,7 +71,7 @@
                     <?php endif; ?>
                 </div>
                 <div class="col-md-4 text-end">
-                    <a href="/public/index.php?url=devengado" class="btn btn-light btn-lg me-2">
+                    <a href="/ZIGMA/public/index.php?url=Devengado/index" class="btn btn-light btn-lg me-2">
                         <i class="fas fa-arrow-left me-2"></i>Regresar
                     </a>
                 </div>

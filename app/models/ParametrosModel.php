@@ -1,4 +1,8 @@
 <?php
+namespace App\Models;
+
+use PDO;
+
 class ParametrosModel extends Model {
     public function getParametrosLegales() {
         $sql = "SELECT * FROM parametros_legales ORDER BY año_vigencia DESC";
@@ -97,6 +101,15 @@ class ParametrosModel extends Model {
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$auxilio, $usuario_id, $anio]);
         $this->registrarHistorial('Actualizar auxilio transporte', $usuario_id, json_encode(['auxilio'=>$auxilio,'anio'=>$anio]));
+        return true;
+    }
+    // Actualiza solo el salario mínimo legal vigente para el año dado
+    public function actualizarSalarioMinimo($smlv, $anio, $usuario_id) {
+        if ($smlv <= 0 || $anio < 2000) return false;
+        $sql = "UPDATE parametros_legales SET smlv = ?, actualizado_por = ?, fecha_actualizacion = NOW() WHERE año_vigencia = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$smlv, $usuario_id, $anio]);
+        $this->registrarHistorial('Actualizar SMLV', $usuario_id, json_encode(['smlv'=>$smlv,'anio'=>$anio]));
         return true;
     }
 }

@@ -15,7 +15,8 @@ class App {
         
         // Cargar el controlador
         require_once '../app/controllers/' . $this->controller . '.php';
-        $controllerInstance = new $this->controller;
+        $controllerClass = 'App\\Controllers\\' . $this->controller;
+        $controllerInstance = new $controllerClass;
         
         // Verificar si el método existe en el controlador
         if(isset($url[1]) && !empty($url[1]) && method_exists($controllerInstance, $url[1])) {
@@ -38,5 +39,6 @@ class App {
         if(isset($_GET['url'])) {
             return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
         }
+        return [];
     }
 }

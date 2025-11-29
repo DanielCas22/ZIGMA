@@ -190,7 +190,7 @@
                                                        class="btn-zigma-warning btn-sm" title="Editar empleado">
                                                         <i class="fa fa-edit"></i> Editar
                                                     </a>
-                                                    <?php if (RolePermissions::hasPermission($_SESSION['user']['rol'], 'empleados', 'delete')): ?>
+                                                    <?php if ($emp['canDelete']): ?>
                                                     <a href="/ZIGMA/public/index.php?url=Empleado/delete&id=<?= $emp['id_empleados'] ?>" 
                                                        class="btn-zigma-danger btn-sm" 
                                                        onclick="return confirm('⚠️ ATENCIÓN: Esta acción eliminará:\n\n• El empleado y su información\n• Su usuario y credenciales de acceso\n• Todos sus roles asignados\n• Todas sus horas extras registradas\n\n¿Está seguro de continuar? Esta acción NO se puede deshacer.');"

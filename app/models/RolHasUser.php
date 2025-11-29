@@ -1,4 +1,8 @@
 <?php
+namespace App\Models;
+
+use PDO;
+
 class RolHasUser extends Model {
     protected $table = 'rol_has_user';
     

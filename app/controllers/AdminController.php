@@ -1,4 +1,8 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+
 class AdminController extends Controller {
     public function parametros() {
         if (!isset($_SESSION['user']) || $_SESSION['user']['rol'] !== 'admin') {
@@ -93,6 +97,25 @@ class AdminController extends Controller {
             $_SESSION[$result ? 'success' : 'error'] = $result ? 'Auxilio de transporte actualizado.' : 'Error al actualizar.';
         } else {
             $_SESSION['error'] = 'Datos incompletos para actualizar el auxilio de transporte.';
+        }
+        header('Location: /ZIGMA/public/index.php?url=Admin/parametros');
+        exit;
+    }
+
+    public function guardarSalarioMinimo() {
+        if (!isset($_SESSION['user']) || $_SESSION['user']['rol'] !== 'admin') {
+            header('Location: /ZIGMA/public/index.php?url=Dashboard');
+            exit;
+        }
+        $smlv = isset($_POST['salario_minimo']) ? intval($_POST['salario_minimo']) : null;
+        if ($smlv && $smlv > 0) {
+            $archivo = __DIR__ . '/../../config/nomina.php';
+            $contenido = file_get_contents($archivo);
+            $contenido = preg_replace('/define\(["\\\']SALARIO_MINIMO["\\\'],\s*\d+\s*\);/', "define('SALARIO_MINIMO', $smlv);", $contenido);
+            file_put_contents($archivo, $contenido);
+            $_SESSION['success'] = 'Salario mínimo actualizado correctamente.';
+        } else {
+            $_SESSION['error'] = 'Valor de salario mínimo inválido.';
         }
         header('Location: /ZIGMA/public/index.php?url=Admin/parametros');
         exit;

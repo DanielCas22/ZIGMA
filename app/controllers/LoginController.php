@@ -1,4 +1,8 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+
 class LoginController extends Controller {
     private function baseUrl() {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);

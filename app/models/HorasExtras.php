@@ -1,11 +1,10 @@
 <?php
-require_once __DIR__ . '/TarifaHora.php';
-require_once __DIR__ . '/TipoHoraExtra.php';
+namespace App\Models;
+
+use PDO;
 
 class HorasExtras extends Model {
     protected $table = 'horas_extras';
-
-    // ...existing code...
 
     public function getByEmpleado($empleado_id) {
         $sql = 'SELECT he.*, e.nombre as empleado_nombre FROM horas_extras he 
@@ -17,7 +16,6 @@ class HorasExtras extends Model {
     }
 
     public function calcularValorAutomatico($tipo, $cantidad, $fecha) {
-        // Usar TarifaHora para obtener la tarifa vigente
         $tarifaModel = new TarifaHora();
         $tarifaVigente = $tarifaModel->getTarifaVigente($fecha);
         
@@ -26,7 +24,6 @@ class HorasExtras extends Model {
             return null; // Error si no hay tarifa válida
         }
 
-        // Usar TipoHoraExtra para obtener el porcentaje
         $tipoModel = new TipoHoraExtra();
         $tipoData = $tipoModel->getTipoPorcentaje($tipo);
         $porcentaje = isset($tipoData['porcentaje']) ? $tipoData['porcentaje'] : 0;
@@ -34,7 +31,6 @@ class HorasExtras extends Model {
             return null; // Error si no hay tipo válido
         }
 
-        // Calcular valor automáticamente
         return $tarifaModel->calcularValorHorasExtras(
             $valor_hora, 
             $cantidad, 
@@ -58,24 +54,18 @@ class HorasExtras extends Model {
     }
 
     public function create($data) {
-        // Calcular valor automáticamente si no se proporciona
         if (!isset($data['valor']) || empty($data['valor'])) {
             $fecha = $data['anio'] . '-' . str_pad($data['mes'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($data['dia'], 2, '0', STR_PAD_LEFT);
             $data['valor'] = $this->calcularValorAutomatico($data['tipo'], $data['cantidad'], $fecha);
         }
 
-        // Obtener porcentaje automáticamente si no se proporciona
         if (!isset($data['porcentaje']) || empty($data['porcentaje'])) {
             $tipoModel = new TipoHoraExtra();
             $tipoData = $tipoModel->getTipoPorcentaje($data['tipo']);
             $data['porcentaje'] = isset($tipoData['porcentaje']) ? $tipoData['porcentaje'] : 0;
         }
 
-        // Determinar estado según el rol del usuario actual
-        $estado = 'pendiente'; // Por defecto pendiente para todos
-        // Los empleados siempre crean horas extras pendientes que requieren aprobación
-        // Solo admin y RRHH pueden aprobar/rechazar, no crear directamente aprobadas
-
+        $estado = 'pendiente';
         $sql = 'INSERT INTO horas_extras (empleado_id, valor, cantidad, tipo, porcentaje, dia, mes, anio, estado, fecha_creacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
@@ -99,13 +89,11 @@ class HorasExtras extends Model {
     }
 
     public function update($id, $data) {
-        // Recalcular valor automáticamente si es necesario
         if (!isset($data['valor']) || empty($data['valor'])) {
             $fecha = $data['anio'] . '-' . str_pad($data['mes'], 2, '0', STR_PAD_LEFT) . '-' . str_pad($data['dia'], 2, '0', STR_PAD_LEFT);
             $data['valor'] = $this->calcularValorAutomatico($data['tipo'], $data['cantidad'], $fecha);
         }
 
-        // Actualizar porcentaje automáticamente si es necesario
         if (!isset($data['porcentaje']) || empty($data['porcentaje'])) {
             $tipoModel = new TipoHoraExtra();
             $tipoData = $tipoModel->getTipoPorcentaje($data['tipo']);

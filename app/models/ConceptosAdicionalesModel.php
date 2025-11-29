@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/Model.php';
+namespace App\Models;
+
+use PDO;
 
 class ConceptosAdicionalesModel extends Model {
     
@@ -19,7 +21,7 @@ class ConceptosAdicionalesModel extends Model {
             
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             error_log("Error obteniendo conceptos adicionales: " . $e->getMessage());
             return [];
         }
@@ -42,9 +44,9 @@ class ConceptosAdicionalesModel extends Model {
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
             return floatval($resultado['total']);
             
-        } catch (Exception $e) {
-            error_log("Error calculando total conceptos adicionales: " . $e->getMessage());
-            return 0.0;
+        } catch (\Exception $e) {
+            error_log("Error obteniendo total conceptos adicionales: " . $e->getMessage());
+            return 0;
         }
     }
     

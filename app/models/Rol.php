@@ -1,4 +1,8 @@
 <?php
+namespace App\Models;
+
+use PDO;
+
 class Rol extends Model {
     protected $table = 'rol';
 
@@ -16,7 +20,7 @@ class Rol extends Model {
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return $result ? $result : [];
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return [];
         }
     }

@@ -1,4 +1,8 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+
 require_once '../app/models/Empleado.php';
 require_once '../app/models/HorasExtras.php';
 require_once '../app/models/TotalDevengado.php';
@@ -18,16 +22,49 @@ class DevengadoController extends Controller {
         }
         try {
             $devengadoModel = $this->model('DevengadoModel');
-            $calculoCompleto = $devengadoModel->calcularDevengadoTodosEmpleados();
-            // Mostrar todos los empleados calculados, sin filtrar
+            // Iniciar sesión si no está iniciada
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $user = $_SESSION['user'] ?? null;
+            $rol = $user['rol'] ?? null;
+            $empleado_id = $user['empleado_id'] ?? null;
+            if ($rol === 'empleado' && $empleado_id) {
+                // Solo mostrar datos del empleado logueado
+                $calculo = $devengadoModel->calcularDevengadoCompleto($empleado_id);
+                $calculosEmpleados = [$calculo];
+                $totalesEmpresa = [
+                    'sueldo_basico' => $calculo['conceptos']['sueldo_basico']['valor'],
+                    'horas_extras' => $calculo['conceptos']['horas_extras']['valor'],
+                    'comisiones' => $calculo['conceptos']['comisiones']['valor'],
+                    'auxilio_transporte' => $calculo['conceptos']['auxilio_transporte']['valor'],
+                    'otros' => $calculo['conceptos']['otros']['valor'],
+                    'total_general' => $calculo['resumen']['total_devengado']
+                ];
+                $promedios = [
+                    'sueldo_basico' => $calculo['conceptos']['sueldo_basico']['valor'],
+                    'horas_extras' => $calculo['conceptos']['horas_extras']['valor'],
+                    'comisiones' => $calculo['conceptos']['comisiones']['valor'],
+                    'auxilio_transporte' => $calculo['conceptos']['auxilio_transporte']['valor'],
+                    'otros' => $calculo['conceptos']['otros']['valor']
+                ];
+                $total_empleados = 1;
+            } else {
+                $calculoCompleto = $devengadoModel->calcularDevengadoTodosEmpleados();
+                $calculosEmpleados = $calculoCompleto['empleados'];
+                $totalesEmpresa = $calculoCompleto['totales_empresa'];
+                $promedios = $calculoCompleto['promedios'];
+                $total_empleados = $calculoCompleto['total_empleados'];
+            }
             $this->view('devengado/index', [
                 'title' => 'Total Devengado - Nómina',
-                'calculos_empleados' => $calculoCompleto['empleados'],
-                'totales_empresa' => $calculoCompleto['totales_empresa'],
-                'promedios' => $calculoCompleto['promedios'],
-                'total_empleados' => count($calculoCompleto['empleados'])
+                'calculos_empleados' => $calculosEmpleados,
+                'totales_empresa' => $totalesEmpresa,
+                'promedios' => $promedios,
+                'total_empleados' => $total_empleados,
+                'currentRole' => $rol
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('devengado/index', [
                 'title' => 'Total Devengado - Nómina',
                 'error' => 'Error al calcular el devengado: ' . $e->getMessage(),
@@ -97,8 +134,8 @@ class DevengadoController extends Controller {
                 
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                // Obtener empleados válidos (excluye roles)
-                $empleados = $empleadoModel->getValidEmployees();
+                // Obtener todos los empleados registrados, sin filtros
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('devengado/generar', [
                     'title' => 'Generar Devengado',
@@ -109,8 +146,8 @@ class DevengadoController extends Controller {
         } else {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
-            // Obtener empleados válidos (excluye roles)
-            $empleados = $empleadoModel->getValidEmployees();
+            // Obtener todos los empleados registrados, sin filtros
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('devengado/generar', [
                 'title' => 'Generar Devengado',
@@ -159,7 +196,11 @@ class DevengadoController extends Controller {
             echo json_encode(['success' => false, 'message' => 'Acceso no autorizado']);
             exit;
         }
-        
+        $user = $_SESSION['user'];
+        if (($user['rol'] ?? null) === 'empleado') {
+            echo json_encode(['success' => false, 'message' => 'No tiene permiso para agregar conceptos.']);
+            exit;
+        }
         try {
             $empleado_id = $_POST['empleado_id'] ?? null;
             $concepto = $_POST['concepto'] ?? null;
@@ -186,7 +227,7 @@ class DevengadoController extends Controller {
                 echo json_encode(['success' => false, 'message' => 'Error al agregar el concepto']);
             }
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Error del servidor: ' . $e->getMessage()]);
         }
         

@@ -1,4 +1,6 @@
 <?php
+namespace App\Models;
+
 class User extends Model {
     public function create($username, $password, $empleado_id) {
         $sql = 'INSERT INTO user (username, password, empleado_id) VALUES (?, ?, ?)';
@@ -11,7 +13,7 @@ class User extends Model {
         $sql = 'SELECT * FROM user WHERE empleado_id = ?';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$empleado_id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
     public function login($username, $password) {
@@ -20,7 +22,7 @@ class User extends Model {
             JOIN rol r ON ru.rol_id = r.id_rol
             WHERE u.username = :username');
         $stmt->execute(['username' => $username]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
         if ($user && (password_verify($password, $user['password']) || $password === $user['password'])) {
             unset($user['password']);
             return $user;

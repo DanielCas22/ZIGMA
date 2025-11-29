@@ -1,4 +1,8 @@
 <?php
+namespace App\Controllers;
+
+use App\Controllers\Controller;
+
 require_once '../app/models/Empleado.php';
 require_once '../app/models/TotalDeducidoModel.php';
 require_once '../app/models/ConceptosAdicionalesDeduciblesModel.php';
@@ -16,24 +20,63 @@ class TotalDeducidoController extends Controller {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
-        
         try {
             $deducidoModel = $this->model('TotalDeducidoModel');
-            
-            // Calcular total deducido para todos los empleados
-            $calculoCompleto = $deducidoModel->calcularTotalDeducidoTodosEmpleados();
-            
+            // Iniciar sesión si no está iniciada
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $user = $_SESSION['user'] ?? null;
+            $rol = $user['rol'] ?? null;
+            $empleado_id = $user['empleado_id'] ?? null;
+            if ($rol === 'empleado' && $empleado_id) {
+                // Solo mostrar datos del empleado logueado
+                $calculo = $deducidoModel->calcularTotalDeducidoCompleto($empleado_id);
+                $calculosEmpleados = [$calculo];
+                $totalesEmpresa = [
+                    'salud' => $calculo['deducciones']['salud_empleado']['valor'],
+                    'pension' => $calculo['deducciones']['pension_empleado']['valor'],
+                    'fondo_solidaridad' => $calculo['deducciones']['fondo_solidaridad']['valor'],
+                    'retencion_fuente' => $calculo['deducciones']['retencion_fuente']['valor'],
+                    'otros' => $calculo['deducciones']['otros_deducibles']['valor'],
+                    'total_general' => $calculo['resumen']['total_deducciones']
+                ];
+                $promedios = [
+                    'salud' => $calculo['deducciones']['salud_empleado']['valor'],
+                    'pension' => $calculo['deducciones']['pension_empleado']['valor'],
+                    'fondo_solidaridad' => $calculo['deducciones']['fondo_solidaridad']['valor'],
+                    'retencion_fuente' => $calculo['deducciones']['retencion_fuente']['valor'],
+                    'otros' => $calculo['deducciones']['otros_deducibles']['valor'],
+                    'total_general' => $calculo['resumen']['total_deducciones']
+                ];
+                $estadisticas = [
+                    'empleados_con_fondo_solidaridad' => $calculo['deducciones']['fondo_solidaridad']['valor'] > 0 ? 1 : 0,
+                    'empleados_con_retencion' => $calculo['deducciones']['retencion_fuente']['valor'] > 0 ? 1 : 0,
+                    'empleados_con_otros_descuentos' => $calculo['deducciones']['otros_deducibles']['valor'] > 0 ? 1 : 0
+                ];
+                $porcentajes_empresa = [];
+                $total_empleados = 1;
+            } else {
+                // Calcular total deducido para todos los empleados
+                $calculoCompleto = $deducidoModel->calcularTotalDeducidoTodosEmpleados();
+                $calculosEmpleados = $calculoCompleto['empleados'];
+                $totalesEmpresa = $calculoCompleto['totales_empresa'];
+                $promedios = $calculoCompleto['promedios'];
+                $estadisticas = $calculoCompleto['estadisticas'];
+                $porcentajes_empresa = $calculoCompleto['porcentajes_empresa'];
+                $total_empleados = $calculoCompleto['total_empleados'];
+            }
             $this->view('total_deducido/index', [
                 'title' => 'Total Deducido - Nómina',
-                'calculos_empleados' => $calculoCompleto['empleados'],
-                'totales_empresa' => $calculoCompleto['totales_empresa'],
-                'promedios' => $calculoCompleto['promedios'],
-                'estadisticas' => $calculoCompleto['estadisticas'],
-                'porcentajes_empresa' => $calculoCompleto['porcentajes_empresa'],
-                'total_empleados' => $calculoCompleto['total_empleados']
+                'calculos_empleados' => $calculosEmpleados,
+                'totales_empresa' => $totalesEmpresa,
+                'promedios' => $promedios,
+                'estadisticas' => $estadisticas,
+                'porcentajes_empresa' => $porcentajes_empresa,
+                'total_empleados' => $total_empleados,
+                'currentRole' => $rol
             ]);
-            
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $this->view('total_deducido/index', [
                 'title' => 'Total Deducido - Nómina',
                 'error' => 'Error al calcular el total deducido: ' . $e->getMessage(),
@@ -68,6 +111,7 @@ class TotalDeducidoController extends Controller {
                 'fondo_solidaridad' => $calculo['deducciones']['fondo_solidaridad']['valor'],
                 'porcentaje_fondo' => $calculo['deducciones']['fondo_solidaridad']['porcentaje'],
                 'retencion_fuente' => $calculo['deducciones']['retencion_fuente']['valor'] ?? 0,
+                'retencion_fuente_detalle' => $calculo['deducciones']['retencion_fuente']['detalle'] ?? [],
                 'conceptos_adicionales' => [
                     'total' => $calculo['deducciones']['otros_deducibles']['valor'],
                     'cantidad' => count($calculo['deducciones']['otros_deducibles']['detalle']),
@@ -141,7 +185,7 @@ class TotalDeducidoController extends Controller {
                 
             } catch (Exception $e) {
                 $empleadoModel = $this->model('Empleado');
-                $empleados = $empleadoModel->getValidEmployees();
+                $empleados = $empleadoModel->getAllWithRoles();
                 
                 $this->view('total_deducido/generar', [
                     'title' => 'Generar Total Deducido',
@@ -153,7 +197,7 @@ class TotalDeducidoController extends Controller {
             // Mostrar formulario
             $empleadoModel = $this->model('Empleado');
             // Obtener empleados válidos (excluye roles)
-            $empleados = $empleadoModel->getValidEmployees();
+            $empleados = $empleadoModel->getAllWithRoles();
             
             $this->view('total_deducido/generar', [
                 'title' => 'Generar Total Deducido',
@@ -204,7 +248,11 @@ class TotalDeducidoController extends Controller {
             echo json_encode(['success' => false, 'message' => 'Acceso no autorizado']);
             exit;
         }
-        
+        $user = $_SESSION['user'];
+        if (($user['rol'] ?? null) === 'empleado') {
+            echo json_encode(['success' => false, 'message' => 'No tiene permiso para agregar descuentos.']);
+            exit;
+        }
         try {
             $empleado_id = $_POST['empleado_id'] ?? null;
             $concepto = $_POST['concepto'] ?? null;
@@ -230,8 +278,7 @@ class TotalDeducidoController extends Controller {
             } else {
                 echo json_encode(['success' => false, 'message' => 'Error al agregar el concepto deducible']);
             }
-            
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             echo json_encode(['success' => false, 'message' => 'Error del servidor: ' . $e->getMessage()]);
         }
         

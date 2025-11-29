@@ -1,4 +1,7 @@
 <?php
+namespace App\Models;
+
+use PDO;
 
 class TarifaHora extends Model {
     
