@@ -304,6 +304,7 @@ class Empleado extends Model {
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Procesar los resultados para establecer el rol principal y todos los roles
             foreach ($result as &$empleado) {
                 $empleado['rol_nombre'] = $empleado['rol_principal'] ?? 'Sin rol';
                 $empleado['todos_los_roles'] = $empleado['roles_concatenados'] ?? '';

@@ -7,7 +7,6 @@ class DevengadoModel extends Model {
     
     // Constantes para auxilios y parámetros 2025
     const AUXILIO_TRANSPORTE_LIMITE = 2645000; // 2 SMMLV
-    const AUXILIO_TRANSPORTE_VALOR = 200000;   // Valor fijo auxilio transporte 2025
     const SALARIO_MINIMO = 1423000;
     
     /**
@@ -148,6 +147,7 @@ class DevengadoModel extends Model {
         
         $parametros = $this->getParametrosVigentes();
         $salarioMinimo = isset($parametros['smlv']) ? $parametros['smlv'] : self::SALARIO_MINIMO;
+        $auxilioTransporteVigente = isset($parametros['auxilio_transporte']) ? $parametros['auxilio_transporte'] : 0;
         
         return [
             'empleado' => [
@@ -208,7 +208,7 @@ class DevengadoModel extends Model {
             'parametros' => [
                 'salario_minimo' => $salarioMinimo,
                 'auxilio_transporte_limite' => isset($parametros['smlv']) ? $parametros['smlv'] * 2 : self::AUXILIO_TRANSPORTE_LIMITE,
-                'auxilio_transporte_valor' => isset($parametros['auxilio_transporte']) ? $parametros['auxilio_transporte'] : self::AUXILIO_TRANSPORTE_VALOR,
+                'auxilio_transporte_valor' => $auxilioTransporteVigente,
                 'fecha_calculo' => date('Y-m-d H:i:s')
             ]
         ];

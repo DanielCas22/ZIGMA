@@ -1,6 +1,7 @@
 <?php
 namespace App\Controllers;
-
+require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../models/RolePermissions.php';
 use App\Controllers\Controller;
 use App\Models\RolePermissions;
 
@@ -156,7 +157,7 @@ class HorasExtrasController extends Controller {
                 if (!RolePermissions::canAccessAllEmployees('horas_extras')) {
                     $currentEmployeeId = RolePermissions::getCurrentEmployeeId();
                     if ($empleado_id !== $currentEmployeeId) {
-                        throw new Exception('No tiene permisos para crear horas extras para este empleado.');
+                        throw new \Exception('No tiene permisos para crear horas extras para este empleado.');
                     }
                 }
                 
@@ -181,7 +182,7 @@ class HorasExtrasController extends Controller {
                     // Error en la creación
                     $error = "Error al crear las horas extras. Verifique los datos e intente nuevamente.";
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $error = "Error: " . $e->getMessage();
             }
         }

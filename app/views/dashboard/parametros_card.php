@@ -1,14 +1,14 @@
-<div class="col-12 col-md-4 mb-4 d-flex align-items-stretch">
-    <div class="card text-center shadow border-primary border-2 w-200 h-200" style="background: #fff; min-height: 150px;">
-        <div class="card-body d-flex flex-column justify-content-between">
-            <h5 class="card-title text-primary d-flex align-items-center justify-content-center mb-2" style="color: #ec4899 !important; font-size: 1.25rem;">
+<div class="col-md-4">
+    <div class="card text-center shadow border-primary border-2">
+        <div class="card-body">
+            <h5 class="card-title text-primary d-flex align-items-center justify-content-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-gear me-2" viewBox="0 0 16 16">
                     <path d="M9.405 1.05a1 1 0 0 0-2.81 0l-.094.188a1.007 1.007 0 0 1-1.255.465l-.211-.087c-1.07-.428-2.255.323-2.255 1.466v.172a1.007 1.007 0 0 1-.465 1.255l-.188.094c-1.013.527-1.013 2.065 0 2.592l.188.094a1.007 1.007 0 0 1 .465 1.255l-.087.211c-.428 1.07.323 2.255 1.466 2.255h.172a1.007 1.007 0 0 1 1.255.465l.094.188c.527 1.013 2.065 1.013 2.592 0l.094-.188a1.007 1.007 0 0 1 1.255-.465h.172c1.07.428 2.255-.323 2.255-1.466v-.172a1.007 1.007 0 0 1 .465-1.255l.188-.094c1.013-.527 1.013-2.065 0-2.592l-.188-.094a1.007 1.007 0 0 1-.465-1.255l.087-.211c.428-1.07-.323-2.255-1.466-2.255h-.172a1.007 1.007 0 0 1-1.255-.465l-.094-.188zm-2.633.283c.246-.475.96-.475 1.206 0l.094.188a2.007 2.007 0 0 0 2.51.928l.211-.087c.475-.19 1.012.174 1.012.684v.172a2.007 2.007 0 0 0 .928 2.51l.188.094c.475.246.475.96 0 1.206l-.188.094a2.007 2.007 0 0 0-.928 2.51l.087.211c.19.475-.174 1.012-.684 1.012h-.172a2.007 2.007 0 0 0-2.51.928l-.094.188c-.246.475-.96.475-1.206 0l-.094-.188a2.007 2.007 0 0 0-2.51-.928l-.211.087c-.475.19-1.012-.174-1.012-.684v-.172a2.007 2.007 0 0 0-.928-2.51l-.188-.094c-.475-.246-.475-.96 0-1.206l.188-.094a2.007 2.007 0 0 0 .928-2.51l-.087-.211c-.19-.475.174-1.012.684-1.012h.172a2.007 2.007 0 0 0 2.51-.928l.094-.188z"/>
                 </svg>
                 Parámetros Administrativos
             </h5>
-            <p class="card-text small mb-3" style="color: #6c757d; font-size: 1rem;">Configura parámetros clave del sistema, tablas y valores administrativos.</p>
-            <a href="/ZIGMA/public/index.php?url=Admin/parametros" class="btn btn-outline-primary fw-bold mt-auto">Ir</a>
+            <p class="card-text small">Configura parámetros clave del sistema, tablas y valores administrativos.</p>
+            <a href="/ZIGMA/public/index.php?url=Admin/parametros" class="btn btn-outline-primary fw-bold">Ir</a>
         </div>
     </div>
 </div>

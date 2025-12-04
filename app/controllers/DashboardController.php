@@ -1,10 +1,9 @@
 <?php
 namespace App\Controllers;
+require_once __DIR__ . '/../models/RolePermissions.php';
 
 use App\Controllers\Controller;
 use App\Models\RolePermissions;
-
-require_once __DIR__ . '/../models/RolePermissions.php';
 
 class DashboardController extends Controller {
     private function baseUrl() {

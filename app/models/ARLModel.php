@@ -151,7 +151,7 @@ class ARLModel extends Model {
         
         if ($existente) {
             // Actualizar
-            $sql = "UPDATE empleados_riesgo_arl SET codigo_riesgo = ?, fecha_actualizacion = NOW() WHERE id_empleado = ?";
+            $sql = "UPDATE empleados_riesgo_arl SET codigo_riesgo = ? WHERE id_empleado = ?";
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([$codigoRiesgo, $idEmpleado]);
         } else {

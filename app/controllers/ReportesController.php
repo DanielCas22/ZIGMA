@@ -21,6 +21,17 @@ class ReportesController extends Controller
     {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
+        // Filtrar empleados especiales
+        $empleados = array_filter($empleados, function($emp) {
+            $nombre = trim(mb_strtolower($emp['nombre']));
+            $apellido = trim(mb_strtolower($emp['apellido']));
+            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
+                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
+                ($nombre === 'empleado' && $apellido === 'general')) {
+                return false;
+            }
+            return true;
+        });
         // Si se solicita Excel
         if (isset($_GET['formato']) && $_GET['formato'] === 'excel') {
             require_once __DIR__ . '/../../vendor/autoload.php';

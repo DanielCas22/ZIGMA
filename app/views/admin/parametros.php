@@ -95,6 +95,7 @@
             <table class="table table-bordered">
                 <thead><tr><th>Fecha</th><th>Usuario</th><th>Acción</th><th>Detalle</th></tr></thead>
                 <tbody>
+<<<<<<< HEAD
                     <?php if (isset($historial) && is_array($historial) && count($historial) > 0): ?>
                         <?php foreach ($historial as $h): ?>
                         <tr>
@@ -132,6 +133,39 @@
                     <?php else: ?>
                         <tr><td colspan="4" class="text-center text-muted">No hay historial disponible.</td></tr>
                     <?php endif; ?>
+=======
+                    <?php foreach ($historial as $h): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($h['fecha']) ?></td>
+                        <td><?= htmlspecialchars($h['actualizado_por']) ?></td>
+                        <td><?= htmlspecialchars($h['accion']) ?></td>
+                        <td>
+                            <?php
+                            $detalle = json_decode($h['detalle'], true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($detalle)) {
+                                echo '<ul style="margin:0; padding-left:18px;">';
+                                foreach ($detalle as $k => $v) {
+                                    $k = ($k === 'anio') ? 'año' : $k;
+                                    if (is_array($v)) {
+                                        echo "<li><b>$k:</b><ul>";
+                                        foreach ($v as $kk => $vv) {
+                                            $kk = ($kk === 'anio') ? 'año' : $kk;
+                                            echo "<li><b>$kk:</b> $vv</li>";
+                                        }
+                                        echo "</ul></li>";
+                                    } else {
+                                        echo "<li><b>$k:</b> $v</li>";
+                                    }
+                                }
+                                echo '</ul>';
+                            } else {
+                                echo '<pre>' . htmlspecialchars(str_replace('"anio"', '"año"', $h['detalle'])) . '</pre>';
+                            }
+                            ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+>>>>>>> b3292af65daf18ba052c64223fdc2738357c8a43
                 </tbody>
             </table>
             <a href="/ZIGMA/public/index.php?url=Admin/exportarConfiguracion" class="btn btn-secondary">Exportar Configuración</a>

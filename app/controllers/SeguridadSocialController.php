@@ -1,9 +1,13 @@
 <?php
 namespace App\Controllers;
-
+require_once __DIR__ . '/Controller.php';
 use App\Controllers\Controller;
 use App\Models\SeguridadSocialModel;
 use App\Models\ARLModel;
+use App\Models\Empleado;
+use App\Models\SalarioPorRol;
+use App\Models\RolHasUser;
+use App\Models\User;
 
 /**
  * Controlador para manejo de cálculos de Seguridad Social
@@ -14,8 +18,8 @@ class SeguridadSocialController extends Controller {
     private $arlModel;
     
     public function __construct() {
-        $this->seguridadSocialModel = new SeguridadSocialModel();
-        $this->arlModel = new ARLModel();
+        $this->seguridadSocialModel = new \App\Models\SeguridadSocialModel();
+        $this->arlModel = new \App\Models\ARLModel();
     }
     
     /**
@@ -82,7 +86,7 @@ class SeguridadSocialController extends Controller {
             
             $this->view('seguridad_social/detalle', $data);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Detalle de Seguridad Social',
                 'error' => 'Error al calcular seguridad social: ' . $e->getMessage(),
@@ -102,7 +106,7 @@ class SeguridadSocialController extends Controller {
                 $totalDevengado = floatval($_POST['total_devengado'] ?? 0);
                 
                 if ($totalDevengado <= 0) {
-                    throw new InvalidArgumentException('El total devengado debe ser mayor a 0');
+                    throw new \InvalidArgumentException('El total devengado debe ser mayor a 0');
                 }
                 
                 $calculoCompleto = $this->seguridadSocialModel->calcularSeguridadSocialCompleta($totalDevengado);
@@ -122,7 +126,7 @@ class SeguridadSocialController extends Controller {
             
             $this->view('seguridad_social/completo', $data);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Cálculo Completo de Seguridad Social',
                 'error' => 'Error en el cálculo: ' . $e->getMessage(),
@@ -151,7 +155,7 @@ class SeguridadSocialController extends Controller {
             echo json_encode($reporte, JSON_PRETTY_PRINT);
             exit;
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             header('Content-Type: application/json');
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
@@ -168,7 +172,7 @@ class SeguridadSocialController extends Controller {
                 $diasTrabajados = intval($_POST['dias_trabajados'] ?? 30);
                 
                 if ($diasTrabajados <= 0 || $diasTrabajados > 31) {
-                    throw new InvalidArgumentException('Los días trabajados deben estar entre 1 y 31');
+                    throw new \InvalidArgumentException('Los días trabajados deben estar entre 1 y 31');
                 }
                 
                 // Usar cálculo CON ARL para la vista principal
@@ -191,7 +195,7 @@ class SeguridadSocialController extends Controller {
                 exit;
             }
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Cálculo de Seguridad Social por Empleado',
                 'error' => 'Error al actualizar cálculos: ' . $e->getMessage(),
@@ -210,10 +214,10 @@ class SeguridadSocialController extends Controller {
         $data = [
             'title' => 'Configuración de Seguridad Social',
             'porcentajes' => [
-                'salud_empleado' => SeguridadSocialModel::PORC_SALUD_EMPLEADO,
-                'pension_empleado' => SeguridadSocialModel::PORC_PENSION_EMPLEADO,
-                'salud_empleador' => SeguridadSocialModel::PORC_SALUD_EMPLEADOR,
-                'pension_empleador' => SeguridadSocialModel::PORC_PENSION_EMPLEADOR
+                'salud_empleado' => \SeguridadSocialModel::PORC_SALUD_EMPLEADO,
+                'pension_empleado' => \SeguridadSocialModel::PORC_PENSION_EMPLEADO,
+                'salud_empleador' => \SeguridadSocialModel::PORC_SALUD_EMPLEADOR,
+                'pension_empleador' => \SeguridadSocialModel::PORC_PENSION_EMPLEADOR
             ]
         ];
         
@@ -239,7 +243,7 @@ class SeguridadSocialController extends Controller {
             
             $this->view('seguridad_social/index_con_arl', $data);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Cálculo de Seguridad Social + ARL por Empleado',
                 'error' => 'Error al calcular seguridad social + ARL: ' . $e->getMessage(),
@@ -270,7 +274,7 @@ class SeguridadSocialController extends Controller {
             
             $this->view('seguridad_social/detalle_con_arl', $data);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Detalle de Seguridad Social + ARL',
                 'error' => 'Error al calcular: ' . $e->getMessage(),
@@ -299,7 +303,7 @@ class SeguridadSocialController extends Controller {
             }
             
             // Obtener empleados con sus riesgos actuales
-            $empleadoModel = new Empleado();
+            $empleadoModel = new \Empleado();
             // Obtener empleados válidos (excluye roles)
             $empleados = $empleadoModel->getAllWithRoles();
             
@@ -321,7 +325,7 @@ class SeguridadSocialController extends Controller {
             
             $this->view('seguridad_social/gestion_riesgos', $data);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Gestión de Riesgos ARL',
                 'error' => 'Error: ' . $e->getMessage(),
@@ -363,7 +367,7 @@ class SeguridadSocialController extends Controller {
             
             $this->view('seguridad_social/calculo_arl_puro', $data);
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Cálculo ARL (PROM Original)',
                 'error' => 'Error en el cálculo: ' . $e->getMessage(),
@@ -384,7 +388,7 @@ class SeguridadSocialController extends Controller {
                 $diasTrabajados = intval($_POST['dias_trabajados'] ?? 30);
                 
                 if ($diasTrabajados <= 0 || $diasTrabajados > 31) {
-                    throw new InvalidArgumentException('Los días trabajados deben estar entre 1 y 31');
+                    throw new \InvalidArgumentException('Los días trabajados deben estar entre 1 y 31');
                 }
                 
                 $calculosEmpleados = $this->seguridadSocialModel->calcularSeguridadSocialConARLTodos($diasTrabajados);
@@ -407,7 +411,7 @@ class SeguridadSocialController extends Controller {
                 exit;
             }
             
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             $data = [
                 'title' => 'Cálculo de Seguridad Social + ARL por Empleado',
                 'error' => 'Error al actualizar cálculos: ' . $e->getMessage(),

@@ -89,7 +89,8 @@
                                                     <i class="fas fa-file-invoice me-1"></i> Ver
                                                 </a>
                                                 <?php if (in_array($currentRole, ['admin', 'rrhh'])): ?>
-                                                    <form method="POST" action="<?= URL_ROOT ?>=Desprendible/eliminar/<?= $empleado['id_empleados'] ?? $empleado['id'] ?>" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar el desprendible?');">
+                                                    <form method="POST" action="<?= URL_ROOT ?>=Desprendible/eliminar" style="display:inline;" onsubmit="return confirm('¿Está seguro de eliminar el desprendible?');">
+                                                        <input type="hidden" name="empleadoId" value="<?= $empleado['id_empleados'] ?? $empleado['id'] ?>">
                                                         <button type="submit" class="btn-zigma-danger btn-sm" title="Eliminar desprendible">
                                                             <i class="fas fa-trash-alt me-1"></i> Eliminar
                                                         </button>

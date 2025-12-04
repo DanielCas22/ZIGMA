@@ -96,25 +96,6 @@
         <p class="mb-0">Generado: <?= date('d/m/Y H:i', strtotime($fecha_generacion)) ?></p>
     </div>
 
-        <!-- Controles -->
-        <div class="row mb-3 no-print">
-            <div class="col-md-6">
-                <button onclick="window.print()" class="btn btn-zigma-primary">
-                    <i class="fas fa-print me-1"></i> Imprimir
-                </button>
-            </div>
-            <div class="col-md-6 text-end">
-                <div class="btn-group">
-                    <a href="/ZIGMA/Nomina/reporte" class="btn btn-zigma-secondary">
-                        <i class="fas fa-file-alt me-1"></i> Reporte
-                    </a>
-                    <a href="/ZIGMA/Nomina/resumen" class="btn btn-zigma-primary">
-                        <i class="fas fa-chart-bar me-1"></i> Resumen
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <!-- Estadísticas Rápidas -->
         <div class="row mb-4 no-print">
             <div class="col-md-3">

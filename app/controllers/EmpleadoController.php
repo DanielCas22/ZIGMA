@@ -1,6 +1,12 @@
 <?php
 namespace App\Controllers;
-
+require_once __DIR__ . '/Controller.php';
+require_once __DIR__ . '/../models/Empleado.php';
+require_once __DIR__ . '/../models/Rol.php';
+require_once __DIR__ . '/../models/SalarioPorRol.php';
+require_once __DIR__ . '/../models/ARLModel.php';
+require_once __DIR__ . '/../models/RolePermissions.php';
+use App\Controllers\Controller;
 use App\Models\Empleado;
 use App\Models\Rol;
 use App\Models\SalarioPorRol;
@@ -20,7 +26,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de lectura
-        RolePermissions::redirectIfNoPermission('empleados', 'read');
+        \App\Models\RolePermissions::redirectIfNoPermission('empleados', 'read');
         
         // Mostrar dashboard de empleados con roles
         $empleadoModel = $this->model('Empleado');
@@ -28,7 +34,7 @@ class EmpleadoController extends Controller {
         $empleados = $empleadoModel->getAllWithRoles();
         
         // Verificar si el usuario actual puede eliminar empleados
-        $canDelete = RolePermissions::hasPermission($_SESSION['user']['rol'], 'empleados', 'delete');
+        $canDelete = \App\Models\RolePermissions::hasPermission($_SESSION['user']['rol'], 'empleados', 'delete');
         
         // Procesar roles y permisos para cada empleado
         foreach ($empleados as &$empleado) {
@@ -46,7 +52,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de creación
-        RolePermissions::redirectIfNoPermission('empleados', 'create');
+        \App\Models\RolePermissions::redirectIfNoPermission('empleados', 'create');
         
         // Mostrar formulario de registro con roles
         $rolModel = $this->model('Rol');
@@ -61,7 +67,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de creación
-        RolePermissions::redirectIfNoPermission('empleados', 'create');
+        \App\Models\RolePermissions::redirectIfNoPermission('empleados', 'create');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombre = $_POST['nombres'] ?? '';
@@ -85,7 +91,7 @@ class EmpleadoController extends Controller {
             if (!$salario_final) {
                 // Si no hay salario manual, obtener SMLV vigente de la base de datos
                 require_once __DIR__ . '/../models/ParametrosModel.php';
-                $paramModel = new ParametrosModel();
+                $paramModel = new \ParametrosModel();
                 $parametros = $paramModel->getParametrosVigentes();
                 $salario_final = isset($parametros['smlv']) ? $parametros['smlv'] : 0;
             }
@@ -124,8 +130,9 @@ class EmpleadoController extends Controller {
                     exit();
                 }
             } catch (\Exception $e) {
-                $_SESSION['error'] = $e->getMessage();
-                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/nuevo');
+                // Capturar error de usuario duplicado u otros errores
+                $errorMessage = urlencode($e->getMessage());
+                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/create&error=usuario_duplicado&message=' . $errorMessage);
                 exit();
             }
         }
@@ -138,7 +145,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de actualización
-        RolePermissions::redirectIfNoPermission('empleados', 'update');
+        \App\Models\RolePermissions::redirectIfNoPermission('empleados', 'update');
         
         if (!isset($_GET['id'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php?url=Empleado/index');
@@ -161,7 +168,7 @@ class EmpleadoController extends Controller {
             if ($riesgoEmpleado) {
                 $empleado['riesgo_arl'] = $riesgoEmpleado['codigo_riesgo'];
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Si hay error, continuar sin riesgo asignado
             error_log("Error al obtener riesgo ARL: " . $e->getMessage());
         }
@@ -187,7 +194,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de actualización
-        RolePermissions::redirectIfNoPermission('empleados', 'update');
+        \App\Models\RolePermissions::redirectIfNoPermission('empleados', 'update');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = intval($_POST['id']);
@@ -315,7 +322,7 @@ class EmpleadoController extends Controller {
         }
         
         // Verificar permisos de eliminación (solo admin)
-        RolePermissions::redirectIfNoPermission('empleados', 'delete');
+        \App\Models\RolePermissions::redirectIfNoPermission('empleados', 'delete');
         
         if (isset($_GET['id'])) {
             $id = intval($_GET['id']);

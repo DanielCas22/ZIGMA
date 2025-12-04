@@ -1,6 +1,6 @@
 <?php
 namespace App\Controllers;
-
+require_once __DIR__ . '/Controller.php';
 use App\Controllers\Controller;
 use App\Models\RolePermissions;
 
@@ -135,6 +135,9 @@ class DesprendibleController extends Controller {
      * Eliminar desprendible (solo admin/rrhh)
      */
     public function eliminar($empleadoId = null) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['empleadoId'])) {
+            $empleadoId = $_POST['empleadoId'];
+        }
         require_once __DIR__ . '/../models/RolePermissions.php';
         $currentRole = RolePermissions::getCurrentUserRole();
         if (!in_array($currentRole, ['admin', 'rrhh'])) {
