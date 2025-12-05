@@ -47,7 +47,7 @@ class HorasExtras extends Model {
     }
 
     public function getHorasExtrasByEmpleado($empleado_id) {
-        $sql = 'SELECT * FROM horas_extras WHERE empleado_id = ? ORDER BY anio DESC, mes DESC, dia DESC';
+        $sql = 'SELECT * FROM horas_extras WHERE empleado_id = ? AND estado != "rechazada" ORDER BY anio DESC, mes DESC, dia DESC';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$empleado_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -245,6 +245,15 @@ class HorasExtras extends Model {
             "Tus horas extras han sido rechazadas. Comentario: $comentario";
         $url = "/ZIGMA/public/index.php?url=HorasExtras/historial/$empleadoId";
         return $noti->registrar($usuarioId, 'horas_extras', $mensaje, $url);
+    }
+
+    /**
+     * Elimina todas las horas extras rechazadas de la base de datos
+     */
+    public function deleteRechazadas() {
+        $sql = "DELETE FROM horas_extras WHERE estado = 'rechazado'";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute();
     }
 }
 ?>

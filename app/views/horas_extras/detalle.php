@@ -187,19 +187,12 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="/ZIGMA/public/index.php?url=HorasExtras/edit/<?= urlencode((string)($he['id_extras'] ?? '')) ?>" 
-                                                   class="btn btn-sm btn-outline-primary" 
+                                                <a href="/ZIGMA/public/index.php?url=HorasExtras/edit/<?= urlencode((string)($he['id_extras'] ?? '')) ?>"
+                                                   class="btn btn-sm btn-outline-primary"
                                                    title="Editar">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <?php if (isset($hasDeletePermission) && $hasDeletePermission): ?>
-                                                <a href="/ZIGMA/public/index.php?url=HorasExtras/delete/<?= urlencode((string)($he['id_extras'] ?? '')) ?>" 
-                                                   class="btn btn-sm btn-outline-danger" 
-                                                   onclick="return confirm('¿Está seguro de eliminar este registro?')" 
-                                                   title="Eliminar">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                                <?php endif; ?>
+                                                <!-- Botón de eliminar oculto -->
                                             </div>
                                         </td>
                                     </tr>

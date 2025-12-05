@@ -112,4 +112,253 @@ class ReportesController extends Controller
         fclose($output);
         exit();
     }
+
+    public function reporteEmpleado() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: /Login');
+            exit();
+        }
+        $empleadoModel = $this->model('Empleado');
+        $empleados = $empleadoModel->getAllWithRoles();
+        $empleado_id = isset($_GET['empleado_id']) ? intval($_GET['empleado_id']) : null;
+        $resumen = null;
+        if ($empleado_id) {
+            $empleado = $empleadoModel->getByIdWithRoles($empleado_id);
+            $devengadoModel = $this->model('TotalDevengado');
+            $deducidoModel = $this->model('TotalDeducidoModel');
+            $horasExtrasModel = $this->model('HorasExtras');
+            $total_devengado = $devengadoModel->getTotalByEmpleado($empleado_id);
+            $total_deducido = $deducidoModel->getTotalByEmpleado($empleado_id);
+            $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($empleado_id);
+            $total_horas = 0;
+            $total_valor = 0;
+            foreach ($horas_extras as $he) {
+                if (isset($he['estado']) && strtolower($he['estado']) !== 'rechazado') {
+                    $total_horas += floatval($he['cantidad']);
+                    $total_valor += floatval($he['valor']);
+                }
+            }
+            $resumen = [
+                'empleado' => $empleado,
+                'total_devengado' => $total_devengado,
+                'total_deducido' => $total_deducido,
+                'total_horas_extras' => $total_horas,
+                'total_valor_extras' => $total_valor,
+                'horas_extras' => $horas_extras
+            ];
+        }
+        $this->view('reportes/reporte_empleado', [
+            'empleados' => $empleados,
+            'resumen' => $resumen
+        ]);
+    }
+
+    public function descargarEmpleado() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: /Login');
+            exit();
+        }
+        $empleado_id = isset($_GET['empleado_id']) ? intval($_GET['empleado_id']) : null;
+        if (!$empleado_id) {
+            header('Location: /ZIGMA/public/index.php?url=Reportes/reporteEmpleado');
+            exit();
+        }
+        $empleadoModel = $this->model('Empleado');
+        $devengadoModel = $this->model('TotalDevengado');
+        $deducidoModel = $this->model('TotalDeducidoModel');
+        $horasExtrasModel = $this->model('HorasExtras');
+        $empleado = $empleadoModel->getByIdWithRoles($empleado_id);
+        $total_devengado = $devengadoModel->getTotalByEmpleado($empleado_id);
+        $total_deducido = $deducidoModel->getTotalByEmpleado($empleado_id);
+        $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($empleado_id);
+        $total_horas = 0;
+        $total_valor = 0;
+        foreach ($horas_extras as $he) {
+            if (isset($he['estado']) && strtolower($he['estado']) !== 'rechazado') {
+                $total_horas += floatval($he['cantidad']);
+                $total_valor += floatval($he['valor']);
+            }
+        }
+        // PDF
+        if (isset($_GET['formato']) && $_GET['formato'] === 'pdf') {
+            require_once __DIR__ . '/../../vendor/autoload.php';
+            \App\Utils\ReportePDF::generarReporteEmpleado([
+                'empleado' => $empleado,
+                'total_devengado' => $total_devengado,
+                'total_deducido' => $total_deducido,
+                'total_horas_extras' => $total_horas,
+                'total_valor_extras' => $total_valor,
+                'horas_extras' => $horas_extras
+            ]);
+            exit();
+        }
+        // Excel
+        if (isset($_GET['formato']) && $_GET['formato'] === 'excel') {
+            require_once __DIR__ . '/../../vendor/autoload.php';
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+            // Encabezado principal
+            $sheet->fromArray(['Empleado', 'Total Devengado', 'Total Deducido', 'Total Horas Extras', 'Valor Horas Extras'], NULL, 'A1');
+            $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+            $sheet->getStyle('A1:E1')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('223A5E');
+            $sheet->getStyle('A1:E1')->getFont()->getColor()->setRGB('FFFFFF');
+            $sheet->fromArray([
+                $empleado['nombre'] . ' ' . $empleado['apellido'],
+                $total_devengado,
+                $total_deducido,
+                $total_horas,
+                $total_valor
+            ], NULL, 'A2');
+            // Encabezado detalle
+            $sheet->fromArray(['Fecha', 'Tipo', 'Cantidad', 'Valor', 'Estado'], NULL, 'A4');
+            $sheet->getStyle('A4:E4')->getFont()->setBold(true);
+            $sheet->getStyle('A4:E4')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB('2E5C9A');
+            $sheet->getStyle('A4:E4')->getFont()->getColor()->setRGB('FFFFFF');
+            $row = 5;
+            foreach ($horas_extras as $he) {
+                $sheet->fromArray([
+                    $he['dia'] . '/' . $he['mes'] . '/' . $he['anio'],
+                    $he['tipo'],
+                    $he['cantidad'],
+                    $he['valor'],
+                    $he['estado']
+                ], NULL, 'A' . $row);
+                // Bordes para cada fila de detalle
+                $sheet->getStyle('A'.$row.':E'.$row)->getBorders()->getAllBorders()->setBorderStyle(
+                    \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                );
+                $row++;
+            }
+            // Bordes para encabezados
+            $sheet->getStyle('A1:E2')->getBorders()->getAllBorders()->setBorderStyle(
+                \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+            );
+            $sheet->getStyle('A4:E4')->getBorders()->getAllBorders()->setBorderStyle(
+                \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+            );
+            // Ajuste de columnas
+            foreach (range('A', 'E') as $col) {
+                $sheet->getColumnDimension($col)->setAutoSize(true);
+                $sheet->getStyle($col.'1:'.$col.$row)->getAlignment()->setHorizontal(
+                    \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER
+                );
+            }
+            $sheet->getStyle('A1:E'.$row)->getFont()->setSize(11);
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="reporte_empleado.xlsx"');
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save('php://output');
+            exit();
+        }
+        // Si no formato, redirigir
+        header('Location: /ZIGMA/public/index.php?url=Reportes/reporteEmpleado&empleado_id=' . $empleado_id);
+        exit();
+    }
+
+    public function reporteNomina() {
+        $empleadoModel = $this->model('Empleado');
+        $devengadoModel = $this->model('TotalDevengado');
+        $deducidoModel = $this->model('TotalDeducidoModel');
+        $nominaData = [];
+        $total_nomina = 0;
+        $total_devengado = 0;
+        $total_deducido = 0;
+        $empleados = $empleadoModel->getAllWithRoles();
+        foreach ($empleados as $emp) {
+            if (in_array($emp['id_empleados'], [1,2,3])) continue;
+            $dev = $devengadoModel->getTotalByEmpleado($emp['id_empleados']);
+            $ded = $deducidoModel->getTotalByEmpleado($emp['id_empleados']);
+            $horasExtrasModel = $this->model('HorasExtras');
+            $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($emp['id_empleados']);
+            $total_horas = 0;
+            $total_valor = 0;
+            foreach ($horas_extras as $he) {
+                if (isset($he['estado']) && strtolower($he['estado']) !== 'rechazado') {
+                    $total_horas += floatval($he['cantidad']);
+                    $total_valor += floatval($he['valor']);
+                }
+            }
+            $valor_pagar = $dev - $ded + $total_valor;
+            $nominaData[] = [
+                'nombre' => $emp['nombre'],
+                'apellido' => $emp['apellido'],
+                'devengado' => $dev,
+                'deducido' => $ded,
+                'valor_pagar' => $valor_pagar,
+                'total_horas' => $total_horas,
+                'total_valor_horas' => $total_valor
+            ];
+            $total_nomina += $valor_pagar;
+            $total_devengado += ($dev + $total_valor);
+            $total_deducido += $ded;
+        }
+        $estadisticas = [
+            'total_nomina' => $total_nomina,
+            'total_devengado' => $total_devengado,
+            'total_deducido' => $total_deducido,
+            'promedio_nomina' => count($nominaData) ? $total_nomina / count($nominaData) : 0
+        ];
+        $this->view('reportes/reporte_nomina', [
+            'nomina' => $nominaData,
+            'estadisticas' => $estadisticas
+        ]);
+    }
+
+    public function descargarNomina() {
+        $formato = isset($_GET['formato']) ? strtolower($_GET['formato']) : 'pdf';
+        $empleadoModel = $this->model('Empleado');
+        $devengadoModel = $this->model('TotalDevengado');
+        $deducidoModel = $this->model('TotalDeducidoModel');
+        $nominaData = [];
+        $total_nomina = 0;
+        $total_devengado = 0;
+        $total_deducido = 0;
+        $horasExtrasModel = $this->model('HorasExtras');
+        $empleados = $empleadoModel->getAllWithRoles();
+        foreach ($empleados as $emp) {
+            if (in_array($emp['id_empleados'], [1,2,3])) continue;
+            $dev = $devengadoModel->getTotalByEmpleado($emp['id_empleados']);
+            $ded = $deducidoModel->getTotalByEmpleado($emp['id_empleados']);
+            $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($emp['id_empleados']);
+            $total_horas = 0;
+            $total_valor = 0;
+            foreach ($horas_extras as $he) {
+                if (isset($he['estado']) && strtolower($he['estado']) !== 'rechazado') {
+                    $total_horas += floatval($he['cantidad']);
+                    $total_valor += floatval($he['valor']);
+                }
+            }
+            $valor_pagar = $dev - $ded + $total_valor;
+            $nominaData[] = [
+                'nombre' => $emp['nombre'],
+                'apellido' => $emp['apellido'],
+                'devengado' => $dev,
+                'deducido' => $ded,
+                'valor_pagar' => $valor_pagar,
+                'total_horas' => $total_horas,
+                'total_valor_horas' => $total_valor
+            ];
+            $total_nomina += $valor_pagar;
+            $total_devengado += ($dev + $total_valor);
+            $total_deducido += $ded;
+        }
+        $estadisticas = [
+            'total_nomina' => $total_nomina,
+            'total_devengado' => $total_devengado,
+            'total_deducido' => $total_deducido,
+            'promedio_nomina' => count($nominaData) ? $total_nomina / count($nominaData) : 0
+        ];
+        if ($formato === 'excel') {
+            require_once __DIR__ . '/../utils/ReporteExcel.php';
+            $excel = new \App\Utils\ReporteExcel();
+            $excel->generarReporteNomina($nominaData, $estadisticas);
+        } else {
+            require_once __DIR__ . '/../utils/ReportePDF.php';
+            $pdf = new \App\Utils\ReportePDF();
+            $pdf->generarReporteNomina($nominaData, $estadisticas);
+        }
+        exit;
+    }
 }

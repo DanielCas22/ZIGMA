@@ -55,12 +55,14 @@ class HorasExtrasController extends Controller {
             $empleado['total_valor'] = 0;
             $tipos = [];
             foreach ($horasExtras as $he) {
-                $empleado['total_horas'] += floatval($he['cantidad']);
-                $empleado['total_valor'] += floatval($he['valor']);
-                $tipos[] = $he['tipo'];
+                if (isset($he['estado']) && strtolower($he['estado']) !== 'rechazado') {
+                    $empleado['total_horas'] += floatval($he['cantidad']);
+                    $empleado['total_valor'] += floatval($he['valor']);
+                    $tipos[] = $he['tipo'];
+                }
             }
-            $empleado['tipo_frecuente'] = !empty($tipos) ? array_count_values($tipos) : [];
-            $empleado['tipo_frecuente'] = !empty($empleado['tipo_frecuente']) ? array_keys($empleado['tipo_frecuente'], max($empleado['tipo_frecuente']))[0] : 'N/A';
+            // Tipo de horas más frecuente (solo de las válidas)
+            $empleado['tipo_frecuente'] = !empty($tipos) ? array_keys(array_filter(array_count_values($tipos), function($v) use ($tipos) { return $v == max(array_count_values($tipos)); }))[0] : 'N/A';
             $empleado['rol'] = $empleado['rol_nombre'] ?? 'Sin rol';
             $empleado['canDelete'] = RolePermissions::hasPermission($_SESSION['user']['rol'], 'horas_extras', 'delete');
         }
@@ -244,8 +246,10 @@ class HorasExtrasController extends Controller {
         $total_horas = 0;
         $total_valor = 0;
         foreach ($horasExtras as $he) {
-            $total_horas += floatval($he['cantidad']);
-            $total_valor += floatval($he['valor']);
+            if (isset($he['estado']) && strtolower($he['estado']) !== 'rechazado') {
+                $total_horas += floatval($he['cantidad']);
+                $total_valor += floatval($he['valor']);
+            }
         }
         
         $hasDeletePermission = false;
@@ -261,9 +265,15 @@ class HorasExtrasController extends Controller {
         ]);
     }
 
-    public function delete($id) {
+    public function delete($id = null) {
         if (!isset($_SESSION['user'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
+            exit;
+        }
+        if ($id === null) {
+            // Si no se recibe el ID, mostrar error y redirigir
+            $_SESSION['error'] = 'No se recibió el ID de la hora extra a eliminar.';
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras');
             exit;
         }
         $horasExtrasModel = $this->model('HorasExtras');

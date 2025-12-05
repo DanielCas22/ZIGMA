@@ -353,4 +353,17 @@ class TotalDeducidoModel extends Model {
             throw $e;
         }
     }
+    
+    /**
+     * Retorna el total deducido por un empleado
+     */
+    public function getTotalByEmpleado($empleado_id) {
+        $sql = 'SELECT SUM(td.valor) as total FROM total_deducido td
+                INNER JOIN nomina n ON n.total_deducido_id = td.id_total_deducido
+                WHERE n.empleado_id = ?';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$empleado_id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row && isset($row['total']) ? floatval($row['total']) : 0;
+    }
 }

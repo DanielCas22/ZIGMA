@@ -262,6 +262,12 @@ class Empleado extends Model {
             $stmtDelUsers->bindParam(':id', $id, PDO::PARAM_INT);
             $stmtDelUsers->execute();
             
+            // Eliminar todos los registros de nómina asociados al empleado
+            $sqlNomina = 'DELETE FROM nomina WHERE empleado_id = :id';
+            $stmtNomina = $this->db->prepare($sqlNomina);
+            $stmtNomina->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmtNomina->execute();
+            
             // Finalmente eliminar el empleado
             $sql = 'DELETE FROM empleados WHERE id_empleados = :id';
             $stmt = $this->db->prepare($sql);

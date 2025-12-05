@@ -27,6 +27,10 @@
             background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
             border: none;
         }
+        .reporte-card .btn-warning {
+            background: linear-gradient(90deg, #ffc107 0%, #ffeb3b 100%);
+            border: none;
+        }
         .reporte-card .btn {
             font-weight: 500;
             letter-spacing: 0.5px;
@@ -55,6 +59,24 @@
                     <p class="card-text mb-4">Descargue un resumen general de la nómina y empleados.</p>
                     <a href="/ZIGMA/public/index.php?url=Reportes/descargarGeneral&formato=pdf" class="btn btn-danger mb-2 w-100"><i class="fas fa-file-pdf me-2"></i>Descargar PDF</a>
                     <a href="/ZIGMA/public/index.php?url=Reportes/descargarGeneral&formato=excel" class="btn btn-success w-100"><i class="fas fa-file-excel me-2"></i>Descargar Excel</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-5">
+            <div class="card mb-4 reporte-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-2"><i class="fas fa-user me-2 text-success"></i>Reporte por Empleado</h5>
+                    <p class="card-text mb-4">Consulte y descargue el resumen individual de cada empleado, incluyendo devengado, deducido y horas extras.</p>
+                    <a href="/ZIGMA/public/index.php?url=Reportes/reporteEmpleado" class="btn btn-primary w-100"><i class="fas fa-user me-2"></i>Ver Reporte</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-5">
+            <div class="card mb-4 reporte-card">
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-2"><i class="fas fa-coins me-2 text-warning"></i>Reporte de Nómina</h5>
+                    <p class="card-text mb-4">Visualice el reporte general de nómina con valores, gastos detallados y estadísticas.</p>
+                    <a href="/ZIGMA/public/index.php?url=Reportes/reporteNomina" class="btn btn-warning w-100"><i class="fas fa-coins me-2"></i>Ver Reporte</a>
                 </div>
             </div>
         </div>

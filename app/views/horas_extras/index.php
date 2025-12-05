@@ -264,13 +264,6 @@
                                                        class="btn btn-zigma-secondary btn-sm" title="Agregar nuevas horas extras">
                                                         <i class="fa fa-plus"></i>
                                                     </a>
-                                                    <?php if ($emp['canDelete']): ?>
-                                                    <a href="/ZIGMA/public/index.php?url=HorasExtras/delete&id=<?= urlencode($emp_id) ?>"
-                                                       class="btn btn-danger btn-sm" title="Eliminar horas extras"
-                                                       onclick="return confirm('¿Está seguro de eliminar todas las horas extras de este empleado? Esta acción no se puede deshacer.');">
-                                                        <i class="fa fa-trash"></i>
-                                                    </a>
-                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>

@@ -163,7 +163,6 @@
                                 <option value="">Seleccione un rol</option>
                                 <option value="empleado" data-sueldo="1423000">Empleado</option>
                                 <option value="rrhh" data-sueldo="2000000">RRHH</option>
-                                <option value="admin" data-sueldo="4000000">Admin</option>
                             </select>
                         </div>
                         <div class="mb-3 form-section">

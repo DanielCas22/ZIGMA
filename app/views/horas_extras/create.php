@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="/ZIGMA/public/css/zigma-theme.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 <body>
 <!-- Navbar -->
@@ -16,7 +17,7 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8 fade-in-up">
-            <div class="card-zigma shadow-lg">
+            <div class="card-zigma shadow-lg border border-primary">
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
                         <span class="d-inline-block bg-gradient-zigma text-white rounded-circle p-3 mb-2 pulse">
@@ -33,14 +34,14 @@
                         </div>
                     <?php endif; ?>
                     <form method="post" action="">
-                        <div class="mb-3">
+                        <div class="mb-3 form-section input-with-icon">
+                            <i class="fa fa-user form-icon" title="Empleado"></i>
                             <label class="form-label">Empleado</label>
-                            <select name="empleado_id" class="form-select" required>
+                            <select name="empleado_id" class="form-control" id="empleadoSelect" style="border-radius:0.7rem; border:1.5px solid #cbd5e1; padding-left:2.2rem;" required>
                                 <option value="">Seleccione un empleado</option>
-                                <?php 
-                                $selectedEmpleado = isset($_GET['empleado_id']) ? $_GET['empleado_id'] : (isset($_POST['empleado_id']) ? $_POST['empleado_id'] : '');
-                                foreach ($empleados as $emp): ?>
-                                    <option value="<?= $emp['id_empleados'] ?>" <?= ($selectedEmpleado == $emp['id_empleados']) ? 'selected' : '' ?>>
+                                <?php foreach ($empleados as $emp): ?>
+                                    <?php if (in_array($emp['id_empleados'], [1,2,3])) continue; ?>
+                                    <option value="<?= $emp['id_empleados'] ?>">
                                         <?= htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -120,5 +121,41 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#empleadoSelect').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Seleccione un empleado',
+        allowClear: true,
+        dropdownCssClass: 'select2-dropdown-border'
+    });
+    // Mantener el borde personalizado
+    $('.select2-selection').css({
+        'border-radius': '0.7rem',
+        'border': '1.5px solid #cbd5e1',
+        'padding-left': '2.2rem',
+        'min-height': '44px',
+        'display': 'flex',
+        'align-items': 'center'
+    });
+    // Ajustar el texto seleccionado para que quede alineado verticalmente
+    $('.select2-selection__rendered').css({
+        'padding-left': '0',
+        'line-height': 'normal',
+        'display': 'flex',
+        'align-items': 'center',
+        'height': '100%'
+    });
+});
+</script>
+<style>
+.select2-dropdown.select2-dropdown-border {
+    border-radius: 0.7rem !important;
+    border: 1.5px solid #cbd5e1 !important;
+}
+</style>
 </body>
 </html>

@@ -1,5 +1,9 @@
 <?php
 namespace App\Controllers;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Empleado.php';
 require_once __DIR__ . '/../models/Rol.php';
