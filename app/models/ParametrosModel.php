@@ -112,4 +112,33 @@ class ParametrosModel extends Model {
         $this->registrarHistorial('Actualizar SMLV', $usuario_id, json_encode(['smlv'=>$smlv,'anio'=>$anio]));
         return true;
     }
+    public function getAportes() {
+        $sql = "SELECT * FROM parametros_aportes ORDER BY id DESC LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function actualizarAportes($aportes, $usuario_id) {
+        // Validación básica
+        foreach (['salud_empleador','salud_empleado','pension_empleador','pension_empleado','parafiscales','sena','icbf','prestaciones'] as $campo) {
+            if (!isset($aportes[$campo]) || $aportes[$campo] < 0 || $aportes[$campo] > 100) return false;
+        }
+        $sql = "INSERT INTO parametros_aportes (salud_empleador, salud_empleado, pension_empleador, pension_empleado, parafiscales, sena, icbf, prestaciones, actualizado_por, fecha_actualizacion)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            $aportes['salud_empleador'],
+            $aportes['salud_empleado'],
+            $aportes['pension_empleador'],
+            $aportes['pension_empleado'],
+            $aportes['parafiscales'],
+            $aportes['sena'],
+            $aportes['icbf'],
+            $aportes['prestaciones'],
+            $usuario_id
+        ]);
+        $this->registrarHistorial('Actualizar aportes y parafiscales', $usuario_id, json_encode($aportes));
+        return true;
+    }
 }

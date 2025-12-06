@@ -161,8 +161,9 @@
                             <label class="form-label">Rol o Cargo</label>
                             <select name="rol" class="form-select" required id="rolSelect" onchange="actualizarSueldo()" title="Seleccione el rol o cargo del empleado">
                                 <option value="">Seleccione un rol</option>
-                                <option value="empleado" data-sueldo="1423000">Empleado</option>
-                                <option value="rrhh" data-sueldo="2000000">RRHH</option>
+                                <?php foreach ((new \App\Models\Rol())->getAll() as $rol): ?>
+                                    <option value="<?= htmlspecialchars($rol['nombre']) ?>"><?= htmlspecialchars(ucfirst($rol['nombre'])) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="mb-3 form-section">
@@ -207,18 +208,27 @@
     </div>
 </div>
 <script>
+// Cargar salarios por rol desde PHP a JS
+var salariosPorRol = <?php echo json_encode((new \App\Models\SalarioPorRol())->getAll()); ?>;
 function autoAsignarSueldo() {
     var rolSelect = document.getElementById('rolSelect');
     var sueldoInput = document.getElementById('sueldoInput');
-    var selected = rolSelect.options[rolSelect.selectedIndex];
-    var sueldo = selected.getAttribute('data-sueldo');
-    if (sueldo) {
-        sueldoInput.value = sueldo;
+    var rol = rolSelect.value;
+    var salario = '';
+    salariosPorRol.forEach(function(item) {
+        if(item.rol === rol) salario = item.salario;
+    });
+    if (salario) {
+        sueldoInput.value = salario;
     }
 }
 function actualizarSueldo() {
     autoAsignarSueldo();
 }
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarSueldo();
+    document.getElementById('rolSelect').addEventListener('change', actualizarSueldo);
+});
 </script>
 </body>
 </html>

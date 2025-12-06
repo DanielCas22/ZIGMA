@@ -18,11 +18,11 @@ class DevengadoModel extends Model {
     }
 
     /**
-     * Calcular el auxilio de transporte para un empleado usando la lógica centralizada en Empleado
+     * Calcular el auxilio de transporte para un empleado usando el campo propio
      */
-    public function calcularAuxilioTransporte($salarioMensual) {
+    public function calcularAuxilioTransporte($empleado) {
         $empleadoModel = new Empleado();
-        return $empleadoModel->getAuxilioTransporte($salarioMensual);
+        return $empleadoModel->getAuxilioTransporteEmpleado($empleado);
     }
     
     /**
@@ -133,7 +133,7 @@ class DevengadoModel extends Model {
         }
         
         // Calcular componentes del devengado
-        $auxilioTransporte = $this->calcularAuxilioTransporte($salarioBasico);
+        $auxilioTransporte = $this->calcularAuxilioTransporte($empleado);
         $horasExtras = $this->obtenerHorasExtras($idEmpleado);
         $comisiones = $this->calcularComisiones($idEmpleado);
         $otros = $this->calcularOtrosConceptos($idEmpleado);

@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use PDO;
+
 class SalarioPorRol extends Model {
     /**
      * Mapa de salarios por defecto según jerarquía de roles
@@ -116,5 +118,15 @@ class SalarioPorRol extends Model {
         $sql = "INSERT INTO salarios_por_rol (rol, salario, descripcion) VALUES (?, ?, ?)";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$rol, floatval($salario), $descripcion]);
+    }
+    
+    /**
+     * Retorna el menor salario base por rol configurado (usado como SMLV lógico)
+     */
+    public function getMenorSalarioBase() {
+        $all = $this->getAll();
+        if (!$all || count($all) === 0) return 0;
+        $salarios = array_map(function($r) { return floatval($r['salario']); }, $all);
+        return min($salarios);
     }
 }

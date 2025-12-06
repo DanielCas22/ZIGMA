@@ -326,16 +326,34 @@ class Empleado extends Model {
     }
 
     /**
-     * Calcula el auxilio de transporte según el sueldo actual y el SMLV vigente
-     * Si el sueldo es menor o igual a dos salarios mínimos vigentes, retorna el auxilio vigente; si es mayor, retorna 0.
+     * Calcula el auxilio de transporte según el sueldo actual y el menor salario base por rol (SMLV lógico)
+     * Si el sueldo es menor o igual a dos veces ese valor, retorna el auxilio vigente; si es mayor, retorna 0.
      */
     public function getAuxilioTransporte($sueldo_actual) {
+        require_once __DIR__ . '/SalarioPorRol.php';
+        $salarioPorRol = new SalarioPorRol();
+        $smlv = $salarioPorRol->getMenorSalarioBase();
         require_once __DIR__ . '/ParametrosModel.php';
         $paramModel = new ParametrosModel();
         $parametros = $paramModel->getParametrosVigentes();
-        $salario_minimo = isset($parametros['smlv']) ? floatval($parametros['smlv']) : 1423000;
         $auxilio_transporte = isset($parametros['auxilio_transporte']) ? floatval($parametros['auxilio_transporte']) : 200000;
-        if ($sueldo_actual <= 2 * $salario_minimo) {
+        if ($sueldo_actual <= 2 * $smlv) {
+            return $auxilio_transporte;
+        }
+        return 0;
+    }
+
+    /**
+     * Devuelve el auxilio de transporte del empleado según su campo propio,
+     * si cumple la condición de salario, o 0 si no aplica.
+     */
+    public function getAuxilioTransporteEmpleado($empleado) {
+        require_once __DIR__ . '/SalarioPorRol.php';
+        $salarioPorRol = new SalarioPorRol();
+        $smlv = $salarioPorRol->getMenorSalarioBase();
+        $sueldo_actual = isset($empleado['sueldo_actual']) ? floatval($empleado['sueldo_actual']) : 0;
+        $auxilio_transporte = isset($empleado['auxilio_transporte']) ? floatval($empleado['auxilio_transporte']) : 0;
+        if ($sueldo_actual <= 2 * $smlv) {
             return $auxilio_transporte;
         }
         return 0;
@@ -359,5 +377,11 @@ class Empleado extends Model {
         $sql = "UPDATE empleados SET sueldo_actual = ?";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$nuevoSMLV]);
+    }
+
+    public function actualizarAuxilioTransporteTodos($nuevoAuxilio) {
+        $sql = "UPDATE empleados SET auxilio_transporte = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$nuevoAuxilio]);
     }
 }

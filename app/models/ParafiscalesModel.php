@@ -243,5 +243,19 @@ class ParafiscalesModel extends Model {
         $stmt->execute([$limite]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    /**
+     * Obtener los porcentajes de SENA, ICBF y Caja desde la base de datos de parámetros
+     */
+    private function getPorcentajesParafiscales() {
+        require_once __DIR__ . '/ParametrosModel.php';
+        $paramModel = new ParametrosModel();
+        $aportes = $paramModel->getAportes();
+        return [
+            'sena' => isset($aportes['sena']) ? floatval($aportes['sena']) : 0,
+            'icbf' => isset($aportes['icbf']) ? floatval($aportes['icbf']) : 0,
+            'caja' => isset($aportes['parafiscales']) ? floatval($aportes['parafiscales']) : 0
+        ];
+    }
 }
 ?>
