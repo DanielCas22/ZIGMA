@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use PDO;
+use InvalidArgumentException;
 
 class TotalDeducidoModel extends Model {
     
@@ -230,16 +231,9 @@ class TotalDeducidoModel extends Model {
     public function calcularTotalDeducidoTodosEmpleados() {
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
-        // Filtrar empleados especiales (placeholders)
+        // Filtrar empleados del sistema (IDs 1, 2, 3 son empleados del sistema)
         $empleados = array_filter($empleados, function($emp) {
-            $nombre = trim(mb_strtolower($emp['nombre']));
-            $apellido = trim(mb_strtolower($emp['apellido']));
-            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
-                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
-                ($nombre === 'empleado' && $apellido === 'general')) {
-                return false;
-            }
-            return true;
+            return !in_array($emp['id_empleados'], [1, 2, 3]);
         });
         
         $resultados = [];
@@ -356,14 +350,25 @@ class TotalDeducidoModel extends Model {
     
     /**
      * Retorna el total deducido por un empleado
+     * Calcula basado en conceptos adicionales deducibles
      */
     public function getTotalByEmpleado($empleado_id) {
-        $sql = 'SELECT SUM(td.valor) as total FROM total_deducido td
-                INNER JOIN nomina n ON n.total_deducido_id = td.id_total_deducido
-                WHERE n.empleado_id = ?';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$empleado_id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row && isset($row['total']) ? floatval($row['total']) : 0;
+        try {
+            // Obtener conceptos adicionales (deducciones) del empleado
+            $conceptosModel = new ConceptosAdicionalesDeduciblesModel();
+            $conceptos = $conceptosModel->obtenerConceptosPorEmpleado($empleado_id);
+            
+            $total = 0;
+            if (is_array($conceptos)) {
+                foreach ($conceptos as $concepto) {
+                    $total += floatval($concepto['valor'] ?? 0);
+                }
+            }
+            
+            return $total;
+        } catch (\Exception $e) {
+            error_log("Error calculando total deducido para empleado $empleado_id: " . $e->getMessage());
+            return 0;
+        }
     }
 }

@@ -145,6 +145,17 @@ class RolePermissions {
         try {
             $db = require __DIR__ . '/../../config/database.php';
             
+            // Verificar que existan empleados
+            $checkSql = "SELECT COUNT(*) FROM empleados";
+            $checkStmt = $db->prepare($checkSql);
+            $checkStmt->execute();
+            $employeeCount = $checkStmt->fetchColumn();
+            
+            // Si no hay empleados, no mostrar alertas
+            if ($employeeCount == 0) {
+                return 0;
+            }
+            
             $sql = "SELECT COUNT(*) FROM horas_extras WHERE estado = 'pendiente'";
             $stmt = $db->prepare($sql);
             $stmt->execute();
@@ -168,16 +179,43 @@ class RolePermissions {
         try {
             $db = require __DIR__ . '/../../config/database.php';
             
+            // Verificar que existan empleados
+            $checkSql = "SELECT COUNT(*) FROM empleados";
+            $checkStmt = $db->prepare($checkSql);
+            $checkStmt->execute();
+            $employeeCount = $checkStmt->fetchColumn();
+            
+            // Si no hay empleados, no retornar datos
+            if ($employeeCount == 0) {
+                return [];
+            }
+            
             $limit = (int)$limit; // Asegura que sea un entero seguro
-            $sql = "SELECT he.*, e.nombre, e.apellido 
+            $sql = "SELECT DISTINCT he.*, u.username as nombre, e.apellido 
                     FROM horas_extras he 
                     INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
+                    LEFT JOIN user u ON e.id_empleados = u.empleado_id
                     WHERE he.estado = 'pendiente' 
                     ORDER BY he.fecha_creacion DESC 
                     LIMIT $limit";
             $stmt = $db->prepare($sql);
             $stmt->execute();
-            return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            
+            // Si no hay datos en user, usar los nombres de empleados
+            if (empty($result)) {
+                $sql = "SELECT DISTINCT he.*, e.nombre, e.apellido 
+                        FROM horas_extras he 
+                        INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
+                        WHERE he.estado = 'pendiente' 
+                        ORDER BY he.fecha_creacion DESC 
+                        LIMIT $limit";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+                $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+            
+            return $result;
         } catch (Exception $e) {
             return [];
         }

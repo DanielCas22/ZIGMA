@@ -10,11 +10,13 @@ class AdminController extends Controller {
             exit;
         }
         $paramModel = $this->model('ParametrosModel');
+        $parametrosGenerales = $this->model('ParametrosGenerales')->getAll();
         $parametros = $paramModel->getParametrosLegales();
         $rangosSolidaridad = $paramModel->getRangosFondoSolidaridad();
         $tablaRetencion = $paramModel->getTablaRetencionFuente();
         $historial = $paramModel->getHistorialCambios();
         $this->view('admin/parametros', [
+            'parametrosGenerales' => $parametrosGenerales,
             'parametros' => $parametros,
             'rangosSolidaridad' => $rangosSolidaridad,
             'tablaRetencion' => $tablaRetencion,
@@ -25,6 +27,26 @@ class AdminController extends Controller {
     // El método guardarParametrosLegales ya no permite editar el SMLV, solo muestra error y redirige
     public function guardarParametrosLegales() {
         $_SESSION['error'] = 'La edición del salario mínimo no está permitida.';
+        header('Location: /ZIGMA/public/index.php?url=Admin/parametros');
+        exit;
+    }
+
+    public function guardarParametrosGenerales() {
+        if (!isset($_SESSION['user']) || $_SESSION['user']['rol'] !== 'admin') {
+            header('Location: /ZIGMA/public/index.php?url=Dashboard');
+            exit;
+        }
+        $paramModel = $this->model('ParametrosGenerales');
+        $result = $paramModel->update([
+            'uvt' => $_POST['uvt'] ?? 0,
+            'smlv' => $_POST['smlv'] ?? 0,
+            'periodo_pago' => $_POST['periodo_pago'] ?? 'mensual',
+            'formato_divisa' => $_POST['formato_divisa'] ?? '$',
+            'formato_decimales' => $_POST['formato_decimales'] ?? 2,
+            'formato_miles' => $_POST['formato_miles'] ?? '.',
+            'ano_vigencia' => $_POST['ano_vigencia'] ?? date('Y')
+        ]);
+        $_SESSION[$result ? 'success' : 'error'] = $result ? 'Parámetros generales actualizados correctamente.' : 'Error al actualizar parámetros.';
         header('Location: /ZIGMA/public/index.php?url=Admin/parametros');
         exit;
     }

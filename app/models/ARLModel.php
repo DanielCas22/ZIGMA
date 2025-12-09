@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use PDO;
+use InvalidArgumentException;
 
 /**
  * Modelo para cálculos de ARL (Administradora de Riesgos Laborales)

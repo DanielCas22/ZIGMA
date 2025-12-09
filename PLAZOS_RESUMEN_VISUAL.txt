@@ -1,0 +1,369 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║            ✅ FUNCIONALIDAD DE PLAZOS - IMPLEMENTACIÓN COMPLETA               ║
+║                                                                              ║
+║                    Conceptos Adicionales con Distribución Temporal            ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 ¿QUÉ SE IMPLEMENTÓ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Se agregó la capacidad de distribuir conceptos adicionales (devengos y descuentos) 
+en múltiples períodos (quincenas o meses), permitiendo al administrador:
+
+  • Adicionar un concepto por $200,000 y distribuirlo en 2 quincenas
+  • Adicionar un descuento por $600,000 y pagarlo en 3 meses
+  • Ver la distribución automática con vista previa en tiempo real
+  • Editar y administrar los plazos de forma intuitiva
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 MÓDULOS AFECTADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TOTAL DEVENGADO (Otros Conceptos)                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Cuando el admin abre "Otros Conceptos" encuentra:                          │
+│                                                                              │
+│  [FORMULARIO MEJORADO]                                                       │
+│  ├─ Concepto: ____________________                                          │
+│  ├─ Valor: $ ____________________                                           │
+│  ├─ Descripción: ____________________________________                      │
+│  │                                                                          │
+│  └─ 📅 CONFIGURACIÓN DE PLAZOS                                             │
+│     ├─ ☐ ¿Distribuir en plazos?                                           │
+│     ├─ Tipo: [Quincena ▼] o [Mes ▼]                                       │
+│     ├─ Cantidad: [2 - 12] períodos                                         │
+│     ├─ Distribución: $XXX,XXX por período (CÁLCULO EN VIVO)               │
+│     └─ 💡 Ejemplo: 2 quincenas de $100,000 cada una                       │
+│                                                                              │
+│  [BOTÓN] Agregar Concepto (ahora con soporte a plazos)                     │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TOTAL DEDUCIDO (Otros Descuentos)                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  IDÉNTICO a Total Devengado pero para descuentos/deducciones                │
+│                                                                              │
+│  Permite distribuir préstamos, castigos, etc. en múltiples períodos         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🗄️ BASE DE DATOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TABLA NUEVA: conceptos_adicionales_plazos
+└─ Almacena cada período de pago/descuento
+
+    id (PK)          → Identificador único
+    concepto_id (FK) → Referencia al concepto
+    periodo_numero   → 1, 2, 3... (número secuencial)
+    valor_periodo    → Monto a pagar en ese período
+    tipo_periodo     → 'quincena' o 'mes'
+    estado           → 'pendiente', 'pagado', 'cancelado'
+    fecha_creacion   → Cuándo se creó
+    fecha_actualizacion → Última actualización
+
+COLUMNAS NUEVAS: conceptos_adicionales_prestaciones
+    total_plazos     → Cantidad de períodos (default: 1)
+    tipo_plazo       → 'quincena' o 'mes'
+    tiene_plazo      → TRUE/FALSE (flag de activación)
+
+EJEMPLO DE DATOS:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ conceptos_adicionales_prestaciones                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ id=5 | empleado_id=4 | concepto='Bonificación'                              │
+│      | valor=300000 | tiene_plazo=TRUE | total_plazos=3                    │
+│      | tipo_plazo='quincena'                                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ conceptos_adicionales_plazos                                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ id=1 | concepto_id=5 | periodo_numero=1 | valor_periodo=100000             │
+│      | tipo_periodo='quincena' | estado='pendiente'                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ id=2 | concepto_id=5 | periodo_numero=2 | valor_periodo=100000             │
+│      | tipo_periodo='quincena' | estado='pendiente'                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ id=3 | concepto_id=5 | periodo_numero=3 | valor_periodo=100000             │
+│      | tipo_periodo='quincena' | estado='pendiente'                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💻 MODELO - NUEVOS MÉTODOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ConceptosAdicionalesModel.php
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ agregarConcepto($emp_id, $concepto, $desc, $valor, $usuario,               │
+│                 $total_plazos=1, $tipo_plazo='quincena')                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Crear concepto con soporte a plazos                                         │
+│ Si $total_plazos > 1, automáticamente crea los registros de plazo           │
+│                                                                              │
+│ EJEMPLO:                                                                     │
+│ $modelo->agregarConcepto(4, 'Bonificación', 'Bono Q4', 300000,            │
+│                          'admin', 3, 'quincena');                           │
+│ → Crea concepto + 3 registros de plazo de $100,000 cada uno                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ crearPlazos($concepto_id, $valor_total, $total_plazos, $tipo_plazo)        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Crea N registros de plazo distribuyendo equitativamente el valor            │
+│                                                                              │
+│ EJEMPLO:                                                                     │
+│ $modelo->crearPlazos(5, 600000, 2, 'mes');                                 │
+│ → Crea 2 plazos de $300,000 cada uno                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ obtenerPlazos($concepto_id)                                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Obtiene todos los períodos de un concepto                                   │
+│                                                                              │
+│ RETORNA:                                                                     │
+│ Array de plazos con id, periodo_numero, valor_periodo, estado, etc.        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ obtenerConceptoConPlazos($concepto_id)                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Obtiene un concepto con su array 'plazos' incluido                          │
+│                                                                              │
+│ RETORNA:                                                                     │
+│ $concepto = [                                                               │
+│   'id' => 5,                                                                │
+│   'concepto' => 'Bonificación',                                             │
+│   'valor' => 300000,                                                        │
+│   'tiene_plazo' => true,                                                    │
+│   'total_plazos' => 3,                                                      │
+│   'plazos' => [                                                             │
+│     ['id'=>1, 'periodo_numero'=>1, 'valor_periodo'=>100000, ...],          │
+│     ['id'=>2, 'periodo_numero'=>2, 'valor_periodo'=>100000, ...],          │
+│     ['id'=>3, 'periodo_numero'=>3, 'valor_periodo'=>100000, ...]           │
+│   ]                                                                          │
+│ ]                                                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ obtenerProximoPlazo($concepto_id)                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Obtiene el próximo plazo pendiente de pagar                                 │
+│                                                                              │
+│ RETORNA:                                                                     │
+│ Array con el plazo pendiente más antiguo, o NULL si todos están pagados    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ marcarPlazoPagado($plazo_id)                                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Marca un plazo como 'pagado'                                                │
+│                                                                              │
+│ EJEMPLO:                                                                     │
+│ $modelo->marcarPlazoPagado(1);  // Marca el período 1 como pagado          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🖥️ INTERFAZ DE USUARIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TOTAL DEVENGADO - Tabla de Conceptos:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concepto │ Valor Total │ Plazos      │ Descripción          │ Acciones      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Bonificación │ $300,000 │ 3x quincena │ Bono por desempeño │ [🗑] Eliminar │
+│ Comisión │ $150,000    │ Sin plazo   │ Venta especial     │ [🗑] Eliminar │
+│ Auxilio  │ $500,000    │ 5x quincena │ Apoyo emergencia   │ [🗑] Eliminar │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+TOTAL DEDUCIDO - Tabla de Conceptos:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Concepto │ Valor Total │ Plazos      │ Descripción      │ Acciones        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Préstamo │ $2,000,000  │ 12x mes     │ Crédito personal │ [🗑] Eliminar   │
+│ Descuento│ $300,000    │ 3x quincena │ Tardanza         │ [🗑] Eliminar   │
+│ Retención│ $500,000    │ Sin plazo   │ Ret. fuente      │ [🗑] Eliminar   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+CÁLCULO EN TIEMPO REAL:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Valor ingresado: $600,000                                                   │
+│ Tipo de período: Quincena                                                   │
+│ Cantidad de plazos: 3                                                       │
+│                                                                              │
+│ ➜ Distribución: $200,000 por período                                        │
+│                                                                              │
+│ Ejemplo:                                                                     │
+│ • Período 1 (15 días): $200,000 [Pendiente]                                │
+│ • Período 2 (15 días): $200,000 [Pendiente]                                │
+│ • Período 3 (15 días): $200,000 [Pendiente]                                │
+│                                                                              │
+│ TOTAL A DISTRIBUIR: $600,000                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 ARCHIVOS CREADOS/MODIFICADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CREADOS:
+  ✅ /scripts/data/agregar_plazos_conceptos.sql
+     └─ Script SQL para crear tablas y columnas
+  
+  ✅ /bin/crear_tabla_plazos.php
+     └─ Ejecutor del script SQL
+  
+  ✅ /bin/verificar_plazos.php
+     └─ Script de verificación de instalación
+  
+  ✅ /scripts/data/PLAZOS_CONCEPTOS_README.md
+     └─ Documentación técnica detallada
+  
+  ✅ /IMPLEMENTACION_PLAZOS.md
+     └─ Resumen completo de cambios
+
+MODIFICADOS:
+  ✅ /app/models/ConceptosAdicionalesModel.php
+     └─ +150 líneas de código para gestión de plazos
+  
+  ✅ /app/views/devengado/index.php
+     └─ Nuevo formulario con sección de plazos + JavaScript
+  
+  ✅ /app/views/total_deducido/index.php
+     └─ Nuevo formulario con sección de plazos + JavaScript
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 CÓMO USAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASO 1: Acceder al módulo
+  • Total Devengado → Hacer clic en celda "Otros"
+  • Total Deducido → Hacer clic en celda "Otros Descuentos"
+
+PASO 2: Llenar formulario
+  ├─ Concepto: Nombre del beneficio/descuento
+  ├─ Valor: Monto total en pesos
+  └─ Descripción: Detalles adicionales
+
+PASO 3: Configurar plazos (OPCIONAL)
+  ├─ ☐ Marcar "¿Distribuir en plazos?"
+  ├─ Seleccionar tipo: Quincena o Mes
+  ├─ Definir cantidad: 2 a 12 períodos
+  └─ Observar cálculo automático
+
+PASO 4: Guardar
+  └─ Click en "Agregar Concepto" o "Agregar Descuento"
+
+PASO 5: Verificar
+  ├─ Ver en tabla con badge de plazos
+  ├─ Ejemplo: "3x quincena"
+  └─ Eliminar si es necesario
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ EJEMPLOS DE USO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EJEMPLO 1: Bonificación de Fin de Año
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DEVENGADO                                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Concepto: Bonificación Fin de Año                                           │
+│ Valor: $1,000,000                                                           │
+│ Descripción: Bono por cumplimiento de metas                                 │
+│                                                                              │
+│ Plazos:                                                                      │
+│   ☑ ¿Distribuir en plazos?                                                 │
+│   Tipo: [Quincena] ← Dos semanas cada pago                                  │
+│   Cantidad: [4] períodos                                                    │
+│                                                                              │
+│ Distribución: $250,000 x 4 quincenas                                        │
+│                                                                              │
+│ Resultado:                                                                   │
+│ • Quincena 1: $250,000 (Semana 1-2)                                         │
+│ • Quincena 2: $250,000 (Semana 3-4)                                         │
+│ • Quincena 3: $250,000 (Semana 5-6)                                         │
+│ • Quincena 4: $250,000 (Semana 7-8)                                         │
+│ TOTAL: $1,000,000                                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+EJEMPLO 2: Préstamo a Empleado
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DEDUCIDO                                                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Concepto: Préstamo Personal                                                 │
+│ Valor: $5,000,000                                                           │
+│ Descripción: Préstamo otorgado para vivienda                                │
+│                                                                              │
+│ Plazos:                                                                      │
+│   ☑ ¿Distribuir en plazos?                                                 │
+│   Tipo: [Mes] ← Un mes cada cuota                                           │
+│   Cantidad: [12] períodos                                                   │
+│                                                                              │
+│ Distribución: $416,667 x 12 meses (aprox)                                   │
+│                                                                              │
+│ Resultado:                                                                   │
+│ • Mes 1-12: ~$416,667 (Descuento mensual)                                   │
+│ TOTAL: ~$5,000,000 en cuota de 1 año                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+EJEMPLO 3: Concepto Sin Plazo
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DEVENGADO O DEDUCIDO                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ Concepto: Auxilio de Transporte                                             │
+│ Valor: $100,000                                                             │
+│ Descripción: Apoyo para movilidad                                           │
+│                                                                              │
+│ Plazos:                                                                      │
+│   ☐ ¿Distribuir en plazos?  ← DESACTIVADO (pago de una sola vez)           │
+│                                                                              │
+│ Resultado:                                                                   │
+│ • Pago único: $100,000 (Sin plazo)                                          │
+│ TOTAL: $100,000 en periodo actual                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 VERIFICACIÓN DE INSTALACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Para verificar que la instalación fue exitosa:
+
+  php /ZIGMA/bin/verificar_plazos.php
+
+Deberías ver:
+  ✅ Tabla conceptos_adicionales_plazos creada
+  ✅ Columna total_plazos agregada
+  ✅ Columna tipo_plazo agregada
+  ✅ Columna tiene_plazo agregada
+  📊 Registros en conceptos_adicionales_plazos: 0
+  ✅ IMPLEMENTACIÓN COMPLETADA EXITOSAMENTE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 PRÓXIMAS MEJORAS (OPCIONALES)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [ ] Integración automática con Nómina (distribuye en nóminas futuras)
+  [ ] Reporte de plazos pendientes por empleado
+  [ ] Edición de plazos (solo admin)
+  [ ] Historial de plazos pagados con fechas
+  [ ] Exportación a Excel con desglose de plazos
+  [ ] Notificaciones de vencimiento próximo
+  [ ] Cancelación anticipada de plazos
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ FUNCIONALIDAD LISTA PARA USAR ✨
+
+Prueba agregando un concepto con plazos y verás la distribución automática.
+
+Fecha: 8 de Diciembre de 2025
+Estado: ✅ COMPLETADO Y FUNCIONAL
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use PDO;
+use InvalidArgumentException;
 
 class NominaModel extends Model {
     
@@ -199,14 +200,7 @@ class NominaModel extends Model {
     
     private function filtrarEmpleadosEspeciales($empleados) {
         return array_filter($empleados, function($emp) {
-            $nombre = trim(mb_strtolower($emp['nombre']));
-            $apellido = trim(mb_strtolower($emp['apellido']));
-            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
-                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
-                ($nombre === 'empleado' && $apellido === 'general')) {
-                return false;
-            }
-            return true;
+            return !in_array($emp['id_empleados'], [1, 2, 3]);
         });
     }
 }

@@ -77,9 +77,17 @@ use App\Models\RolePermissions;
             transform: scale(1.1);
         }
         
-        .btn-outline-light:hover {
-            background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%);
-            border-color: #ec4899;
+        .btn-zigma-fluor {
+          background: none;
+          color: #0ff6ff !important;
+          border: 2px solid #0ff6ff !important;
+          transition: all 0.3s ease;
+        }
+        .btn-zigma-fluor:hover, .btn-zigma-fluor:focus {
+          background: linear-gradient(135deg, #0ff6ff 0%, #1e3a8a 100%);
+          color: #fff !important;
+          border-color: #0ff6ff !important;
+          box-shadow: 0 6px 20px rgba(15, 246, 255, 0.3);
         }
         
         .card {
@@ -381,9 +389,9 @@ use App\Models\RolePermissions;
       <div class="row g-4 mt-2">
         <?php
         $cards = [
-          ["Horas Extras", "primary", "bi-clock-history", "/ZIGMA/public/index.php?url=HorasExtras", "Ir", null],
-          ["Empleados", "success", "bi-people", "/ZIGMA/public/index.php?url=Empleado/index", "Ir", null],
-          ["Prestaciones Sociales", "warning", "bi-gift", "/ZIGMA/public/index.php?url=PrestacionesSociales", "Ir", null],
+          ["Horas Extras", "primary", "bi-clock-history", "/ZIGMA/public/index.php?url=HorasExtras", "Ir", "Registra y gestiona las horas extras trabajadas por los empleados."],
+          ["Empleados", "success", "bi-people", "/ZIGMA/public/index.php?url=Empleado/index", "Ir", "Crea, modifica y consulta el información de los empleados registrados."],
+          ["Prestaciones Sociales", "warning", "bi-gift", "/ZIGMA/public/index.php?url=PrestacionesSociales", "Ir", "Calcula cesantías, prima, vacaciones y otras prestaciones legales."],
           ["Seguridad Social", "info", "bi-shield-check", "/ZIGMA/public/index.php?url=SeguridadSocial", "Ir", "Salud, Pensión y ARL"],
           ["Total Devengado", "danger", "bi-cash-stack", "/ZIGMA/public/index.php?url=Devengado", "Ir", "Sueldos, Horas Extras, Comisiones"],
           ["Total Deducido", "danger", "bi-dash-circle", "/ZIGMA/public/index.php?url=TotalDeducido", "Ir", "Salud, Pensión, Fondo, Retención"],
@@ -407,7 +415,7 @@ use App\Models\RolePermissions;
           if (!empty($cards[$i][5])) {
             echo '<p class="card-text small">' . $cards[$i][5] . '</p>';
           }
-          echo '<a href="' . $cards[$i][3] . '" class="btn btn-outline-' . $cards[$i][1] . ' fw-bold">' . $cards[$i][4] . '</a>';
+          echo '<a href="' . $cards[$i][3] . '" class="btn btn-zigma-fluor fw-bold">' . $cards[$i][4] . '</a>';
           echo '</div></div></div>';
           if ($i % 3 === 2 || $i === count($cards) - 1) {
             echo '</div>';

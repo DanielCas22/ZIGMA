@@ -353,6 +353,48 @@
                                           placeholder="Descripción detallada del concepto adicional"></textarea>
                             </div>
                         </div>
+                        
+                        <!-- Sección de plazos -->
+                        <div class="row mt-3 p-3 bg-light rounded border border-info">
+                            <div class="col-12">
+                                <h6 class="mb-3"><i class="fas fa-calendar-alt me-2 text-info"></i>Configuración de Plazos</h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tieneplazo" class="form-label">¿Distribuir en plazos?</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="tieneplazo" name="tiene_plazo" value="1">
+                                    <label class="form-check-label" for="tieneplazo">
+                                        Sí, distribuir en múltiples períodos
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tipoplazo" class="form-label">Tipo de período</label>
+                                <select class="form-select" id="tipoplazo" name="tipo_plazo" disabled>
+                                    <option value="quincena">Quincena (15 días)</option>
+                                    <option value="mes">Mes (30 días)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label for="totalplazos" class="form-label">Cantidad de plazos</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="totalplazos" name="total_plazos" 
+                                           min="2" max="12" value="2" disabled>
+                                    <span class="input-group-text">períodos</span>
+                                </div>
+                                <small class="text-muted d-block mt-1">Distribución: <span id="distribucionplazo">$0.00 por período</span></small>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label for="totalplazos" class="form-label">&nbsp;</label>
+                                <div id="resumenplazos" class="alert alert-info d-none mb-0">
+                                    <small>
+                                        <strong>Ejemplo:</strong> Si el valor es <strong id="valoresEmpleado">$0</strong> distribuido en 
+                                        <strong id="periodosEmpleado">2</strong> <strong id="tipoEmpleado">quincenas</strong>, cada período será de <strong id="montoEmpleado">$0</strong>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="row mt-3">
                             <div class="col-12">
                                 <button type="submit" class="btn btn-success">
@@ -393,6 +435,49 @@
         // Modal de conceptos adicionales
         const modalConceptos = document.getElementById('modalConceptos');
         const formConcepto = document.getElementById('formConcepto');
+        const checkTieneplazo = document.getElementById('tieneplazo');
+        const selectTipoplazo = document.getElementById('tipoplazo');
+        const inputTotalplazos = document.getElementById('totalplazos');
+        const inputValor = document.getElementById('valor');
+        
+        // Manejar cambios en la opción de plazos
+        checkTieneplazo.addEventListener('change', function() {
+            selectTipoplazo.disabled = !this.checked;
+            inputTotalplazos.disabled = !this.checked;
+            document.getElementById('resumenplazos').classList.toggle('d-none', !this.checked);
+            actualizarDistribucionplazos();
+        });
+        
+        // Manejar cambios en tipo de plazo
+        selectTipoplazo.addEventListener('change', actualizarDistribucionplazos);
+        
+        // Manejar cambios en cantidad de plazos
+        inputTotalplazos.addEventListener('change', actualizarDistribucionplazos);
+        
+        // Manejar cambios en valor
+        inputValor.addEventListener('input', actualizarDistribucionplazos);
+        
+        function actualizarDistribucionplazos() {
+            const valor = parseFloat(inputValor.value) || 0;
+            const totalplazos = parseInt(inputTotalplazos.value) || 1;
+            const tipo = selectTipoplazo.value;
+            const tieneplazos = checkTieneplazo.checked;
+            
+            const montoporperiodo = tieneplazos && totalplazos > 0 ? (valor / totalplazos) : valor;
+            const tipoTexto = tipo === 'quincena' ? 'quincena(s)' : 'mes(es)';
+            
+            // Actualizar elemento de distribución
+            document.getElementById('distribucionplazo').textContent = 
+                `$${new Intl.NumberFormat('es-CO', {minimumFractionDigits: 2}).format(montoporperiodo)} por período`;
+            
+            // Actualizar resumen
+            document.getElementById('valoresEmpleado').textContent = 
+                `$${new Intl.NumberFormat('es-CO').format(valor)}`;
+            document.getElementById('periodosEmpleado').textContent = totalplazos;
+            document.getElementById('tipoEmpleado').textContent = tipoTexto;
+            document.getElementById('montoEmpleado').textContent = 
+                `$${new Intl.NumberFormat('es-CO', {minimumFractionDigits: 2}).format(montoporperiodo)}`;
+        }
         
         // Event listeners para las celdas de "Otros"
         document.querySelectorAll('.otros-concepto').forEach(function(celda) {
@@ -404,6 +489,13 @@
                 document.getElementById('empleadoId').textContent = empleadoId;
                 document.getElementById('empleadoNombre').textContent = empleadoNombre;
                 document.getElementById('inputEmpleadoId').value = empleadoId;
+                
+                // Limpiar y resetear formulario de plazos
+                formConcepto.reset();
+                checkTieneplazo.checked = false;
+                selectTipoplazo.disabled = true;
+                inputTotalplazos.disabled = true;
+                document.getElementById('resumenplazos').classList.add('d-none');
                 
                 // Cargar conceptos existentes
                 cargarConceptosEmpleado(empleadoId);
@@ -418,6 +510,12 @@
             e.preventDefault();
             
             const formData = new FormData(formConcepto);
+            
+            // Agregar parámetros de plazo
+            if (!checkTieneplazo.checked) {
+                formData.set('total_plazos', '1');
+                formData.set('tipo_plazo', 'quincena');
+            }
             
             fetch('?url=Devengado/agregarConcepto', {
                 method: 'POST',
@@ -457,13 +555,18 @@
                 
                 if (data.success && data.conceptos.length > 0) {
                     let html = '<div class="table-responsive"><table class="table table-sm">';
-                    html += '<thead><tr><th>Concepto</th><th>Valor</th><th>Descripción</th><th>Acciones</th></tr></thead>';
+                    html += '<thead><tr><th>Concepto</th><th>Valor Total</th><th>Plazos</th><th>Descripción</th><th>Acciones</th></tr></thead>';
                     html += '<tbody>';
                     
                     data.conceptos.forEach(concepto => {
+                        const plazoInfo = concepto.tiene_plazo 
+                            ? `${concepto.total_plazos}x ${concepto.tipo_plazo}`
+                            : 'Sin plazo';
+                        
                         html += `<tr>
                             <td><strong>${concepto.concepto}</strong></td>
                             <td class="currency">$${new Intl.NumberFormat('es-CO').format(concepto.valor)}</td>
+                            <td><span class="badge bg-info">${plazoInfo}</span></td>
                             <td><small>${concepto.descripcion || 'Sin descripción'}</small></td>
                             <td>
                                 <button class="btn btn-sm btn-danger" onclick="eliminarConcepto(${concepto.id})">

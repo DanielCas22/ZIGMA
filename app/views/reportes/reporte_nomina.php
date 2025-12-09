@@ -53,12 +53,17 @@
         </table>
     </div>
     <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
+            <a href="/ZIGMA/public/index.php?url=Dashboard/index" class="btn btn-zigma-fluor w-100 mb-2">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+            </a>
+        </div>
+        <div class="col-md-4">
             <a href="/ZIGMA/public/index.php?url=Reportes/descargarNomina&formato=pdf" class="btn btn-danger w-100 mb-2">
                 <i class="fas fa-file-pdf me-2"></i>Descargar PDF
             </a>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <a href="/ZIGMA/public/index.php?url=Reportes/descargarNomina&formato=excel" class="btn btn-success w-100">
                 <i class="fas fa-file-excel me-2"></i>Descargar Excel
             </a>

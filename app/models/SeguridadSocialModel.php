@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use InvalidArgumentException;
+
 require_once __DIR__ . '/Model.php';
 require_once __DIR__ . '/ARLModel.php';
 require_once __DIR__ . '/DevengadoModel.php';
@@ -468,14 +470,8 @@ class SeguridadSocialModel extends Model {
     
     private function filtrarEmpleadosEspeciales($empleados) {
         return array_filter($empleados, function($emp) {
-            $nombre = trim(mb_strtolower($emp['nombre']));
-            $apellido = trim(mb_strtolower($emp['apellido']));
-            if (($nombre === 'administrador' && $apellido === 'del sistema') ||
-                ($nombre === 'coordinador' && $apellido === 'rrhh') ||
-                ($nombre === 'empleado' && $apellido === 'general')) {
-                return false;
-            }
-            return true;
+            // Filtrar empleados del sistema por ID (IDs 1, 2, 3)
+            return !in_array($emp['id_empleados'], [1, 2, 3]);
         });
     }
 }

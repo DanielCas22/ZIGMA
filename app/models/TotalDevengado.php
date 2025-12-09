@@ -17,14 +17,25 @@ class TotalDevengado extends Model {
 
     /**
      * Retorna el total devengado por un empleado
+     * Calcula basado en conceptos adicionales no deducibles
      */
     public function getTotalByEmpleado($empleado_id) {
-        $sql = 'SELECT SUM(td.total) as total FROM total_devengado td
-                INNER JOIN nomina n ON n.total_devengado_id = td.id_total_devengado
-                WHERE n.empleado_id = ?';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$empleado_id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row && isset($row['total']) ? floatval($row['total']) : 0;
+        try {
+            // Obtener conceptos adicionales (devengos) del empleado
+            $conceptosModel = new ConceptosAdicionalesModel();
+            $conceptos = $conceptosModel->obtenerConceptosPorEmpleado($empleado_id);
+            
+            $total = 0;
+            if (is_array($conceptos)) {
+                foreach ($conceptos as $concepto) {
+                    $total += floatval($concepto['valor'] ?? 0);
+                }
+            }
+            
+            return $total;
+        } catch (\Exception $e) {
+            error_log("Error calculando total devengado para empleado $empleado_id: " . $e->getMessage());
+            return 0;
+        }
     }
 }

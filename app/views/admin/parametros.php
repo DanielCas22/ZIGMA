@@ -15,7 +15,8 @@
         <div class="alert alert-danger"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>
     <?php endif; ?>
     <ul class="nav nav-tabs" id="paramTabs" role="tablist">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#legales">Legales</button></li>
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#generales">Parámetros Generales</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#legales">Legales</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#solidaridad">Fondo Solidaridad</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#retencion">Retención Fuente</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#historial">Historial</button></li>
@@ -23,7 +24,75 @@
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#aportes">Aportes y Parafiscales</button></li>
     </ul>
     <div class="tab-content mt-3">
-        <div class="tab-pane fade show active" id="legales">
+        <div class="tab-pane fade show active" id="generales">
+            <form method="post" action="/ZIGMA/public/index.php?url=Admin/guardarParametrosGenerales" onsubmit="return confirm('¿Guardar cambios en parámetros generales?');">
+                <h5>Parámetros Generales del Sistema</h5>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label>UVT (Unidad de Valor Tributario)</label>
+                        <input type="number" step="0.01" name="uvt" class="form-control" required min="0" value="<?= htmlspecialchars($parametrosGenerales['uvt'] ?? 45286.00) ?>" placeholder="Ej: 45286.00">
+                        <small class="form-text text-muted">Valor tributario actual para cálculo de retención</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label>SMLV (Salario Mínimo Legal Vigente)</label>
+                        <input type="number" step="1" name="smlv" class="form-control" required min="0" value="<?= htmlspecialchars($parametrosGenerales['smlv'] ?? 1300000) ?>" placeholder="Ej: 1300000">
+                        <small class="form-text text-muted">Salario mínimo legal vigente en COP</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label>Año de Vigencia</label>
+                        <input type="number" name="ano_vigencia" class="form-control" required min="2000" value="<?= htmlspecialchars($parametrosGenerales['ano_vigencia'] ?? date('Y')) ?>">
+                    </div>
+                </div>
+                
+                <hr>
+                <h6>Período de Pago</h6>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label>Tipo de Período</label>
+                        <select name="periodo_pago" class="form-select" required>
+                            <option value="semanal" <?= ($parametrosGenerales['periodo_pago'] ?? 'mensual') === 'semanal' ? 'selected' : '' ?>>Semanal</option>
+                            <option value="quincenal" <?= ($parametrosGenerales['periodo_pago'] ?? 'mensual') === 'quincenal' ? 'selected' : '' ?>>Quincenal</option>
+                            <option value="mensual" <?= ($parametrosGenerales['periodo_pago'] ?? 'mensual') === 'mensual' ? 'selected' : '' ?>>Mensual</option>
+                        </select>
+                        <small class="form-text text-muted">Frecuencia de pago de nómina</small>
+                    </div>
+                </div>
+
+                <hr>
+                <h6>Formato de Nómina y Reportes</h6>
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label>Símbolo Divisa</label>
+                        <input type="text" name="formato_divisa" class="form-control" required maxlength="5" value="<?= htmlspecialchars($parametrosGenerales['formato_divisa'] ?? '$') ?>" placeholder="$">
+                        <small class="form-text text-muted">Símbolo de moneda (Ej: $, COP)</small>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Decimales</label>
+                        <select name="formato_decimales" class="form-select" required>
+                            <option value="0" <?= ($parametrosGenerales['formato_decimales'] ?? 2) == 0 ? 'selected' : '' ?>>0 decimales</option>
+                            <option value="1" <?= ($parametrosGenerales['formato_decimales'] ?? 2) == 1 ? 'selected' : '' ?>>1 decimal</option>
+                            <option value="2" <?= ($parametrosGenerales['formato_decimales'] ?? 2) == 2 ? 'selected' : '' ?>>2 decimales</option>
+                            <option value="3" <?= ($parametrosGenerales['formato_decimales'] ?? 2) == 3 ? 'selected' : '' ?>>3 decimales</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Separador Miles</label>
+                        <select name="formato_miles" class="form-select" required>
+                            <option value="." <?= ($parametrosGenerales['formato_miles'] ?? '.') === '.' ? 'selected' : '' ?>>Punto (.)</option>
+                            <option value="," <?= ($parametrosGenerales['formato_miles'] ?? '.') === ',' ? 'selected' : '' ?>>Coma (,)</option>
+                            <option value=" " <?= ($parametrosGenerales['formato_miles'] ?? '.') === ' ' ? 'selected' : '' ?>>Espacio ( )</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <strong>Ejemplo de formato:</strong> <span id="ejemploFormato">$1.300.000</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </form>
+        </div>
+        <div class="tab-pane fade" id="legales">
             <div class="row mb-3 align-items-end">
                 <div class="col-md-4">
                     <form method="post" action="/ZIGMA/public/index.php?url=Admin/guardarSalarioRol" class="d-flex align-items-end gap-2" id="formSalarioRol" onsubmit="return confirm('¿Guardar salario base para el rol seleccionado?');">
@@ -235,6 +304,38 @@ document.addEventListener('DOMContentLoaded', function() {
     actualizarSalarioRolInput();
     document.getElementById('rolSalarioSelect').addEventListener('change', actualizarSalarioRolInput);
     actualizarAuxilioNota();
+    
+    // Actualizar formato de ejemplo
+    const formatoDivisaSelect = document.querySelector('input[name="formato_divisa"]');
+    const formatoDecimalesSelect = document.querySelector('select[name="formato_decimales"]');
+    const formatoMilesSelect = document.querySelector('select[name="formato_miles"]');
+    
+    if (formatoDivisaSelect && formatoDecimalesSelect && formatoMilesSelect) {
+        function actualizarEjemplo() {
+            const divisa = formatoDivisaSelect.value || '$';
+            const decimales = parseInt(formatoDecimalesSelect.value) || 0;
+            const miles = formatoMilesSelect.value || '.';
+            
+            const numero = 1300000;
+            let formatted;
+            
+            if (miles === ' ') {
+                formatted = numero.toLocaleString('de-DE', { minimumFractionDigits: decimales, maximumFractionDigits: decimales });
+            } else if (miles === ',') {
+                formatted = numero.toLocaleString('es-ES', { minimumFractionDigits: decimales, maximumFractionDigits: decimales });
+            } else {
+                formatted = numero.toLocaleString('en-US', { minimumFractionDigits: decimales, maximumFractionDigits: decimales })
+                    .replace(/,/g, miles === ',' ? '@' : miles)
+                    .replace(/@/g, ',');
+            }
+            
+            document.getElementById('ejemploFormato').textContent = divisa + formatted;
+        }
+        
+        formatoDivisaSelect.addEventListener('input', actualizarEjemplo);
+        formatoDecimalesSelect.addEventListener('change', actualizarEjemplo);
+        formatoMilesSelect.addEventListener('change', actualizarEjemplo);
+    }
 });
 </script>
 </body>
