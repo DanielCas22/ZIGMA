@@ -5,6 +5,16 @@ use App\Models\RolePermissions;
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <style>
+    .card.text-center {
+      min-width: 250px;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+    .card.text-center .card-title {
+      color: #ff00ff !important;
+    }
+  </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - ZIGMA</title>
@@ -314,7 +324,7 @@ use App\Models\RolePermissions;
           <a class="nav-link fw-bold d-flex align-items-center" href="/ZIGMA/public/index.php?url=Admin/parametros">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear me-2" viewBox="0 0 16 16">
               <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-              <path d="M9.796 1.343c-.527-1.013-2.065-1.013-2.592 0l-.094.188a1.007 1.007 0 0 1-1.255.465l-.211-.087c-1.07-.428-2.255.323-2.255 1.466v.172a1.007 1.007 0 0 1-.465 1.255l-.188.094c-1.013.527-1.013 2.065 0 2.592l.188.094a1.007 1.007 0 0 1 .465 1.255l-.087.211c-.428 1.07.323 2.255 1.466 2.255h.172a1.007 1.007 0 0 1 1.255.465l.094.188c.527 1.013 2.065 1.013 2.592 0l.094-.188a1.007 1.007 0 0 1 1.255-.465h.172c1.07.428 2.255-.323 2.255-1.466v-.172a1.007 1.007 0 0 1 .465-1.255l.188-.094c1.013-.527 1.013-2.065 0-2.592l-.188-.094a1.007 1.007 0 0 1-.465-1.255l.087-.211c.428-1.07-.323-2.255-1.466-2.255h-.172a1.007 1.007 0 0 1-1.255-.465l-.094-.188zm-2.633.283c.246-.475.96-.475 1.206 0l.094.188a2.007 2.007 0 0 0 2.51.928l.211-.087c.475-.19 1.012.174 1.012.684v.172a2.007 2.007 0 0 0 .928 2.51l.188.094c.475.246.475.96 0 1.206l-.188.094a2.007 2.007 0 0 0-.928 2.51l.087.211c.19.475-.174 1.012-.684 1.012h-.172a2.007 2.007 0 0 0-2.51.928l-.094.188c-.246.475-.96.475-1.206 0l-.094-.188a2.007 2.007 0 0 0-2.51-.928l-.211.087c-.475.19-1.012-.174-1.012-.684v-.172a2.007 2.007 0 0 0-.928-2.51l-.188-.094c-.475-.246-.475-.96 0-1.206l.188-.094a2.007 2.007 0 0 0 .928-2.51l-.087-.211c-.19-.475.174-1.012.684-1.012h.172a2.007 2.007 0 0 0 2.51-.928l.094-.188z"/>
+              <path d="M9.796 1.343c-.527-1.013-2.065-1.013-2.592 0l-.094.188a1.007 1.007 0 0 1-1.255.465l-.211-.087c-1.07-.428-2.255.323-2.255 1.466v.172a1.007 1.007 0 0 1-.465 1.255l-.188.094c-1.013.527-1.013 2.065 0 2.592l.188.094a1.007 1.007 0 0 1 .465 1.255l-.087.211c-.428 1.07.323 2.255 1.466 2.255h.172a1.007 1.007 0 0 1 1.255.465l.094.188c.527 1.013 2.065 1.013 2.592 0l.094-.188a1.007 1.007 0 0 1 1.255-.465h.172c1.07.428 2.255-.323 2.255-1.466v-.172a1.007 1.007 0 0 1 .465-1.255l.188-.094c1.013-.527 1.013-2.065 0-2.592l-.188-.094a1.007 1.007 0 0 1-.465-1.255l.087-.211c.428-1.07-.323-2.255-1.466-2.255h-.172a1.007 1.007 0 0 1-1.255-.465l-.094-.188zm-2.633.283c.246-.475.96-.475 1.206 0l.094.188a2.007 2.007 0 0 0 2.51.928l.211-.087c.475-.19 1.012.174 1.012.684v.172a2.007 2.007 0 0 0 .928 2.51l.188.094c.475.246.475.96 0 1.206l-.188.094a2.007 2.007 0 0 0-.928 2.51l.087.211c.19.475-.174 1.012-.684 1.012h-.172a2.007 2.007 0 0 0-2.51.928l-.094.188c-.246.475-.96.475-1.206 0l-.094-.188a2.007 2.007 0 0 0-2.51-.928l-.211.087c-.475.19-1.012-.174-1.012-.684v-.172a2.007 2.007 0 0 0-.928-2.51l-.188-.094c-.475-.246-.475-.96 0-1.206l.188-.094a2.007 2.007 0 0 0 .928-2.51l-.087-.211c-.19-.475.174-1.012.684-1.012h-.172a2.007 2.007 0 0 0 2.51-.928l.094-.188z"/>
             </svg>
             Parámetros Administrativos
           </a>
@@ -333,6 +343,7 @@ use App\Models\RolePermissions;
       
       <!-- Notificaciones de Horas Extras Pendientes -->
       <?php if (isset($pendingHoursCount) && $pendingHoursCount > 0): ?>
+        <?php if (!empty($pendingHours)): ?>
         <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm" role="alert">
           <div class="d-flex align-items-center">
             <i class="fas fa-bell text-warning me-3" style="font-size: 1.5rem;"></i>
@@ -363,149 +374,46 @@ use App\Models\RolePermissions;
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+        <?php endif; ?>
       <?php endif; ?>
       
       <h2>Accesos rápidos</h2>
       <div class="row g-4 mt-2">
-        <div class="col-md-4">
-          <div class="card text-center shadow border-primary border-2">
-            <div class="card-body">
-              <h5 class="card-title text-primary d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-clock-history me-2" viewBox="0 0 16 16">
-                  <path d="M8.515 3.879a.5.5 0 0 0-1 0v4.25a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 1 0 .496-.868l-3.248-1.856V3.88z"/>
-                  <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16zm0-1A7 7 0 1 0 8 1a7 7 0 0 0 0 14z"/>
-                </svg>
-                Horas Extras
-              </h5>
-              <a href="/ZIGMA/public/index.php?url=HorasExtras" class="btn btn-outline-primary fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-success border-2">
-            <div class="card-body">
-              <h5 class="card-title text-success d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-people me-2" viewBox="0 0 16 16">
-                  <path d="M13 7a2 2 0 1 0-4 0 2 2 0 0 0 4 0zM6 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0z"/>
-                  <path fill-rule="evenodd" d="M13 9c1.105 0 2 .672 2 1.5V13h-5v-2.5c0-.828.895-1.5 2-1.5zM6 9c1.105 0 2 .672 2 1.5V13H1v-2.5C1 9.672 1.895 9 3 9z"/>
-                </svg>
-                Empleados
-              </h5>
-              <a href="/ZIGMA/public/index.php?url=Empleado/index" class="btn btn-outline-success fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-warning border-2">
-            <div class="card-body">
-              <h5 class="card-title text-warning d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-gift me-2" viewBox="0 0 16 16">
-                  <path d="M3 2.5a2.5 2.5 0 0 1 5 0 2.5 2.5 0 0 1 5 0v.006c0 .07 0 .27-.038.494H15a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 14.5V7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h2.038A2.968 2.968 0 0 1 3 2.5zm1.068.5H7v-.5a1.5 1.5 0 1 0-3 0c0 .085.002.274.045.43a.522.522 0 0 0 .023.07zM9 3h2.932a.56.56 0 0 0 .023-.07c.043-.156.045-.345.045-.43a1.5 1.5 0 0 0-3 0V3zM1 4v2h6V4H1zm8 0v2h6V4H9zm5 3H9v8h4.5a.5.5 0 0 0 .5-.5V7zm-7 8V7H2v7.5a.5.5 0 0 0 .5.5H7z"/>
-                </svg>
-                Prestaciones Sociales
-              </h5>
-              <a href="/ZIGMA/public/index.php?url=PrestacionesSociales" class="btn btn-outline-warning fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-info border-2">
-            <div class="card-body">
-              <h5 class="card-title text-info d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-shield-check me-2" viewBox="0 0 16 16">
-                  <path d="M5.338 1.59a61.44 61.44 0 0 0-2.837.856.481.481 0 0 0-.328.39c-.554 4.157.726 7.19 2.253 9.188a10.725 10.725 0 0 0 2.287 2.233c.346.244.652.42.893.533.12.057.218.095.293.118a.55.55 0 0 0 .101.025.615.615 0 0 0 .1-.025c.076-.023.174-.061.294-.118.24-.113.547-.29.893-.533a10.726 10.726 0 0 0 2.287-2.233c1.527-1.997 2.807-5.031 2.253-9.188a.48.48 0 0 0-.328-.39c-.651-.213-1.75-.56-2.837-.855C9.552 1.29 8.531 1.067 8 1.067c-.53 0-1.552.223-2.662.524zM5.072.56C6.157.265 7.31 0 8 0s1.843.265 2.928.56c1.11.3 2.229.655 2.887.87a1.54 1.54 0 0 1 1.044 1.262c.596 4.477-.787 7.795-2.465 9.99a11.775 11.775 0 0 1-2.517 2.453 7.159 7.159 0 0 1-1.048.625c-.28.132-.581.24-.829.24s-.548-.108-.829-.24a7.158 7.158 0 0 1-1.048-.625 11.777 11.777 0 0 1-2.517-2.453C1.928 10.487.545 7.169 1.141 2.692A1.54 1.54 0 0 1 2.185 1.43 62.456 62.456 0 0 1 5.072.56z"/>
-                  <path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
-                </svg>
-                Seguridad Social
-              </h5>
-              <p class="card-text small">Salud, Pensión y ARL</p>
-              <a href="/ZIGMA/public/index.php?url=SeguridadSocial" class="btn btn-outline-info fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-danger border-2">
-            <div class="card-body">
-              <h5 class="card-title text-danger d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-cash-stack me-2" viewBox="0 0 16 16">
-                  <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zM7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
-                  <path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2H3z"/>
-                </svg>
-                Total Devengado
-              </h5>
-              <p class="card-text small">Sueldos, Horas Extras, Comisiones</p>
-              <a href="/ZIGMA/public/index.php?url=Devengado" class="btn btn-outline-danger fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-danger border-2">
-            <div class="card-body">
-              <h5 class="card-title text-danger d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-dash-circle me-2" viewBox="0 0 16 16">
-                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                  <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
-                </svg>
-                Total Deducido
-              </h5>
-              <p class="card-text small">Salud, Pensión, Fondo, Retención</p>
-              <a href="/ZIGMA/public/index.php?url=TotalDeducido" class="btn btn-outline-danger fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-success border-2">
-            <div class="card-body">
-              <h5 class="card-title text-success d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-building me-2" viewBox="0 0 16 16">
-                  <path d="M4 2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1ZM4 5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM7.5 5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1ZM4.5 8a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Zm2.5.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1Zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1Z"/>
-                  <path d="M2 1a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V1Zm11 0H3v14h3v-2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 .5.5V15h3V1Z"/>
-                </svg>
-                Parafiscales
-              </h5>
-              <p class="card-text small">SENA, ICBF, Caja de Compensación</p>
-              <a href="/ZIGMA/public/index.php?url=Parafiscales" class="btn btn-outline-success fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-primary border-2">
-            <div class="card-body">
-              <h5 class="card-title text-primary d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-file-earmark-spreadsheet me-2" viewBox="0 0 16 16">
-                  <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5v2zM3 12v-2h2v2H3zm0 1h2v2H4a1 1 0 0 1-1-1v-1zm3 2v-2h3v2H6zm4 0v-2h3v1a1 1 0 0 1-1 1h-2zm3-3h-3v-2h3v2zm-7 0v-2h3v2H6z"/>
-                </svg>
-                Nómina
-              </h5>
-              <p class="card-text small">Pago de Salarios y Liquidación</p>
-              <a href="/ZIGMA/public/index.php?url=Nomina" class="btn btn-outline-primary fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card text-center shadow border-warning border-2">
-            <div class="card-body">
-              <h5 class="card-title text-warning d-flex align-items-center justify-content-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-file-invoice me-2" viewBox="0 0 16 16">
-                  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
-                  <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
-                </svg>
-                Desprendibles
-              </h5>
-              <p class="card-text small">Generar y consultar desprendibles</p>
-              <a href="/ZIGMA/public/index.php?url=Desprendible" class="btn btn-outline-warning fw-bold">Ir</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-            <?php include __DIR__ . '/reportes_card.php'; ?>
-        </div>
-        <div class="col-md-4">
-            <?php include __DIR__ . '/parametros_card.php'; ?>
-        </div>
-            </div>
-          </div>
-        </div>
+        <?php
+        $cards = [
+          ["Horas Extras", "primary", "bi-clock-history", "/ZIGMA/public/index.php?url=HorasExtras", "Ir", null],
+          ["Empleados", "success", "bi-people", "/ZIGMA/public/index.php?url=Empleado/index", "Ir", null],
+          ["Prestaciones Sociales", "warning", "bi-gift", "/ZIGMA/public/index.php?url=PrestacionesSociales", "Ir", null],
+          ["Seguridad Social", "info", "bi-shield-check", "/ZIGMA/public/index.php?url=SeguridadSocial", "Ir", "Salud, Pensión y ARL"],
+          ["Total Devengado", "danger", "bi-cash-stack", "/ZIGMA/public/index.php?url=Devengado", "Ir", "Sueldos, Horas Extras, Comisiones"],
+          ["Total Deducido", "danger", "bi-dash-circle", "/ZIGMA/public/index.php?url=TotalDeducido", "Ir", "Salud, Pensión, Fondo, Retención"],
+          ["Parafiscales", "success", "bi-building", "/ZIGMA/public/index.php?url=Parafiscales", "Ir", "SENA, ICBF, Caja de Compensación"],
+          ["Nómina", "primary", "bi-file-earmark-spreadsheet", "/ZIGMA/public/index.php?url=Nomina", "Ir", "Pago de Salarios y Liquidación"],
+          ["Desprendibles", "warning", "bi-file-invoice", "/ZIGMA/public/index.php?url=Desprendible", "Ir", "Generar y consultar desprendibles"],
+          ["Reportes", "danger", "bi-bar-chart-line", "/ZIGMA/public/index.php?url=Reportes", "Ir", "Acceda al módulo de reportes y exportaciones del sistema."],
+          ["Parámetros Administrativos", "primary", "bi-gear", "/ZIGMA/public/index.php?url=Admin/parametros", "Ir", "Configura parámetros clave del sistema, tablas y valores administrativos."]
+        ];
+        for ($i = 0; $i < count($cards); $i++) {
+          if ($i % 3 === 0) {
+            echo '<div class="row g-4 mt-2">';
+          }
+          echo '<div class="col-md-4">';
+          echo '<div class="card text-center shadow border-' . $cards[$i][1] . ' border-2">';
+          echo '<div class="card-body">';
+          echo '<h5 class="card-title text-' . $cards[$i][1] . ' d-flex align-items-center justify-content-center">';
+          echo '<i class="bi ' . $cards[$i][2] . ' me-2" style="font-size:22px;"></i>';
+          echo $cards[$i][0];
+          echo '</h5>';
+          if (!empty($cards[$i][5])) {
+            echo '<p class="card-text small">' . $cards[$i][5] . '</p>';
+          }
+          echo '<a href="' . $cards[$i][3] . '" class="btn btn-outline-' . $cards[$i][1] . ' fw-bold">' . $cards[$i][4] . '</a>';
+          echo '</div></div></div>';
+          if ($i % 3 === 2 || $i === count($cards) - 1) {
+            echo '</div>';
+          }
+        }
+        ?>
       </div>
     </div>
   </div>

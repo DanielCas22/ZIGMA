@@ -352,7 +352,10 @@ class Empleado extends Model {
         $salarioPorRol = new SalarioPorRol();
         $smlv = $salarioPorRol->getMenorSalarioBase();
         $sueldo_actual = isset($empleado['sueldo_actual']) ? floatval($empleado['sueldo_actual']) : 0;
-        $auxilio_transporte = isset($empleado['auxilio_transporte']) ? floatval($empleado['auxilio_transporte']) : 0;
+        require_once __DIR__ . '/ParametrosModel.php';
+        $paramModel = new ParametrosModel();
+        $parametros = $paramModel->getParametrosVigentes();
+        $auxilio_transporte = isset($parametros['auxilio_transporte']) ? floatval($parametros['auxilio_transporte']) : 200000;
         if ($sueldo_actual <= 2 * $smlv) {
             return $auxilio_transporte;
         }

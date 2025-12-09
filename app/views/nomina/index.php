@@ -298,25 +298,6 @@
             </div>
         </div>
 
-        <!-- Firmas -->
-        <div class="row mt-5 no-print">
-            <div class="col-md-3 text-center">
-                <div style="height: 80px; border-bottom: 2px solid #2c3e50; margin-bottom: 10px;"></div>
-                <strong>PAGADOR</strong>
-            </div>
-            <div class="col-md-3 text-center">
-                <div style="height: 80px; border-bottom: 2px solid #2c3e50; margin-bottom: 10px;"></div>
-                <strong>PREPARADO POR</strong>
-            </div>
-            <div class="col-md-3 text-center">
-                <div style="height: 80px; border-bottom: 2px solid #2c3e50; margin-bottom: 10px;"></div>
-                <strong>REVISADO POR</strong>
-            </div>
-            <div class="col-md-3 text-center">
-                <div style="height: 80px; border-bottom: 2px solid #2c3e50; margin-bottom: 10px;"></div>
-                <strong>APROBADO POR</strong>
-            </div>
-        </div>
     </div>
 
     <!-- Scripts -->

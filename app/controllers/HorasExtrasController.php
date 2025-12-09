@@ -49,6 +49,7 @@ class HorasExtrasController extends Controller {
             'Extra diurna dominical/festiva',
             'Extra nocturna dominical/festiva'
         ];
+        $empleados_con_horas = [];
         foreach ($empleados as &$empleado) {
             $horasExtras = $horasExtrasModel->getHorasExtrasByEmpleado($empleado['id_empleados']);
             $empleado['total_horas'] = 0;
@@ -65,7 +66,11 @@ class HorasExtrasController extends Controller {
             $empleado['tipo_frecuente'] = !empty($tipos) ? array_keys(array_filter(array_count_values($tipos), function($v) use ($tipos) { return $v == max(array_count_values($tipos)); }))[0] : 'N/A';
             $empleado['rol'] = $empleado['rol_nombre'] ?? 'Sin rol';
             $empleado['canDelete'] = RolePermissions::hasPermission($_SESSION['user']['rol'], 'horas_extras', 'delete');
+            if ($empleado['total_horas'] > 0) {
+                $empleados_con_horas[] = $empleado;
+            }
         }
+        $empleados = $empleados_con_horas;
         $filtro_rol = isset($_GET['filtro_rol']) ? $_GET['filtro_rol'] : '';
         $filtro_horas = isset($_GET['filtro_horas']) ? $_GET['filtro_horas'] : '';
         $filtro_tipo = isset($_GET['filtro_tipo']) ? $_GET['filtro_tipo'] : '';

@@ -179,7 +179,8 @@ class HorasExtras extends Model {
                 INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
                 LEFT JOIN rol_has_user ru ON ru.user_id = (SELECT id_doc FROM user WHERE empleado_id = e.id_empleados)
                 LEFT JOIN rol r ON ru.rol_id = r.id_rol
-                WHERE he.estado = "pendiente"';
+                WHERE he.estado = "pendiente" 
+                  AND (r.nombre IS NULL OR (LOWER(r.nombre) NOT IN ("admin", "rrhh")))';
         $params = [];
         if ($empleadoId) {
             $sql .= ' AND he.empleado_id = ?';

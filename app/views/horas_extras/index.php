@@ -65,8 +65,10 @@
                                     foreach ($empleados as $e) {
                                         $total_horas += isset($e['total_horas']) ? floatval($e['total_horas']) : 0;
                                     }
+                                    echo number_format($total_horas, 1) . ' hrs';
+                                } else {
+                                    echo '0 hrs';
                                 }
-                                echo number_format($total_horas, 1) . ' hrs';
                                 ?>
                             </p>
                         </div>
@@ -83,8 +85,10 @@
                                     foreach ($empleados as $e) {
                                         $total_valor += isset($e['total_valor']) ? floatval($e['total_valor']) : 0;
                                     }
+                                    echo '$' . number_format($total_valor, 0, ',', '.');
+                                } else {
+                                    echo '$0';
                                 }
-                                echo '$' . number_format($total_valor, 0, ',', '.');
                                 ?>
                             </p>
                         </div>

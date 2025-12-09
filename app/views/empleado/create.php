@@ -162,7 +162,9 @@
                             <select name="rol" class="form-select" required id="rolSelect" onchange="actualizarSueldo()" title="Seleccione el rol o cargo del empleado">
                                 <option value="">Seleccione un rol</option>
                                 <?php foreach ((new \App\Models\Rol())->getAll() as $rol): ?>
-                                    <option value="<?= htmlspecialchars($rol['nombre']) ?>"><?= htmlspecialchars(ucfirst($rol['nombre'])) ?></option>
+                                    <?php if (strtolower($rol['nombre']) !== 'admin'): ?>
+                                        <option value="<?= htmlspecialchars($rol['nombre']) ?>"><?= htmlspecialchars(ucfirst($rol['nombre'])) ?></option>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </select>
                         </div>

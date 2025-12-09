@@ -65,10 +65,10 @@ class NominaModel extends Model {
                 'total_parafiscales' => $parafiscales['resumen']['total_parafiscales'] ?? 0
             ],
             'prestaciones_sociales' => [
-                'cesantias' => $prestaciones['conceptos']['cesantias']['valor'] ?? 0,
-                'intereses_cesantias' => $prestaciones['conceptos']['intereses_cesantias']['valor'] ?? 0,
-                'prima_servicios' => $prestaciones['conceptos']['prima_servicios']['valor'] ?? 0,
-                'vacaciones' => $prestaciones['conceptos']['vacaciones']['valor'] ?? 0,
+                'cesantias' => $prestaciones['prestaciones']['cesantias']['valor_cesantias'] ?? 0,
+                'intereses_cesantias' => $prestaciones['prestaciones']['intereses_cesantias']['valor_intereses'] ?? 0,
+                'prima_servicios' => $prestaciones['prestaciones']['prima_servicios']['valor_prima'] ?? 0,
+                'vacaciones' => $prestaciones['prestaciones']['vacaciones']['valor_vacaciones'] ?? 0,
                 'total_prestaciones' => $prestaciones['resumen']['total_prestaciones'] ?? 0
             ],
             'deducciones' => [

@@ -122,6 +122,14 @@ class ReportesController extends Controller
         $empleados = $empleadoModel->getAllWithRoles();
         $empleado_id = isset($_GET['empleado_id']) ? intval($_GET['empleado_id']) : null;
         $resumen = null;
+        // Si el usuario es empleado, solo puede ver su propio reporte
+        if (isset($_SESSION['user']) && $_SESSION['user']['rol'] === 'empleado') {
+            $empleado_id = $_SESSION['user']['empleado_id'];
+            // Filtrar lista de empleados para mostrar solo el propio
+            $empleados = array_filter($empleados, function($emp) use ($empleado_id) {
+                return $emp['id_empleados'] == $empleado_id;
+            });
+        }
         if ($empleado_id) {
             $empleado = $empleadoModel->getByIdWithRoles($empleado_id);
             $devengadoModel = $this->model('TotalDevengado');
@@ -159,6 +167,10 @@ class ReportesController extends Controller
             exit();
         }
         $empleado_id = isset($_GET['empleado_id']) ? intval($_GET['empleado_id']) : null;
+        // Si el usuario es empleado, solo puede descargar su propio reporte
+        if (isset($_SESSION['user']) && $_SESSION['user']['rol'] === 'empleado') {
+            $empleado_id = $_SESSION['user']['empleado_id'];
+        }
         if (!$empleado_id) {
             header('Location: /ZIGMA/public/index.php?url=Reportes/reporteEmpleado');
             exit();

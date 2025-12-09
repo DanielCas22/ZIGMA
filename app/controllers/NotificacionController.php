@@ -1,4 +1,6 @@
 <?php
+namespace App\Controllers;
+
 class NotificacionController extends Controller {
     public function index() {
         if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
