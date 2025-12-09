@@ -198,5 +198,32 @@ class AdminController extends Controller {
         header('Location: /ZIGMA/public/index.php?url=Admin/parametros');
         exit;
     }
+
+    public function guardarPorcentajesHorasExtras() {
+        if (!isset($_SESSION['user']) || $_SESSION['user']['rol'] !== 'admin') {
+            header('Location: /ZIGMA/public/index.php?url=Dashboard');
+            exit;
+        }
+        $horas = $_POST['horas'] ?? [];
+        $tipoHoraModel = $this->model('TipoHoraExtra');
+        
+        try {
+            foreach ($horas as $index => $hora) {
+                $nombre = isset($hora['nombre']) ? trim($hora['nombre']) : null;
+                $porcentaje = isset($hora['porcentaje']) ? floatval($hora['porcentaje']) : null;
+                
+                if ($nombre && $porcentaje !== null) {
+                    // Actualizar o crear el tipo de hora extra
+                    $tipoHoraModel->guardarTipo($nombre, $porcentaje);
+                }
+            }
+            $_SESSION['success'] = 'Porcentajes de horas extras actualizados correctamente.';
+        } catch (\Exception $e) {
+            $_SESSION['error'] = 'Error al actualizar porcentajes: ' . $e->getMessage();
+        }
+        
+        header('Location: /ZIGMA/public/index.php?url=Admin/parametros');
+        exit;
+    }
 }
 

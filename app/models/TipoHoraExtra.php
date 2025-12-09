@@ -39,4 +39,32 @@ class TipoHoraExtra extends Model {
         $tipoData = $this->getByNombre($tipo);
         return $tipoData ? intval($tipoData['porcentaje']) : 0;
     }
+
+    /**
+     * Guardar o actualizar un tipo de hora extra
+     */
+    public function guardarTipo($nombre, $porcentaje) {
+        $existe = $this->getByNombre($nombre);
+        
+        if ($existe) {
+            // Actualizar
+            $sql = "UPDATE tipos_horas_extras SET porcentaje = ? WHERE nombre = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([floatval($porcentaje), $nombre]);
+        } else {
+            // Crear
+            $sql = "INSERT INTO tipos_horas_extras (nombre, porcentaje, descripcion) VALUES (?, ?, ?)";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$nombre, floatval($porcentaje), 'Tipo de hora extra creado por admin']);
+        }
+    }
+
+    /**
+     * Eliminar un tipo de hora extra
+     */
+    public function eliminarTipo($nombre) {
+        $sql = "DELETE FROM tipos_horas_extras WHERE nombre = ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$nombre]);
+    }
 }
