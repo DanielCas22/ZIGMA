@@ -1,17 +1,11 @@
 <?php
 namespace App\Controllers;
+require_once __DIR__ . '/../../config/session_config.php';
 require_once __DIR__ . '/Controller.php';
 use App\Controllers\Controller;
 use App\Models\RolePermissions;
 
 class DesprendibleController extends Controller {
-    
-    public function __construct() {
-        // Solo asegurar que la sesión esté iniciada
-        if (session_status() == PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
     
     /**
      * Mostrar lista de empleados para seleccionar desprendible
@@ -21,6 +15,15 @@ class DesprendibleController extends Controller {
         $empleados = $desprendibleModel->obtenerEmpleadosParaDesprendible();
         // Obtener el rol actual del usuario
         $currentRole = isset($_SESSION['user']['rol']) ? $_SESSION['user']['rol'] : 'empleado';
+        $currentEmployeeId = isset($_SESSION['user']['empleado_id']) ? $_SESSION['user']['empleado_id'] : null;
+        
+        // Si el usuario es empleado, mostrar solo su desprendible
+        if ($currentRole === 'empleado' && $currentEmployeeId) {
+            $empleados = array_filter($empleados, function($emp) use ($currentEmployeeId) {
+                return $emp['id_empleados'] == $currentEmployeeId;
+            });
+        }
+        
         $data = [
             'title' => 'Desprendibles de Nómina',
             'empleados' => $empleados,
@@ -103,10 +106,25 @@ class DesprendibleController extends Controller {
      * Enviar desprendible por correo
      */
     public function enviarCorreo() {
+        // Verificar autenticación
+        if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'No autenticado']);
+            return;
+        }
+        
+        $currentRole = isset($_SESSION['user']['rol']) ? $_SESSION['user']['rol'] : 'empleado';
+        $currentEmployeeId = isset($_SESSION['user']['empleado_id']) ? $_SESSION['user']['empleado_id'] : null;
+        
         $empleadoId = $_POST['empleado_id'] ?? null;
         $email = $_POST['email'] ?? null;
         $mes = $_POST['mes'] ?? null;
         $anio = $_POST['anio'] ?? null;
+        
+        // Solo admin/rrhh pueden enviar cualquier desprendible, empleados solo el suyo
+        if ($currentRole === 'empleado' && $empleadoId != $currentEmployeeId) {
+            echo json_encode(['success' => false, 'message' => 'No tiene permiso para enviar este desprendible']);
+            return;
+        }
         
         if (!$empleadoId || !$email) {
             echo json_encode(['success' => false, 'message' => 'Datos incompletos']);
@@ -164,6 +182,21 @@ class DesprendibleController extends Controller {
      * Descargar desprendible en PDF
      */
     public function descargarDesprendiblePDF($empleadoId = null, $mes = null, $anio = null) {
+        // Verificar autenticación
+        if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
+            header('Location: /ZIGMA/public/index.php');
+            exit;
+        }
+        
+        $currentRole = isset($_SESSION['user']['rol']) ? $_SESSION['user']['rol'] : 'empleado';
+        $currentEmployeeId = isset($_SESSION['user']['empleado_id']) ? $_SESSION['user']['empleado_id'] : null;
+        
+        // Solo admin/rrhh pueden ver cualquier desprendible, empleados solo el suyo
+        if ($currentRole === 'empleado' && $empleadoId != $currentEmployeeId) {
+            header('Location: /ZIGMA/public/index.php?url=Desprendible&error=no_permission');
+            exit;
+        }
+        
         require_once __DIR__ . '/../../vendor/autoload.php';
         $desprendibleModel = $this->model('DesprendibleModel');
         $desprendible = $desprendibleModel->obtenerDesprendible($empleadoId, $mes, $anio);
@@ -198,6 +231,21 @@ class DesprendibleController extends Controller {
      * Descargar desprendible en Excel
      */
     public function descargarDesprendibleExcel($empleadoId = null, $mes = null, $anio = null) {
+        // Verificar autenticación
+        if (!isset($_SESSION['user']) || empty($_SESSION['user'])) {
+            header('Location: /ZIGMA/public/index.php');
+            exit;
+        }
+        
+        $currentRole = isset($_SESSION['user']['rol']) ? $_SESSION['user']['rol'] : 'empleado';
+        $currentEmployeeId = isset($_SESSION['user']['empleado_id']) ? $_SESSION['user']['empleado_id'] : null;
+        
+        // Solo admin/rrhh pueden ver cualquier desprendible, empleados solo el suyo
+        if ($currentRole === 'empleado' && $empleadoId != $currentEmployeeId) {
+            header('Location: /ZIGMA/public/index.php?url=Desprendible&error=no_permission');
+            exit;
+        }
+        
         require_once __DIR__ . '/../../vendor/autoload.php';
         $desprendibleModel = $this->model('DesprendibleModel');
         $desprendible = $desprendibleModel->obtenerDesprendible($empleadoId, $mes, $anio);

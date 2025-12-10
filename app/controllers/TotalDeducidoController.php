@@ -1,5 +1,6 @@
 <?php
 namespace App\Controllers;
+require_once __DIR__ . '/../../config/session_config.php';
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Empleado.php';
 require_once __DIR__ . '/../models/TotalDeducidoModel.php';
@@ -8,7 +9,7 @@ use App\Controllers\Controller;
 
 class TotalDeducidoController extends Controller {
     
-    private function baseUrl() {
+    protected function baseUrl() {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         $base = explode('/public', $scriptName)[0];
         return $base;
@@ -21,10 +22,6 @@ class TotalDeducidoController extends Controller {
         }
         try {
             $deducidoModel = $this->model('TotalDeducidoModel');
-            // Iniciar sesión si no está iniciada
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
             $user = $_SESSION['user'] ?? null;
             $rol = $user['rol'] ?? null;
             $empleado_id = $user['empleado_id'] ?? null;

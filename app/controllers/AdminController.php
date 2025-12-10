@@ -5,10 +5,8 @@ use App\Controllers\Controller;
 
 class AdminController extends Controller {
     public function parametros() {
-        if (!isset($_SESSION['user']) || $_SESSION['user']['rol'] !== 'admin') {
-            header('Location: /ZIGMA/public/index.php?url=Dashboard');
-            exit;
-        }
+        $this->requireAuth(['admin']);
+        
         $paramModel = $this->model('ParametrosModel');
         $parametrosGenerales = $this->model('ParametrosGenerales')->getAll();
         $parametros = $paramModel->getParametrosLegales();

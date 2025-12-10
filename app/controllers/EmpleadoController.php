@@ -1,8 +1,6 @@
 <?php
 namespace App\Controllers;
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../../config/session_config.php';
 
 require_once __DIR__ . '/Controller.php';
 require_once __DIR__ . '/../models/Empleado.php';
@@ -18,7 +16,7 @@ use App\Models\ARLModel;
 use App\Models\RolePermissions;
 
 class EmpleadoController extends Controller {
-    private function baseUrl() {
+    protected function baseUrl() {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
         return $protocol . $_SERVER['HTTP_HOST'] . '/ZIGMA';
     }

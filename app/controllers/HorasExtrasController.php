@@ -6,7 +6,7 @@ use App\Controllers\Controller;
 use App\Models\RolePermissions;
 
 class HorasExtrasController extends Controller {
-    private function baseUrl() {
+    protected function baseUrl() {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         $base = explode('/public', $scriptName)[0];
         return $base;
@@ -49,7 +49,8 @@ class HorasExtrasController extends Controller {
             'Extra diurna dominical/festiva',
             'Extra nocturna dominical/festiva'
         ];
-        $empleados_con_horas = [];
+        $empleados_procesados = [];
+        $currentRole = RolePermissions::getCurrentUserRole();
         foreach ($empleados as &$empleado) {
             $horasExtras = $horasExtrasModel->getHorasExtrasByEmpleado($empleado['id_empleados']);
             $empleado['total_horas'] = 0;
@@ -66,11 +67,16 @@ class HorasExtrasController extends Controller {
             $empleado['tipo_frecuente'] = !empty($tipos) ? array_keys(array_filter(array_count_values($tipos), function($v) use ($tipos) { return $v == max(array_count_values($tipos)); }))[0] : 'N/A';
             $empleado['rol'] = $empleado['rol_nombre'] ?? 'Sin rol';
             $empleado['canDelete'] = RolePermissions::hasPermission($_SESSION['user']['rol'], 'horas_extras', 'delete');
-            if ($empleado['total_horas'] > 0) {
-                $empleados_con_horas[] = $empleado;
+            
+            // Si es empleado, solo muestra su propio registro; si es RRHH/Admin, muestra todos
+            if ($currentRole === 'empleado' && $empleado['total_horas'] > 0) {
+                $empleados_procesados[] = $empleado;
+            } elseif (in_array($currentRole, ['rrhh', 'admin'])) {
+                // RRHH y Admin ven todos los empleados sin importar si tienen horas
+                $empleados_procesados[] = $empleado;
             }
         }
-        $empleados = $empleados_con_horas;
+        $empleados = $empleados_procesados;
         $filtro_rol = isset($_GET['filtro_rol']) ? $_GET['filtro_rol'] : '';
         $filtro_horas = isset($_GET['filtro_horas']) ? $_GET['filtro_horas'] : '';
         $filtro_tipo = isset($_GET['filtro_tipo']) ? $_GET['filtro_tipo'] : '';

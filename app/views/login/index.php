@@ -129,8 +129,8 @@
     <div class="container d-flex align-items-center justify-content-center min-vh-100">
         <div class="card shadow p-4" style="min-width:400px; max-width:450px;">
             <h2 class="mb-4 text-center">Iniciar Sesión</h2>
-            <?php if (!empty($data['error'])): ?>
-                <div class="alert alert-danger"><?php echo $data['error']; ?></div>
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger"><?php echo $error; ?></div>
             <?php endif; ?>
             <form method="POST" action="">
                 <div class="mb-3">

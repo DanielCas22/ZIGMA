@@ -5,7 +5,7 @@ use App\Controllers\Controller;
 
 class PrestacionesSocialesController extends Controller {
     
-    private function baseUrl() {
+    protected function baseUrl() {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         $base = explode('/public', $scriptName)[0];
         return $base;

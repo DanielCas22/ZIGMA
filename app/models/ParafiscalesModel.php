@@ -36,10 +36,17 @@ class ParafiscalesModel extends Model {
         
         $totalDevengado = $devengado['resumen']['total_devengado'];
         
+        // Obtener porcentajes de parafiscales desde BD
+        $porcentajes = $this->getPorcentajesParafiscales();
+        $porc_sena = $porcentajes['sena'];
+        $porc_icbf = $porcentajes['icbf'];
+        $porc_caja = $porcentajes['caja'];
+        $porc_total = $porc_sena + $porc_icbf + $porc_caja;
+        
         // Calcular cada componente parafiscal
-        $sena = $totalDevengado * (self::PORC_SENA / 100);
-        $icbf = $totalDevengado * (self::PORC_ICBF / 100);
-        $cajaCompensacion = $totalDevengado * (self::PORC_CAJA_COMP / 100);
+        $sena = $totalDevengado * ($porc_sena / 100);
+        $icbf = $totalDevengado * ($porc_icbf / 100);
+        $cajaCompensacion = $totalDevengado * ($porc_caja / 100);
         $totalParafiscales = $sena + $icbf + $cajaCompensacion;
         
         return [
@@ -59,32 +66,32 @@ class ParafiscalesModel extends Model {
             'parafiscales' => [
                 'sena' => [
                     'base' => $totalDevengado,
-                    'porcentaje' => self::PORC_SENA,
+                    'porcentaje' => $porc_sena,
                     'valor' => $sena,
                     'descripcion' => 'SENA - Servicio Nacional de Aprendizaje',
-                    'formula' => 'Total Devengado × 2%',
+                    'formula' => 'Total Devengado × ' . $porc_sena . '%',
                     'entidad' => 'SENA'
                 ],
                 'icbf' => [
                     'base' => $totalDevengado,
-                    'porcentaje' => self::PORC_ICBF,
+                    'porcentaje' => $porc_icbf,
                     'valor' => $icbf,
                     'descripcion' => 'ICBF - Instituto Colombiano de Bienestar Familiar',
-                    'formula' => 'Total Devengado × 3%',
+                    'formula' => 'Total Devengado × ' . $porc_icbf . '%',
                     'entidad' => 'ICBF'
                 ],
                 'caja_compensacion' => [
                     'base' => $totalDevengado,
-                    'porcentaje' => self::PORC_CAJA_COMP,
+                    'porcentaje' => $porc_caja,
                     'valor' => $cajaCompensacion,
                     'descripcion' => 'Caja de Compensación Familiar',
-                    'formula' => 'Total Devengado × 4%',
+                    'formula' => 'Total Devengado × ' . $porc_caja . '%',
                     'entidad' => 'CAJA COMPENSACIÓN'
                 ]
             ],
             'resumen' => [
                 'total_parafiscales' => $totalParafiscales,
-                'porcentaje_total' => self::PORC_TOTAL,
+                'porcentaje_total' => $porc_total,
                 'desglose' => [
                     'sena' => $sena,
                     'icbf' => $icbf,

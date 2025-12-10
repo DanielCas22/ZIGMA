@@ -6,7 +6,7 @@ use App\Controllers\Controller;
 use App\Models\RolePermissions;
 
 class DashboardController extends Controller {
-    private function baseUrl() {
+    protected function baseUrl() {
         // Obtiene la URL base del proyecto
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         $base = explode('/public', $scriptName)[0];

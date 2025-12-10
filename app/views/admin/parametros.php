@@ -222,7 +222,7 @@
                         <?php foreach ((new \App\Models\TipoHoraExtra())->getAll() as $i => $h): ?>
                         <tr>
                             <td><input type="text" name="horas[<?= $i ?>][nombre]" class="form-control" required value="<?= htmlspecialchars($h['nombre']) ?>" readonly></td>
-                            <td><input type="number" step="0.01" name="horas[<?= $i ?>][porcentaje]" class="form-control" required min="0" value="<?= htmlspecialchars($h['porcentaje']) ?>"></td>
+                            <td><input type="number" step="0.01" name="horas[<?= $i ?>][porcentaje]" class="form-control" required min="0" max="9999" value="<?= htmlspecialchars($h['porcentaje']) ?>"></td>
                             <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">Eliminar</button></td>
                         </tr>
                         <?php endforeach; ?>
@@ -376,7 +376,7 @@ function agregarFilaHorasExtras() {
     var nuevaFila = document.createElement('tr');
     nuevaFila.innerHTML = `
         <td><input type="text" name="horas[${indice}][nombre]" class="form-control" required value="" placeholder="Nombre del tipo de hora extra"></td>
-        <td><input type="number" step="0.01" name="horas[${indice}][porcentaje]" class="form-control" required min="0" value="0"></td>
+        <td><input type="number" step="0.01" name="horas[${indice}][porcentaje]" class="form-control" required min="0" max="9999" value="0"></td>
         <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this)">Eliminar</button></td>
     `;
     tabla.appendChild(nuevaFila);

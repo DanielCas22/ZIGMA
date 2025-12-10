@@ -388,21 +388,32 @@ use App\Models\RolePermissions;
       <h2>Accesos rápidos</h2>
       <div class="row g-4 mt-2">
         <?php
+        $userRole = isset($data['user']['rol']) ? $data['user']['rol'] : 'empleado';
+        $isEmpleado = $userRole === 'empleado';
+        $isRRHH = $userRole === 'rrhh';
+        
         $cards = [
-          ["Horas Extras", "primary", "bi-clock-history", "/ZIGMA/public/index.php?url=HorasExtras", "Ir", "Registra y gestiona las horas extras trabajadas por los empleados."],
-          ["Empleados", "success", "bi-people", "/ZIGMA/public/index.php?url=Empleado/index", "Ir", "Crea, modifica y consulta el información de los empleados registrados."],
-          ["Prestaciones Sociales", "warning", "bi-gift", "/ZIGMA/public/index.php?url=PrestacionesSociales", "Ir", "Calcula cesantías, prima, vacaciones y otras prestaciones legales."],
-          ["Seguridad Social", "info", "bi-shield-check", "/ZIGMA/public/index.php?url=SeguridadSocial", "Ir", "Salud, Pensión y ARL"],
-          ["Total Devengado", "danger", "bi-cash-stack", "/ZIGMA/public/index.php?url=Devengado", "Ir", "Sueldos, Horas Extras, Comisiones"],
-          ["Total Deducido", "danger", "bi-dash-circle", "/ZIGMA/public/index.php?url=TotalDeducido", "Ir", "Salud, Pensión, Fondo, Retención"],
-          ["Parafiscales", "success", "bi-building", "/ZIGMA/public/index.php?url=Parafiscales", "Ir", "SENA, ICBF, Caja de Compensación"],
-          ["Nómina", "primary", "bi-file-earmark-spreadsheet", "/ZIGMA/public/index.php?url=Nomina", "Ir", "Pago de Salarios y Liquidación"],
-          ["Desprendibles", "warning", "bi-file-invoice", "/ZIGMA/public/index.php?url=Desprendible", "Ir", "Generar y consultar desprendibles"],
-          ["Reportes", "danger", "bi-bar-chart-line", "/ZIGMA/public/index.php?url=Reportes", "Ir", "Acceda al módulo de reportes y exportaciones del sistema."],
-          ["Parámetros Administrativos", "primary", "bi-gear", "/ZIGMA/public/index.php?url=Admin/parametros", "Ir", "Configura parámetros clave del sistema, tablas y valores administrativos."]
+          ["Horas Extras", "primary", "bi-clock-history", "/ZIGMA/public/index.php?url=HorasExtras", "Ir", "Registra y gestiona las horas extras trabajadas por los empleados.", false],
+          ["Empleados", "success", "bi-people", "/ZIGMA/public/index.php?url=Empleado/index", "Ir", "Crea, modifica y consulta el información de los empleados registrados.", $isEmpleado],
+          ["Prestaciones Sociales", "warning", "bi-gift", "/ZIGMA/public/index.php?url=PrestacionesSociales", "Ir", "Calcula cesantías, prima, vacaciones y otras prestaciones legales.", false],
+          ["Seguridad Social", "info", "bi-shield-check", "/ZIGMA/public/index.php?url=SeguridadSocial", "Ir", "Salud, Pensión y ARL", false],
+          ["Total Devengado", "danger", "bi-cash-stack", "/ZIGMA/public/index.php?url=Devengado", "Ir", "Sueldos, Horas Extras, Comisiones", false],
+          ["Total Deducido", "danger", "bi-dash-circle", "/ZIGMA/public/index.php?url=TotalDeducido", "Ir", "Salud, Pensión, Fondo, Retención", false],
+          ["Parafiscales", "success", "bi-building", "/ZIGMA/public/index.php?url=Parafiscales", "Ir", "SENA, ICBF, Caja de Compensación", false],
+          ["Nómina", "primary", "bi-file-earmark-spreadsheet", "/ZIGMA/public/index.php?url=Nomina", "Ir", "Pago de Salarios y Liquidación", false],
+          ["Desprendibles", "warning", "bi-file-invoice", "/ZIGMA/public/index.php?url=Desprendible", "Ir", "Generar y consultar desprendibles", false],
+          ["Reportes", "danger", "bi-bar-chart-line", "/ZIGMA/public/index.php?url=Reportes", "Ir", "Acceda al módulo de reportes y exportaciones del sistema.", false],
+          ["Parámetros Administrativos", "primary", "bi-gear", "/ZIGMA/public/index.php?url=Admin/parametros", "Ir", "Configura parámetros clave del sistema, tablas y valores administrativos.", ($isEmpleado || $isRRHH)]
         ];
+        
+        $displayedCards = 0;
         for ($i = 0; $i < count($cards); $i++) {
-          if ($i % 3 === 0) {
+          // Saltar tarjeta si debe ocultarse para empleados
+          if ($cards[$i][6] === true) {
+            continue;
+          }
+          
+          if ($displayedCards % 3 === 0) {
             echo '<div class="row g-4 mt-2">';
           }
           echo '<div class="col-md-4">';
@@ -417,9 +428,15 @@ use App\Models\RolePermissions;
           }
           echo '<a href="' . $cards[$i][3] . '" class="btn btn-zigma-fluor fw-bold">' . $cards[$i][4] . '</a>';
           echo '</div></div></div>';
-          if ($i % 3 === 2 || $i === count($cards) - 1) {
+          
+          $displayedCards++;
+          if ($displayedCards % 3 === 0) {
             echo '</div>';
           }
+        }
+        // Cerrar la última fila si es necesario
+        if ($displayedCards % 3 !== 0) {
+          echo '</div>';
         }
         ?>
       </div>

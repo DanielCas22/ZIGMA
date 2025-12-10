@@ -19,6 +19,12 @@ class ReportesController extends Controller
 
     public function descargarGeneral()
     {
+        // Solo administradores pueden descargar reporte general
+        if (!isset($_SESSION['user']) || (isset($_SESSION['user']['rol']) && $_SESSION['user']['rol'] !== 'admin')) {
+            header('Location: /Login');
+            exit();
+        }
+
         $empleadoModel = new Empleado();
         $empleados = $empleadoModel->getAllWithRoles();
         // Filtrar empleados especiales
@@ -132,11 +138,26 @@ class ReportesController extends Controller
         }
         if ($empleado_id) {
             $empleado = $empleadoModel->getByIdWithRoles($empleado_id);
-            $devengadoModel = $this->model('TotalDevengado');
+            $devengadoModel = $this->model('DevengadoModel');
             $deducidoModel = $this->model('TotalDeducidoModel');
             $horasExtrasModel = $this->model('HorasExtras');
-            $total_devengado = $devengadoModel->getTotalByEmpleado($empleado_id);
-            $total_deducido = $deducidoModel->getTotalByEmpleado($empleado_id);
+            
+            try {
+                $devengadoCompleto = $devengadoModel->calcularDevengadoCompleto($empleado_id);
+                $total_devengado = $devengadoCompleto['resumen']['total_devengado'];
+            } catch (\Exception $e) {
+                error_log("Error calculando devengado: " . $e->getMessage());
+                $total_devengado = 0;
+            }
+            
+            try {
+                $deducidoCompleto = $deducidoModel->calcularTotalDeducidoCompleto($empleado_id);
+                $total_deducido = $deducidoCompleto['resumen']['total_deducciones'];
+            } catch (\Exception $e) {
+                error_log("Error calculando deducido: " . $e->getMessage());
+                $total_deducido = 0;
+            }
+            
             $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($empleado_id);
             $total_horas = 0;
             $total_valor = 0;
@@ -176,12 +197,27 @@ class ReportesController extends Controller
             exit();
         }
         $empleadoModel = $this->model('Empleado');
-        $devengadoModel = $this->model('TotalDevengado');
+        $devengadoModel = $this->model('DevengadoModel');
         $deducidoModel = $this->model('TotalDeducidoModel');
         $horasExtrasModel = $this->model('HorasExtras');
         $empleado = $empleadoModel->getByIdWithRoles($empleado_id);
-        $total_devengado = $devengadoModel->getTotalByEmpleado($empleado_id);
-        $total_deducido = $deducidoModel->getTotalByEmpleado($empleado_id);
+        
+        try {
+            $devengadoCompleto = $devengadoModel->calcularDevengadoCompleto($empleado_id);
+            $total_devengado = $devengadoCompleto['resumen']['total_devengado'];
+        } catch (\Exception $e) {
+            error_log("Error calculando devengado: " . $e->getMessage());
+            $total_devengado = 0;
+        }
+        
+        try {
+            $deducidoCompleto = $deducidoModel->calcularTotalDeducidoCompleto($empleado_id);
+            $total_deducido = $deducidoCompleto['resumen']['total_deducciones'];
+        } catch (\Exception $e) {
+            error_log("Error calculando deducido: " . $e->getMessage());
+            $total_deducido = 0;
+        }
+        
         $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($empleado_id);
         $total_horas = 0;
         $total_valor = 0;
@@ -270,8 +306,22 @@ class ReportesController extends Controller
     }
 
     public function reporteNomina() {
+        // Solo administradores y coordinadores RRHH pueden ver reporte de nómina
+        if (!isset($_SESSION['user'])) {
+            header('Location: /Login');
+            exit();
+        }
+
+        $userRole = isset($_SESSION['user']['rol']) ? $_SESSION['user']['rol'] : 'empleado';
+        
+        // Si es empleado, no puede acceder a reportes de nómina
+        if ($userRole === 'empleado') {
+            header('Location: /ZIGMA/public/index.php?url=Reportes');
+            exit();
+        }
+
         $empleadoModel = $this->model('Empleado');
-        $devengadoModel = $this->model('TotalDevengado');
+        $devengadoModel = $this->model('DevengadoModel');
         $deducidoModel = $this->model('TotalDeducidoModel');
         $nominaData = [];
         $total_nomina = 0;
@@ -280,8 +330,23 @@ class ReportesController extends Controller
         $empleados = $empleadoModel->getAllWithRoles();
         foreach ($empleados as $emp) {
             if (in_array($emp['id_empleados'], [1,2,3])) continue;
-            $dev = $devengadoModel->getTotalByEmpleado($emp['id_empleados']);
-            $ded = $deducidoModel->getTotalByEmpleado($emp['id_empleados']);
+            
+            try {
+                $devengadoCompleto = $devengadoModel->calcularDevengadoCompleto($emp['id_empleados']);
+                $dev = $devengadoCompleto['resumen']['total_devengado'];
+            } catch (\Exception $e) {
+                error_log("Error calculando devengado para empleado {$emp['id_empleados']}: " . $e->getMessage());
+                $dev = 0;
+            }
+            
+            try {
+                $deducidoCompleto = $deducidoModel->calcularTotalDeducidoCompleto($emp['id_empleados']);
+                $ded = $deducidoCompleto['resumen']['total_deducciones'];
+            } catch (\Exception $e) {
+                error_log("Error calculando deducido para empleado {$emp['id_empleados']}: " . $e->getMessage());
+                $ded = 0;
+            }
+            
             $horasExtrasModel = $this->model('HorasExtras');
             $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($emp['id_empleados']);
             $total_horas = 0;
@@ -292,7 +357,7 @@ class ReportesController extends Controller
                     $total_valor += floatval($he['valor']);
                 }
             }
-            $valor_pagar = $dev - $ded + $total_valor;
+            $valor_pagar = $dev - $ded;
             $nominaData[] = [
                 'nombre' => $emp['nombre'],
                 'apellido' => $emp['apellido'],
@@ -303,7 +368,7 @@ class ReportesController extends Controller
                 'total_valor_horas' => $total_valor
             ];
             $total_nomina += $valor_pagar;
-            $total_devengado += ($dev + $total_valor);
+            $total_devengado += $dev;
             $total_deducido += $ded;
         }
         $estadisticas = [
@@ -319,9 +384,23 @@ class ReportesController extends Controller
     }
 
     public function descargarNomina() {
+        // Solo administradores y coordinadores RRHH pueden descargar reporte de nómina
+        if (!isset($_SESSION['user'])) {
+            header('Location: /Login');
+            exit();
+        }
+
+        $userRole = isset($_SESSION['user']['rol']) ? $_SESSION['user']['rol'] : 'empleado';
+        
+        // Si es empleado, no puede descargar reporte de nómina
+        if ($userRole === 'empleado') {
+            header('Location: /ZIGMA/public/index.php?url=Reportes');
+            exit();
+        }
+
         $formato = isset($_GET['formato']) ? strtolower($_GET['formato']) : 'pdf';
         $empleadoModel = $this->model('Empleado');
-        $devengadoModel = $this->model('TotalDevengado');
+        $devengadoModel = $this->model('DevengadoModel');
         $deducidoModel = $this->model('TotalDeducidoModel');
         $nominaData = [];
         $total_nomina = 0;
@@ -331,8 +410,23 @@ class ReportesController extends Controller
         $empleados = $empleadoModel->getAllWithRoles();
         foreach ($empleados as $emp) {
             if (in_array($emp['id_empleados'], [1,2,3])) continue;
-            $dev = $devengadoModel->getTotalByEmpleado($emp['id_empleados']);
-            $ded = $deducidoModel->getTotalByEmpleado($emp['id_empleados']);
+            
+            try {
+                $devengadoCompleto = $devengadoModel->calcularDevengadoCompleto($emp['id_empleados']);
+                $dev = $devengadoCompleto['resumen']['total_devengado'];
+            } catch (\Exception $e) {
+                error_log("Error calculando devengado para empleado {$emp['id_empleados']}: " . $e->getMessage());
+                $dev = 0;
+            }
+            
+            try {
+                $deducidoCompleto = $deducidoModel->calcularTotalDeducidoCompleto($emp['id_empleados']);
+                $ded = $deducidoCompleto['resumen']['total_deducciones'];
+            } catch (\Exception $e) {
+                error_log("Error calculando deducido para empleado {$emp['id_empleados']}: " . $e->getMessage());
+                $ded = 0;
+            }
+            
             $horas_extras = $horasExtrasModel->getHorasExtrasByEmpleado($emp['id_empleados']);
             $total_horas = 0;
             $total_valor = 0;
@@ -342,7 +436,7 @@ class ReportesController extends Controller
                     $total_valor += floatval($he['valor']);
                 }
             }
-            $valor_pagar = $dev - $ded + $total_valor;
+            $valor_pagar = $dev - $ded;
             $nominaData[] = [
                 'nombre' => $emp['nombre'],
                 'apellido' => $emp['apellido'],
@@ -353,7 +447,7 @@ class ReportesController extends Controller
                 'total_valor_horas' => $total_valor
             ];
             $total_nomina += $valor_pagar;
-            $total_devengado += ($dev + $total_valor);
+            $total_devengado += $dev;
             $total_deducido += $ded;
         }
         $estadisticas = [

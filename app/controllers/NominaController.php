@@ -1,5 +1,6 @@
 <?php
 namespace App\Controllers;
+require_once __DIR__ . '/../../config/session_config.php';
 require_once __DIR__ . '/Controller.php';
 use App\Controllers\Controller;
 
@@ -13,10 +14,6 @@ class NominaController extends Controller {
         
         try {
             $nominaModel = $this->model('NominaModel');
-            // Iniciar sesión si no está iniciada
-            if (session_status() === PHP_SESSION_NONE) {
-                session_start();
-            }
             $user = $_SESSION['user'] ?? null;
             $rol = $user['rol'] ?? null;
             $empleado_id = $user['empleado_id'] ?? null;
