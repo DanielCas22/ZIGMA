@@ -177,10 +177,10 @@ class HorasExtras extends Model {
                        DATE_FORMAT(he.fecha_creacion, "%d/%m/%Y %H:%i") as fecha_creacion_formatted
                 FROM horas_extras he 
                 INNER JOIN empleados e ON he.empleado_id = e.id_empleados 
-                LEFT JOIN rol_has_user ru ON ru.user_id = (SELECT id_doc FROM user WHERE empleado_id = e.id_empleados)
+                LEFT JOIN user u ON u.empleado_id = e.id_empleados
+                LEFT JOIN rol_has_user ru ON ru.user_id = u.id_doc
                 LEFT JOIN rol r ON ru.rol_id = r.id_rol
-                WHERE he.estado = "pendiente" 
-                  AND (r.nombre IS NULL OR (LOWER(r.nombre) NOT IN ("admin", "rrhh")))';
+                WHERE he.estado = "pendiente"';
         $params = [];
         if ($empleadoId) {
             $sql .= ' AND he.empleado_id = ?';
