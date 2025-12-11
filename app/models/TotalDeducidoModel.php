@@ -8,8 +8,27 @@ class TotalDeducidoModel extends Model {
     
     // Constantes para cálculos 2025
     const SALARIO_MINIMO = 1423000;
-    const PORC_SALUD_EMPLEADO = 4.0;      // 4%
-    const PORC_PENSION_EMPLEADO = 4.0;    // 4%
+    const PORC_SALUD_EMPLEADO = 4.0;      // 4% (Fallback)
+    const PORC_PENSION_EMPLEADO = 4.0;    // 4% (Fallback)
+    
+    /**
+     * Obtener parámetros de aportes desde la base de datos
+     */
+    private function getParametrosAportes() {
+        static $parametros = null;
+        if ($parametros === null) {
+            $stmt = $this->db->prepare("SELECT * FROM parametros_aportes ORDER BY id DESC LIMIT 1");
+            $stmt->execute();
+            $parametros = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if (!$parametros) {
+                $parametros = [
+                    'salud_empleado' => self::PORC_SALUD_EMPLEADO,
+                    'pension_empleado' => self::PORC_PENSION_EMPLEADO
+                ];
+            }
+        }
+        return $parametros;
+    }
     
     // Tabla Fondo de Solidaridad según attachment
     const FONDO_SOLIDARIDAD_RANGOS = [
@@ -32,25 +51,28 @@ class TotalDeducidoModel extends Model {
     }
 
     /**
-     * Calcular el fondo de solidaridad según la tabla de rangos
+     * Calcular el fondo de solidaridad según la tabla de rangos desde la base de datos
      */
     public function calcularFondoSolidaridad($salario) {
         $salarioMinimo = $this->getSalarioMinimoVigente();
         $salarioEnSMLV = $salario / $salarioMinimo;
         
-        foreach (self::FONDO_SOLIDARIDAD_RANGOS as $rango) {
-            if ($salarioEnSMLV > $rango['desde_smlv'] && $salarioEnSMLV <= $rango['hasta_smlv']) {
-                $valor = ($salario * $rango['porcentaje']) / 100;
-                return [
-                    'salario' => $salario,
-                    'smlv_equivalente' => $salarioEnSMLV,
-                    'rango' => $rango['desde_smlv'] . ' - ' . $rango['hasta_smlv'] . ' SMLV',
-                    'porcentaje' => $rango['porcentaje'],
-                    'valor' => $valor,
-                    'aplica' => $valor > 0,
-                    'formula' => 'Salario × ' . $rango['porcentaje'] . '%'
-                ];
-            }
+        // Consultar rangos desde la base de datos
+        $stmt = $this->db->prepare("SELECT * FROM rangos_fondo_solidaridad WHERE ? > desde_smlv AND ? <= hasta_smlv ORDER BY desde_smlv");
+        $stmt->execute([$salarioEnSMLV, $salarioEnSMLV]);
+        $rango = $stmt->fetch(\PDO::FETCH_ASSOC);
+        
+        if ($rango) {
+            $valor = ($salario * $rango['porcentaje']) / 100;
+            return [
+                'salario' => $salario,
+                'smlv_equivalente' => $salarioEnSMLV,
+                'rango' => $rango['desde_smlv'] . ' - ' . $rango['hasta_smlv'] . ' SMLV',
+                'porcentaje' => $rango['porcentaje'],
+                'valor' => $valor,
+                'aplica' => $valor > 0,
+                'formula' => 'Salario × ' . $rango['porcentaje'] . '%'
+            ];
         }
         
         // Por defecto, si no está en rangos

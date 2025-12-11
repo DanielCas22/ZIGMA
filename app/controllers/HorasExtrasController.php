@@ -43,12 +43,14 @@ class HorasExtrasController extends Controller {
         if (!is_array($empleados)) {
             $empleados = [];
         }
-        $tipos_disponibles = [
-            'Extra diurna',
-            'Extra nocturna', 
-            'Extra diurna dominical/festiva',
-            'Extra nocturna dominical/festiva'
-        ];
+        
+        // Obtener tipos de horas extras activos desde la base de datos
+        $tipoHoraExtraModel = $this->model('TipoHoraExtra');
+        $tipos_db = $tipoHoraExtraModel->getAllActivos();
+        $tipos_disponibles = array_map(function($tipo) {
+            return $tipo['nombre'];
+        }, $tipos_db);
+        
         $empleados_procesados = [];
         $currentRole = RolePermissions::getCurrentUserRole();
         foreach ($empleados as &$empleado) {
@@ -158,9 +160,9 @@ class HorasExtrasController extends Controller {
             }
         }
         
-        // Cargar tipos de horas extras disponibles
+        // Cargar tipos de horas extras activos disponibles
         $tipoModel = $this->model('TipoHoraExtra');
-        $tipos_disponibles = $tipoModel->getAll();
+        $tipos_disponibles = $tipoModel->getAllActivos();
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
@@ -215,9 +217,9 @@ class HorasExtrasController extends Controller {
         $empleadoModel = $this->model('Empleado');
         $empleados = $empleadoModel->getAll();
         
-        // Cargar tipos de horas extras disponibles
+        // Cargar tipos de horas extras activos disponibles
         $tipoModel = $this->model('TipoHoraExtra');
-        $tipos_disponibles = $tipoModel->getAll();
+        $tipos_disponibles = $tipoModel->getAllActivos();
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data = [

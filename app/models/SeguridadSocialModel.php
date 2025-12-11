@@ -13,11 +13,33 @@ require_once __DIR__ . '/DevengadoModel.php';
  */
 class SeguridadSocialModel extends Model {
     
-    // CONSTANTES PORCENTAJES SEGURIDAD SOCIAL 2025
+    // CONSTANTES PORCENTAJES SEGURIDAD SOCIAL 2025 (Fallback si no hay datos en BD)
     const PORC_SALUD_EMPLEADO = 4.0;
     const PORC_PENSION_EMPLEADO = 4.0;
     const PORC_SALUD_EMPLEADOR = 8.5;
     const PORC_PENSION_EMPLEADOR = 12.0;
+    
+    /**
+     * Obtener parámetros de aportes desde la base de datos
+     */
+    private function getParametrosAportes() {
+        static $parametros = null;
+        if ($parametros === null) {
+            $stmt = $this->db->prepare("SELECT * FROM parametros_aportes ORDER BY id DESC LIMIT 1");
+            $stmt->execute();
+            $parametros = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if (!$parametros) {
+                // Fallback a constantes
+                $parametros = [
+                    'salud_empleado' => self::PORC_SALUD_EMPLEADO,
+                    'salud_empleador' => self::PORC_SALUD_EMPLEADOR,
+                    'pension_empleado' => self::PORC_PENSION_EMPLEADO,
+                    'pension_empleador' => self::PORC_PENSION_EMPLEADOR
+                ];
+            }
+        }
+        return $parametros;
+    }
     
     private function obtenerRolesEmpleado($idEmpleado) {
         try {
@@ -47,37 +69,40 @@ class SeguridadSocialModel extends Model {
         if ($totalDevengado <= 0) {
             throw new InvalidArgumentException('Error: Total devengado debe ser mayor a 0');
         }
+        
+        // Obtener parámetros desde BD
+        $params = $this->getParametrosAportes();
 
         // CÁLCULO DEDUCCIONES EMPLEADO (Seguridad Social)
-        $saludEmpleado = $totalDevengado * (self::PORC_SALUD_EMPLEADO / 100);
-        $pensionEmpleado = $totalDevengado * (self::PORC_PENSION_EMPLEADO / 100);
+        $saludEmpleado = $totalDevengado * ($params['salud_empleado'] / 100);
+        $pensionEmpleado = $totalDevengado * ($params['pension_empleado'] / 100);
         $totalDeduccionesEmpleado = $saludEmpleado + $pensionEmpleado;
 
         // CÁLCULO APORTES EMPLEADOR (Seguridad Social)
-        $saludEmpleador = $totalDevengado * (self::PORC_SALUD_EMPLEADOR / 100);
-        $pensionEmpleador = $totalDevengado * (self::PORC_PENSION_EMPLEADOR / 100);
+        $saludEmpleador = $totalDevengado * ($params['salud_empleador'] / 100);
+        $pensionEmpleador = $totalDevengado * ($params['pension_empleador'] / 100);
         $totalAportesEmpleador = $saludEmpleador + $pensionEmpleador;
 
         return [
             'total_devengado' => $totalDevengado,
             'deducciones_empleado' => [
                 'salud' => [
-                    'porcentaje' => self::PORC_SALUD_EMPLEADO,
+                    'porcentaje' => $params['salud_empleado'],
                     'valor' => $saludEmpleado
                 ],
                 'pension' => [
-                    'porcentaje' => self::PORC_PENSION_EMPLEADO,
+                    'porcentaje' => $params['pension_empleado'],
                     'valor' => $pensionEmpleado
                 ],
                 'total' => $totalDeduccionesEmpleado
             ],
             'aportes_empleador' => [
                 'salud' => [
-                    'porcentaje' => self::PORC_SALUD_EMPLEADOR,
+                    'porcentaje' => $params['salud_empleador'],
                     'valor' => $saludEmpleador
                 ],
                 'pension' => [
-                    'porcentaje' => self::PORC_PENSION_EMPLEADOR,
+                    'porcentaje' => $params['pension_empleador'],
                     'valor' => $pensionEmpleador
                 ],
                 'total' => $totalAportesEmpleador

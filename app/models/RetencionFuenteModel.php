@@ -126,16 +126,57 @@ class RetencionFuenteModel extends Model {
     }
 
     private function calcularProgresivoArt383($base_uvt) {
-        $r = $this->rangos; // [95,150,360,640,945,2300]
-        $t = $this->tarifas; // [0,0.19,0.28,0.33,0.35,0.37,0.39]
         $b = max(0, floatval($base_uvt));
-        if ($b <= $r[0]) return 0; // 0%
-        if ($b <= $r[1]) return ($b - $r[0]) * $t[1];
-        if ($b <= $r[2]) return ($r[1] - $r[0]) * $t[1] + ($b - $r[1]) * $t[2];
-        if ($b <= $r[3]) return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($b - $r[2]) * $t[3];
-        if ($b <= $r[4]) return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($r[3] - $r[2]) * $t[3] + ($b - $r[3]) * $t[4];
-        if ($b <= $r[5]) return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($r[3] - $r[2]) * $t[3] + ($r[4] - $r[3]) * $t[4] + ($b - $r[4]) * $t[5];
-        // Mayor a 2300 UVT
-        return ($r[1] - $r[0]) * $t[1] + ($r[2] - $r[1]) * $t[2] + ($r[3] - $r[2]) * $t[3] + ($r[4] - $r[3]) * $t[4] + ($r[5] - $r[4]) * $t[5] + ($b - $r[5]) * $t[6];
+        
+        // Consultar tabla de retención desde la base de datos
+        $stmt = $this->db->prepare("SELECT * FROM tabla_retencion_fuente WHERE ? >= desde_uvt AND ? < hasta_uvt ORDER BY desde_uvt");
+        $stmt->execute([$b, $b]);
+        $rangos_aplicables = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        if (empty($rangos_aplicables)) {
+            // Si no hay rangos, buscar el último rango (para valores muy altos)
+            $stmt = $this->db->prepare("SELECT * FROM tabla_retencion_fuente ORDER BY desde_uvt DESC LIMIT 1");
+            $stmt->execute();
+            $ultimo_rango = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($ultimo_rango && $b >= $ultimo_rango['desde_uvt']) {
+                // Calcular usando todos los rangos acumulados
+                return $this->calcularRetencionAcumulada($b);
+            }
+            return 0;
+        }
+        
+        // Si está en un rango específico, calcular con acumulados
+        return $this->calcularRetencionAcumulada($b);
+    }
+    
+    private function calcularRetencionAcumulada($base_uvt) {
+        // Obtener todos los rangos ordenados
+        $stmt = $this->db->prepare("SELECT * FROM tabla_retencion_fuente ORDER BY desde_uvt");
+        $stmt->execute();
+        $rangos = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        $retencion = 0;
+        $base_anterior = 0;
+        
+        foreach ($rangos as $rango) {
+            $desde = $rango['desde_uvt'];
+            $hasta = $rango['hasta_uvt'];
+            $tarifa = $rango['porcentaje'] / 100;
+            
+            if ($base_uvt <= $desde) {
+                break;
+            }
+            
+            if ($base_uvt > $desde && $base_uvt <= $hasta) {
+                // Parte proporcional en este rango
+                $retencion += ($base_uvt - $desde) * $tarifa;
+                break;
+            } else if ($base_uvt > $hasta) {
+                // Rango completo
+                $retencion += ($hasta - $desde) * $tarifa;
+            }
+        }
+        
+        return $retencion;
     }
 }
