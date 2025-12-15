@@ -160,8 +160,6 @@
                                 <thead>
                                     <tr>
                                         <th>Empleado</th>
-                                        <th>Documento</th>
-                                        <th>Cargo</th>
                                         <th class="text-end">Base Devengado</th>
                                         <th class="text-end">SENA (2%)</th>
                                         <th class="text-end">ICBF (3%)</th>
@@ -176,21 +174,6 @@
                                         <tr>
                                             <td>
                                                 <strong><?= htmlspecialchars($calculo['empleado']['nombre'] . ' ' . $calculo['empleado']['apellido']) ?></strong>
-                                            </td>
-                                            <td><?= htmlspecialchars($calculo['empleado']['documento']) ?></td>
-                                            <td>
-                                                <?php
-                                                $rol_nombre = strtolower($calculo['empleado']['cargo'] ?? 'Sin rol');
-                                                $badge_class = 'badge-role-default';
-                                                if (strpos($rol_nombre, 'admin') !== false) {
-                                                    $badge_class = 'badge-role-admin';
-                                                } elseif (strpos($rol_nombre, 'rrhh') !== false || strpos($rol_nombre, 'recursos humanos') !== false) {
-                                                    $badge_class = 'badge-role-rrhh';
-                                                } elseif (strpos($rol_nombre, 'empleado') !== false) {
-                                                    $badge_class = 'badge-role-empleado';
-                                                }
-                                                ?>
-                                                <span class="badge <?= $badge_class ?>"><?= htmlspecialchars($calculo['empleado']['cargo']) ?></span>
                                             </td>
                                             <td class="text-end">
                                                 $<?= number_format($calculo['base_calculo']['total_devengado'], 0, ',', '.') ?>

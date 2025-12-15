@@ -255,7 +255,7 @@ class ParafiscalesModel extends Model {
         return [
             'sena' => isset($aportes['sena']) ? floatval($aportes['sena']) : 0,
             'icbf' => isset($aportes['icbf']) ? floatval($aportes['icbf']) : 0,
-            'caja' => isset($aportes['parafiscales']) ? floatval($aportes['parafiscales']) : 0
+            'caja' => isset($aportes['caja_compensacion']) ? floatval($aportes['caja_compensacion']) : 0
         ];
     }
 }

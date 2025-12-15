@@ -44,7 +44,7 @@ class ReportesController extends Controller
             $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             // Encabezado con estilo
-            $header = ['Empleado', 'Documento', 'Salario', 'Cargo', 'Roles'];
+            $header = ['Empleado', 'Salario', 'Roles'];
             $sheet->fromArray($header, NULL, 'A1');
             // Estilo de encabezado
             $headerStyle = [
@@ -56,19 +56,17 @@ class ReportesController extends Controller
                 ],
                 'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             ];
-            $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+            $sheet->getStyle('A1:C1')->applyFromArray($headerStyle);
             // Bordes y alternancia de color en filas
             $row = 2;
             foreach ($empleados as $emp) {
                 $sheet->fromArray([
                     $emp['nombre'] . ' ' . $emp['apellido'],
-                    $emp['id_empleados'] ?? '',
                     $emp['sueldo_actual'] ?? '',
-                    $emp['rol_nombre'] ?? '',
                     $emp['todos_los_roles'] ?? ''
                 ], NULL, 'A' . $row);
                 $fillColor = ($row % 2 == 0) ? 'F2F6FC' : 'FFFFFF';
-                $sheet->getStyle('A'.$row.':E'.$row)->applyFromArray([
+                $sheet->getStyle('A'.$row.':C'.$row)->applyFromArray([
                     'fill' => [
                         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
                         'startColor' => ['rgb' => $fillColor],
@@ -83,7 +81,7 @@ class ReportesController extends Controller
                 $row++;
             }
             // Ajustar ancho de columnas
-            foreach (range('A', 'E') as $col) {
+            foreach (range('A', 'C') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
             // Congelar encabezado
@@ -105,13 +103,11 @@ class ReportesController extends Controller
         header('Content-Disposition: attachment; filename="reporte_general.csv"');
         echo "\xEF\xBB\xBF"; // BOM para Excel
         $output = fopen('php://output', 'w');
-        fputcsv($output, ['Empleado', 'Documento', 'Salario', 'Cargo', 'Roles'], ';');
+        fputcsv($output, ['Empleado', 'Salario', 'Roles'], ';');
         foreach ($empleados as $emp) {
             fputcsv($output, [
                 $emp['nombre'] . ' ' . $emp['apellido'],
-                $emp['id_empleados'] ?? '',
                 $emp['sueldo_actual'] ?? '',
-                $emp['rol_nombre'] ?? '',
                 $emp['todos_los_roles'] ?? ''
             ], ';');
         }

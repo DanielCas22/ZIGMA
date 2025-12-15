@@ -61,9 +61,9 @@
                     <?php if (isset($_GET['success'])): ?>
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
                             <i class="fas fa-check-circle me-2"></i>
-                            <?php if ($_GET['success'] === 'aprobada'): ?>
+                            <?php if ($_GET['success'] === 'aprobado'): ?>
                                 Horas extras aprobadas exitosamente.
-                            <?php elseif ($_GET['success'] === 'rechazada'): ?>
+                            <?php elseif ($_GET['success'] === 'rechazado'): ?>
                                 Horas extras rechazadas exitosamente.
                             <?php endif; ?>
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -149,7 +149,7 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <?php $idHora = isset($hora['id_extras']) ? (int)$hora['id_extras'] : null; ?>
+                                                <?php $idHora = isset($hora['id']) ? (int)$hora['id'] : null; ?>
                                                 <div class="btn-group" role="group">
                                                     <?php if ($idHora): ?>
                                                     <button type="button" class="btn btn-success btn-sm"

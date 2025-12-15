@@ -45,16 +45,15 @@
                 </div>
                 
                 <hr>
-                <h6>Período de Pago</h6>
+                <h6>Período de Generación de Desprendibles</h6>
                 <div class="row mb-3">
                     <div class="col-md-4">
                         <label>Tipo de Período</label>
                         <select name="periodo_pago" class="form-select" required>
-                            <option value="semanal" <?= ($parametrosGenerales['periodo_pago'] ?? 'mensual') === 'semanal' ? 'selected' : '' ?>>Semanal</option>
                             <option value="quincenal" <?= ($parametrosGenerales['periodo_pago'] ?? 'mensual') === 'quincenal' ? 'selected' : '' ?>>Quincenal</option>
                             <option value="mensual" <?= ($parametrosGenerales['periodo_pago'] ?? 'mensual') === 'mensual' ? 'selected' : '' ?>>Mensual</option>
                         </select>
-                        <small class="form-text text-muted">Frecuencia de pago de nómina</small>
+                        <small class="form-text text-muted">Frecuencia de generación de desprendibles de pago</small>
                     </div>
                 </div>
 
@@ -93,20 +92,6 @@
             </form>
         </div>
         <div class="tab-pane fade" id="legales">
-            <div class="row mb-3 align-items-end">
-                <div class="col-md-4">
-                    <form method="post" action="/ZIGMA/public/index.php?url=Admin/guardarSalarioRol" class="d-flex align-items-end gap-2" id="formSalarioRol" onsubmit="return confirm('¿Guardar salario base para el rol seleccionado?');">
-                        <label class="form-label mb-0 me-2">Salario Base por Rol</label>
-                        <select name="rol" id="rolSalarioSelect" class="form-select" style="max-width: 160px;" onchange="actualizarSalarioRolInput()">
-                            <?php foreach ((new \App\Models\Rol())->getAll() as $rol): ?>
-                                <option value="<?= htmlspecialchars($rol['nombre']) ?>"><?= htmlspecialchars(ucfirst($rol['nombre'])) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <input type="number" step="1" name="salario_rol" id="salarioRolInput" class="form-control" style="max-width: 140px;" min="0" required placeholder="Salario base">
-                        <button type="submit" class="btn btn-outline-primary">Guardar</button>
-                    </form>
-                </div>
-            </div>
             <form method="post" action="/ZIGMA/public/index.php?url=Admin/guardarAuxilioTransporte" onsubmit="return confirm('¿Guardar cambios en auxilio de transporte?');">
                 <div class="row mb-3">
                     <div class="col-md-3">
@@ -124,13 +109,11 @@
                 <b>Nota:</b> El auxilio de transporte solo se otorga a empleados cuyo salario mensual sea menor o igual a <b>2 salarios mínimos legales vigentes (SMLV)</b>.<br>
                 Con el SMLV actual de $<span id="smlvActual">
                 <?php 
-                // Determinar el salario mínimo vigente según el menor salario base por rol
-                $salarios = array_map(function($r) { return $r['salario']; }, (new \App\Models\SalarioPorRol())->getAll());
-                $smlv = $salarios ? min($salarios) : 0;
-                echo number_format($smlv, 0, ',', '.');
+                // Obtener SMLV del parámetro general
+                echo number_format($parametrosGenerales['smlv'] ?? 0, 0, ',', '.');
                 ?>
                 </span>, el límite es <b>$<span id="limiteAuxilio">
-                <?php echo number_format(($smlv * 2), 0, ',', '.'); ?></span></b>. Si el salario supera este valor, no se asigna auxilio de transporte, sin importar el cargo o rol.
+                <?php $smlv = $parametrosGenerales['smlv'] ?? 0; echo number_format(($smlv * 2), 0, ',', '.'); ?></span></b>. Si el salario supera este valor, no se asigna auxilio de transporte, sin importar el cargo o rol.
             </div>
         </div>
         <div class="tab-pane fade" id="solidaridad">
@@ -180,7 +163,7 @@
                 <tbody>
                     <?php foreach ($historial as $h): ?>
                     <tr>
-                        <td><?= htmlspecialchars($h['fecha']) ?></td>
+                        <td><?= htmlspecialchars($h['fecha_cambio'] ?? $h['fecha'] ?? '') ?></td>
                         <td><?= htmlspecialchars($h['actualizado_por']) ?></td>
                         <td><?= htmlspecialchars($h['accion']) ?></td>
                         <td>
@@ -238,37 +221,37 @@
                 <div class="row mb-3">
                     <div class="col-md-3">
                         <label>Salud (Empleador %)</label>
-                        <input type="number" step="0.01" name="salud_empleador" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['salud_empleador'] ?? '') ?>">
+                        <input type="number" step="0.01" name="salud_empleador" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['salud_empleador'] ?? '8.5') ?>">
                     </div>
                     <div class="col-md-3">
                         <label>Salud (Empleado %)</label>
-                        <input type="number" step="0.01" name="salud_empleado" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['salud_empleado'] ?? '') ?>">
+                        <input type="number" step="0.01" name="salud_empleado" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['salud_empleado'] ?? '4') ?>">
                     </div>
                     <div class="col-md-3">
                         <label>Pensión (Empleador %)</label>
-                        <input type="number" step="0.01" name="pension_empleador" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['pension_empleador'] ?? '') ?>">
+                        <input type="number" step="0.01" name="pension_empleador" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['pension_empleador'] ?? '12') ?>">
                     </div>
                     <div class="col-md-3">
                         <label>Pensión (Empleado %)</label>
-                        <input type="number" step="0.01" name="pension_empleado" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['pension_empleador'] ?? '') ?>">
+                        <input type="number" step="0.01" name="pension_empleado" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['pension_empleado'] ?? '4') ?>">
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-3">
-                        <label>Parafiscales (%)</label>
-                        <input type="number" step="0.01" name="parafiscales" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['parafiscales'] ?? '0') ?>">
-                    </div>
-                    <div class="col-md-3">
                         <label>SENA (%)</label>
-                        <input type="number" step="0.01" name="sena" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['sena'] ?? '0') ?>">
+                        <input type="number" step="0.01" name="sena" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['sena'] ?? '2') ?>">
                     </div>
                     <div class="col-md-3">
                         <label>ICBF (%)</label>
-                        <input type="number" step="0.01" name="icbf" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['icbf'] ?? '0') ?>">
+                        <input type="number" step="0.01" name="icbf" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['icbf'] ?? '3') ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <label>Caja de Compensación (%)</label>
+                        <input type="number" step="0.01" name="caja_compensacion" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['caja_compensacion'] ?? '4') ?>">
                     </div>
                     <div class="col-md-3">
                         <label>Prestaciones Sociales (%)</label>
-                        <input type="number" step="0.01" name="prestaciones" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['prestaciones'] ?? '') ?>">
+                        <input type="number" step="0.01" name="prestaciones" class="form-control" required min="0" max="100" value="<?= htmlspecialchars($aportes['prestaciones'] ?? '8.33') ?>">
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Guardar Cambios</button>

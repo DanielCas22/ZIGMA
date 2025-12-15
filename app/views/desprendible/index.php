@@ -23,17 +23,14 @@
                         <i class="fas fa-users me-2"></i>
                         Buscar Empleado
                     </h5>
-                    <form id="formBusquedaNombre" method="GET" action="/ZIGMA/public/index.php?url=Desprendible/mostrar">
+                    <form id="formBusquedaNombre" onsubmit="return false;">
                         <div class="mb-3">
                             <label for="busqueda_nombre" class="form-label">
                                 <i class="fas fa-search me-1"></i>
                                 Buscar por nombre
                             </label>
-                            <input type="text" class="form-control" id="busqueda_nombre" name="busqueda_nombre" placeholder="Ingrese el nombre del empleado..." required>
+                            <input type="text" class="form-control" id="busqueda_nombre" placeholder="Ingrese el nombre del empleado..." oninput="filtrarEmpleados(this.value)">
                         </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search me-1"></i> Buscar
-                        </button>
                     </form>
                 </div>
             </div>
@@ -149,5 +146,24 @@
         }
     }
 </style>
+
+<script>
+function filtrarEmpleados(filtro) {
+    const tabla = document.querySelector('.table-zigma tbody');
+    const filas = tabla.querySelectorAll('tr');
+    const filtroLower = filtro.toLowerCase();
+    
+    filas.forEach(fila => {
+        const nombre = fila.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+        const documento = fila.querySelector('td:nth-child(1)')?.textContent.toLowerCase() || '';
+        
+        if (nombre.includes(filtroLower) || documento.includes(filtroLower)) {
+            fila.style.display = '';
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+}
+</script>
 </body>
 </html>

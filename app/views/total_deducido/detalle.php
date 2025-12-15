@@ -81,9 +81,6 @@
                         <a href="/ZIGMA/TotalDeducido" class="btn btn-outline-secondary">
                             <i class="fas fa-arrow-left me-1"></i> Volver
                         </a>
-                        <button type="button" class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#conceptosModal">
-                            <i class="fas fa-plus me-1"></i> Gestionar Conceptos
-                        </button>
                     </div>
                 </div>
             </div>

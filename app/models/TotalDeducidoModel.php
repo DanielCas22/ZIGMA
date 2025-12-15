@@ -13,19 +13,17 @@ class TotalDeducidoModel extends Model {
     
     /**
      * Obtener parámetros de aportes desde la base de datos
+     * SIEMPRE obtiene de la BD sin caché para reflejar cambios en tiempo real
      */
     private function getParametrosAportes() {
-        static $parametros = null;
-        if ($parametros === null) {
-            $stmt = $this->db->prepare("SELECT * FROM parametros_aportes ORDER BY id DESC LIMIT 1");
-            $stmt->execute();
-            $parametros = $stmt->fetch(\PDO::FETCH_ASSOC);
-            if (!$parametros) {
-                $parametros = [
-                    'salud_empleado' => self::PORC_SALUD_EMPLEADO,
-                    'pension_empleado' => self::PORC_PENSION_EMPLEADO
-                ];
-            }
+        $stmt = $this->db->prepare("SELECT * FROM parametros_aportes ORDER BY id DESC LIMIT 1");
+        $stmt->execute();
+        $parametros = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if (!$parametros) {
+            $parametros = [
+                'salud_empleado' => self::PORC_SALUD_EMPLEADO,
+                'pension_empleado' => self::PORC_PENSION_EMPLEADO
+            ];
         }
         return $parametros;
     }

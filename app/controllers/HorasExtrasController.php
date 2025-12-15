@@ -208,11 +208,18 @@ class HorasExtrasController extends Controller {
         ]);
     }
 
-    public function edit($id) {
+    public function edit($id = null) {
         if (!isset($_SESSION['user'])) {
             header('Location: ' . $this->baseUrl() . '/public/index.php');
             exit;
         }
+        
+        // Si no se proporciona ID, redirigir a la lista
+        if ($id === null) {
+            header('Location: ' . $this->baseUrl() . '/public/index.php?url=horas_extras/index');
+            exit;
+        }
+        
         $horasExtrasModel = $this->model('HorasExtras');
         $empleadoModel = $this->model('Empleado');
         $empleados = $empleadoModel->getAll();
@@ -346,11 +353,11 @@ class HorasExtrasController extends Controller {
                 // Registrar notificación para el empleado
                 $he = $horasExtrasModel->find($id);
                 if ($he && isset($he['empleado_id'])) {
-                    $horasExtrasModel->registrarNotificacionHorasExtras($he['empleado_id'], 'aprobada');
+                    $horasExtrasModel->registrarNotificacionHorasExtras($he['empleado_id'], 'aprobado');
                 }
                 
                 if ($resultado) {
-                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&success=aprobada');
+                    header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&success=aprobado');
                 } else {
                     header('Location: ' . $this->baseUrl() . '/public/index.php?url=HorasExtras/pendientes&error=1');
                 }

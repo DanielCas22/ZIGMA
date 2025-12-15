@@ -11,6 +11,46 @@ class DesprendibleModel {
     }
     
     /**
+     * Crear un nuevo desprendible/nómina para un empleado
+     */
+    public function crearDesprendible($empleadoId, $mes = null, $anio = null, $dia = null) {
+        try {
+            if (!$mes) $mes = date('n');
+            if (!$anio) $anio = date('Y');
+            if (!$dia) $dia = date('j');
+            
+            // Verificar si ya existe
+            $sql = 'SELECT id_nomina FROM nomina WHERE empleado_id = ? AND mes = ? AND anio = ? LIMIT 1';
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$empleadoId, $mes, $anio]);
+            
+            if ($stmt->rowCount() > 0) {
+                return true; // Ya existe, no crear duplicado
+            }
+            
+            // Obtener datos de nómina
+            $nominaModel = new NominaModel();
+            $calculo = $nominaModel->calcularNominaCompleta($empleadoId);
+            
+            // Insertar nuevo registro
+            $sql = 'INSERT INTO nomina (anio, mes, dia, empleado_id, valor_pagar, estado) 
+                    VALUES (?, ?, ?, ?, ?, "pendiente")';
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                $anio,
+                $mes,
+                $dia,
+                $empleadoId,
+                $calculo['resumen']['neto_pagar'] ?? 0
+            ]);
+            
+        } catch (\Exception $e) {
+            error_log("Error creando desprendible: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
      * Obtener datos completos del desprendible para un empleado
      */
     public function obtenerDesprendible($empleadoId, $mes = null, $anio = null) {
@@ -137,9 +177,26 @@ class DesprendibleModel {
      * Eliminar desprendible de la base de datos
      */
     public function eliminarDesprendible($empleadoId) {
-        // Eliminar desprendible de la tabla nomina
-        $sql = 'DELETE FROM nomina WHERE empleado_id = ?';
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$empleadoId]);
+        try {
+            // Eliminar desprendible de la tabla nomina
+            $sql = 'DELETE FROM nomina WHERE empleado_id = ?';
+            $stmt = $this->db->prepare($sql);
+            $resultado = $stmt->execute([$empleadoId]);
+            
+            // Si se eliminó exitosamente, generar uno nuevo automáticamente
+            if ($resultado) {
+                $mes = date('n'); // Mes actual (1-12)
+                $anio = date('Y'); // Año actual
+                $dia = date('j'); // Día actual (1-31)
+                
+                // Crear nuevo desprendible para el mes actual
+                $this->crearDesprendible($empleadoId, $mes, $anio, $dia);
+            }
+            
+            return $resultado;
+        } catch (\Exception $e) {
+            error_log("Error eliminando desprendible: " . $e->getMessage());
+            return false;
+        }
     }
 }

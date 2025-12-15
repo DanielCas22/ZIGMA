@@ -129,11 +129,11 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <?php if ($hora['estado'] === 'aprobada'): ?>
+                                                <?php if ($hora['estado'] === 'aprobado'): ?>
                                                     <span class="badge bg-success">
                                                         <i class="fas fa-check me-1"></i>Aprobada
                                                     </span>
-                                                <?php elseif ($hora['estado'] === 'rechazada'): ?>
+                                                <?php elseif ($hora['estado'] === 'rechazado'): ?>
                                                     <span class="badge bg-danger">
                                                         <i class="fas fa-times me-1"></i>Rechazada
                                                     </span>
@@ -149,9 +149,9 @@
                                                 </small>
                                             </td>
                                             <td>
-                                                <?php if ($hora['estado'] === 'aprobada' || $hora['estado'] === 'rechazada'): ?>
+                                                <?php if ($hora['estado'] === 'aprobado' || $hora['estado'] === 'rechazado'): ?>
                                                     <div class="text-center">
-                                                        <strong class="d-block text-<?php echo $hora['estado'] === 'aprobada' ? 'success' : 'danger'; ?>">
+                                                        <strong class="d-block text-<?php echo $hora['estado'] === 'aprobado' ? 'success' : 'danger'; ?>">
                                                             <?php echo htmlspecialchars($hora['aprobado_por_usuario'] ?? 'N/A'); ?>
                                                         </strong>
                                                         <small class="text-muted">
@@ -188,7 +188,7 @@
                                         <h5 class="card-title text-success">Aprobadas</h5>
                                         <h3 class="text-success">
                                             <?php 
-                                            $aprobadas = array_filter($historial, function($h) { return $h['estado'] === 'aprobada'; });
+                                            $aprobadas = array_filter($historial, function($h) { return $h['estado'] === 'aprobado'; });
                                             echo count($aprobadas);
                                             ?>
                                         </h3>
@@ -201,7 +201,7 @@
                                         <h5 class="card-title text-danger">Rechazadas</h5>
                                         <h3 class="text-danger">
                                             <?php 
-                                            $rechazadas = array_filter($historial, function($h) { return $h['estado'] === 'rechazada'; });
+                                            $rechazadas = array_filter($historial, function($h) { return $h['estado'] === 'rechazado'; });
                                             echo count($rechazadas);
                                             ?>
                                         </h3>

@@ -82,7 +82,7 @@ class HorasExtras extends Model {
     }
 
     public function find($id) {
-        $sql = 'SELECT * FROM horas_extras WHERE id_extras = ?';
+        $sql = 'SELECT * FROM horas_extras WHERE id = ?';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -100,7 +100,7 @@ class HorasExtras extends Model {
             $data['porcentaje'] = isset($tipoData['porcentaje']) ? $tipoData['porcentaje'] : 0;
         }
 
-        $sql = 'UPDATE horas_extras SET empleado_id=?, valor=?, cantidad=?, tipo=?, porcentaje=?, dia=?, mes=?, anio=? WHERE id_extras=?';
+        $sql = 'UPDATE horas_extras SET empleado_id=?, valor=?, cantidad=?, tipo=?, porcentaje=?, dia=?, mes=?, anio=? WHERE id=?';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
             $data['empleado_id'],
@@ -116,7 +116,7 @@ class HorasExtras extends Model {
     }
 
     public function delete($id) {
-        $sql = 'DELETE FROM horas_extras WHERE id_extras = ?';
+        $sql = 'DELETE FROM horas_extras WHERE id = ?';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$id]);
     }
@@ -126,11 +126,11 @@ class HorasExtras extends Model {
      */
     public function aprobar($id, $aprobado_por, $comentario = null) {
         $sql = 'UPDATE horas_extras SET 
-                estado = "aprobada", 
+                estado = "aprobado", 
                 fecha_aprobacion = NOW(), 
                 aprobado_por = ?, 
                 comentario_aprobacion = ? 
-                WHERE id_extras = ?';
+                WHERE id = ?';
         $stmt = $this->db->prepare($sql);
         $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
 
@@ -138,7 +138,7 @@ class HorasExtras extends Model {
         if ($resultado) {
             $horasExtras = $this->find($id);
             if ($horasExtras && isset($horasExtras['empleado_id']) && $horasExtras['empleado_id']) {
-                $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'aprobada');
+                $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'aprobado');
             }
         }
 
@@ -150,11 +150,11 @@ class HorasExtras extends Model {
      */
     public function rechazar($id, $aprobado_por, $comentario = null) {
         $sql = 'UPDATE horas_extras SET 
-                estado = "rechazada", 
+                estado = "rechazado", 
                 fecha_aprobacion = NOW(), 
                 aprobado_por = ?, 
                 comentario_aprobacion = ? 
-                WHERE id_extras = ?';
+                WHERE id = ?';
         $stmt = $this->db->prepare($sql);
         $resultado = $stmt->execute([$aprobado_por, $comentario, $id]);
 
@@ -162,7 +162,7 @@ class HorasExtras extends Model {
         if ($resultado) {
             $horasExtras = $this->find($id);
             if ($horasExtras && isset($horasExtras['empleado_id']) && $horasExtras['empleado_id']) {
-                $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'rechazada');
+                $this->registrarNotificacionHorasExtras($horasExtras['empleado_id'], 'rechazado');
             }
         }
 
@@ -186,10 +186,26 @@ class HorasExtras extends Model {
             $sql .= ' AND he.empleado_id = ?';
             $params[] = $empleadoId;
         }
-        $sql .= ' ORDER BY he.fecha_creacion ASC';
+        // Filtrar para que si hay múltiples roles, preferir 'rrhh' (el que aprueba)
+        $sql .= ' ORDER BY CASE WHEN r.nombre = "rrhh" THEN 0 ELSE 1 END, he.fecha_creacion ASC';
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $pendientes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Eliminar duplicados: guardar solo el primer registro de cada horas_extras id (preferentemente con rol 'rrhh')
+        $deduplicados = [];
+        $ids_vistos = [];
+        
+        foreach ($pendientes as $pendiente) {
+            $id = $pendiente['id'];
+            if (!in_array($id, $ids_vistos)) {
+                $ids_vistos[] = $id;
+                $deduplicados[] = $pendiente;
+            }
+        }
+        
+        return $deduplicados;
     }
     
     /**
@@ -241,7 +257,7 @@ class HorasExtras extends Model {
             return false;
         }
         $usuarioId = $usuario['id_doc'];
-        $mensaje = $estado === 'aprobada' ?
+        $mensaje = $estado === 'aprobado' ?
             "Tus horas extras han sido aprobadas." :
             "Tus horas extras han sido rechazadas. Comentario: $comentario";
         $url = "/ZIGMA/public/index.php?url=HorasExtras/historial/$empleadoId";

@@ -10,12 +10,14 @@ class AdminController extends Controller {
         $paramModel = $this->model('ParametrosModel');
         $parametrosGenerales = $this->model('ParametrosGenerales')->getAll();
         $parametros = $paramModel->getParametrosLegales();
+        $aportes = $paramModel->getAportes(); // Obtener aportes más recientes
         $rangosSolidaridad = $paramModel->getRangosFondoSolidaridad();
         $tablaRetencion = $paramModel->getTablaRetencionFuente();
         $historial = $paramModel->getHistorialCambios();
         $this->view('admin/parametros', [
             'parametrosGenerales' => $parametrosGenerales,
             'parametros' => $parametros,
+            'aportes' => $aportes,
             'rangosSolidaridad' => $rangosSolidaridad,
             'tablaRetencion' => $tablaRetencion,
             'historial' => $historial
@@ -157,6 +159,7 @@ class AdminController extends Controller {
         $prestaciones = isset($_POST['prestaciones']) ? floatval($_POST['prestaciones']) : null;
         $sena = isset($_POST['sena']) ? floatval($_POST['sena']) : 0;
         $icbf = isset($_POST['icbf']) ? floatval($_POST['icbf']) : 0;
+        $caja_compensacion = isset($_POST['caja_compensacion']) ? floatval($_POST['caja_compensacion']) : 0;
         $paramModel = $this->model('ParametrosModel');
         $result = $paramModel->actualizarAportes([
             'salud_empleador' => $salud_empleador,
@@ -166,6 +169,7 @@ class AdminController extends Controller {
             'parafiscales' => $parafiscales,
             'sena' => $sena,
             'icbf' => $icbf,
+            'caja_compensacion' => $caja_compensacion,
             'prestaciones' => $prestaciones
         ], $_SESSION['user']['id_doc']);
         $_SESSION[$result ? 'success' : 'error'] = $result ? 'Aportes actualizados correctamente.' : 'Error al actualizar aportes.';

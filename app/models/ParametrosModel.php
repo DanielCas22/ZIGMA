@@ -23,7 +23,7 @@ class ParametrosModel extends Model {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     public function getHistorialCambios() {
-        $sql = "SELECT * FROM historial_parametros ORDER BY fecha DESC";
+        $sql = "SELECT * FROM historial_parametros ORDER BY fecha_cambio DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -73,9 +73,9 @@ class ParametrosModel extends Model {
     }
 
     public function registrarHistorial($accion, $usuario_id, $detalle) {
-        $sql = "INSERT INTO historial_parametros (fecha, actualizado_por, accion, detalle) VALUES (NOW(), ?, ?, ?)";
+        $sql = "INSERT INTO historial_parametros (accion, actualizado_por, detalle, fecha_cambio) VALUES (?, ?, ?, NOW())";
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$usuario_id, $accion, $detalle]);
+        $stmt->execute([$accion, $usuario_id, $detalle]);
     }
 
     public function getExportData() {
@@ -97,18 +97,62 @@ class ParametrosModel extends Model {
     // Actualiza solo el auxilio de transporte y su año de vigencia
     public function actualizarAuxilioTransporte($auxilio, $anio, $usuario_id) {
         if ($auxilio < 0 || $anio < 2000) return false;
-        $sql = "UPDATE parametros_legales SET auxilio_transporte = ?, actualizado_por = ?, fecha_actualizacion = NOW() WHERE año_vigencia = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$auxilio, $usuario_id, $anio]);
+        
+        // Primero verificar si existe un registro para este año
+        $checkSql = "SELECT id FROM parametros_legales WHERE año_vigencia = ?";
+        $checkStmt = $this->db->prepare($checkSql);
+        $checkStmt->execute([$anio]);
+        $existe = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($existe) {
+            // Actualizar registro existente
+            $sql = "UPDATE parametros_legales SET auxilio_transporte = ?, actualizado_por = ?, fecha_actualizacion = NOW() WHERE año_vigencia = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$auxilio, $usuario_id, $anio]);
+        } else {
+            // Insertar nuevo registro si no existe
+            $sql = "INSERT INTO parametros_legales (smlv, auxilio_transporte, año_vigencia, actualizado_por) VALUES (?, ?, ?, ?)";
+            $stmt = $this->db->prepare($sql);
+            // Obtener SMLV del registro anterior si existe
+            $smlvSql = "SELECT smlv FROM parametros_legales ORDER BY año_vigencia DESC LIMIT 1";
+            $smlvStmt = $this->db->prepare($smlvSql);
+            $smlvStmt->execute();
+            $previo = $smlvStmt->fetch(PDO::FETCH_ASSOC);
+            $smlv = $previo ? $previo['smlv'] : 1300000;
+            $stmt->execute([$smlv, $auxilio, $anio, $usuario_id]);
+        }
+        
         $this->registrarHistorial('Actualizar auxilio transporte', $usuario_id, json_encode(['auxilio'=>$auxilio,'anio'=>$anio]));
         return true;
     }
     // Actualiza solo el salario mínimo legal vigente para el año dado
     public function actualizarSalarioMinimo($smlv, $anio, $usuario_id) {
         if ($smlv <= 0 || $anio < 2000) return false;
-        $sql = "UPDATE parametros_legales SET smlv = ?, actualizado_por = ?, fecha_actualizacion = NOW() WHERE año_vigencia = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$smlv, $usuario_id, $anio]);
+        
+        // Primero verificar si existe un registro para este año
+        $checkSql = "SELECT id FROM parametros_legales WHERE año_vigencia = ?";
+        $checkStmt = $this->db->prepare($checkSql);
+        $checkStmt->execute([$anio]);
+        $existe = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($existe) {
+            // Actualizar registro existente
+            $sql = "UPDATE parametros_legales SET smlv = ?, actualizado_por = ?, fecha_actualizacion = NOW() WHERE año_vigencia = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$smlv, $usuario_id, $anio]);
+        } else {
+            // Insertar nuevo registro si no existe
+            $sql = "INSERT INTO parametros_legales (smlv, auxilio_transporte, año_vigencia, actualizado_por) VALUES (?, ?, ?, ?)";
+            $stmt = $this->db->prepare($sql);
+            // Obtener auxilio del registro anterior si existe
+            $auxSql = "SELECT auxilio_transporte FROM parametros_legales ORDER BY año_vigencia DESC LIMIT 1";
+            $auxStmt = $this->db->prepare($auxSql);
+            $auxStmt->execute();
+            $previo = $auxStmt->fetch(PDO::FETCH_ASSOC);
+            $auxilio = $previo ? $previo['auxilio_transporte'] : 200000;
+            $stmt->execute([$smlv, $auxilio, $anio, $usuario_id]);
+        }
+        
         $this->registrarHistorial('Actualizar SMLV', $usuario_id, json_encode(['smlv'=>$smlv,'anio'=>$anio]));
         return true;
     }
@@ -120,22 +164,35 @@ class ParametrosModel extends Model {
     }
 
     public function actualizarAportes($aportes, $usuario_id) {
-        // Validación básica
-        foreach (['salud_empleador','salud_empleado','pension_empleador','pension_empleado','parafiscales','sena','icbf','prestaciones'] as $campo) {
-            if (!isset($aportes[$campo]) || $aportes[$campo] < 0 || $aportes[$campo] > 100) return false;
+        // Validación básica - permitir null o 0 para campos opcionales
+        foreach (['salud_empleador','salud_empleado','pension_empleador','pension_empleado','sena','icbf','caja_compensacion','prestaciones'] as $campo) {
+            if (!isset($aportes[$campo])) {
+                $aportes[$campo] = 0; // Asignar 0 si no está definido
+            }
+            $valor = floatval($aportes[$campo]);
+            if ($valor < 0 || $valor > 100) {
+                return false; // Rechazar si está fuera de rango
+            }
         }
-        $sql = "INSERT INTO parametros_aportes (salud_empleador, salud_empleado, pension_empleador, pension_empleado, parafiscales, sena, icbf, prestaciones, actualizado_por, fecha_actualizacion)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        
+        // parafiscales puede ser null o 0 (es el total de SENA + ICBF + CAJA)
+        if (!isset($aportes['parafiscales'])) {
+            $aportes['parafiscales'] = 0;
+        }
+        
+        $sql = "INSERT INTO parametros_aportes (salud_empleador, salud_empleado, pension_empleador, pension_empleado, parafiscales, sena, icbf, caja_compensacion, prestaciones, actualizado_por, fecha_actualizacion)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
-            $aportes['salud_empleador'],
-            $aportes['salud_empleado'],
-            $aportes['pension_empleador'],
-            $aportes['pension_empleado'],
-            $aportes['parafiscales'],
-            $aportes['sena'],
-            $aportes['icbf'],
-            $aportes['prestaciones'],
+            floatval($aportes['salud_empleador']),
+            floatval($aportes['salud_empleado']),
+            floatval($aportes['pension_empleador']),
+            floatval($aportes['pension_empleado']),
+            floatval($aportes['parafiscales']),
+            floatval($aportes['sena']),
+            floatval($aportes['icbf']),
+            floatval($aportes['caja_compensacion']),
+            floatval($aportes['prestaciones']),
             $usuario_id
         ]);
         $this->registrarHistorial('Actualizar aportes y parafiscales', $usuario_id, json_encode($aportes));

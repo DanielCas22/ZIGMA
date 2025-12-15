@@ -36,9 +36,7 @@ class ReportePDF
         // ENCABEZADO DE COLUMNAS
         $tbl .= '<thead><tr>';
         $tbl .= '<th style="background-color:#2E5C9A;color:#fff;font-size:12px;font-weight:bold;border:1px solid #B0B8C1;">Empleado</th>';
-        $tbl .= '<th style="background-color:#2E5C9A;color:#fff;font-size:12px;font-weight:bold;border:1px solid #B0B8C1;">Documento</th>';
         $tbl .= '<th style="background-color:#2E5C9A;color:#fff;font-size:12px;font-weight:bold;border:1px solid #B0B8C1;">Salario</th>';
-        $tbl .= '<th style="background-color:#2E5C9A;color:#fff;font-size:12px;font-weight:bold;border:1px solid #B0B8C1;">Cargo</th>';
         $tbl .= '<th style="background-color:#2E5C9A;color:#fff;font-size:12px;font-weight:bold;border:1px solid #B0B8C1;">Roles</th>';
         $tbl .= '</tr></thead><tbody>';
         $rowNum = 0;
@@ -46,9 +44,7 @@ class ReportePDF
             $rowColor = ($rowNum % 2 == 0) ? '#F4F8FB' : '#FFFFFF';
             $tbl .= '<tr style="background-color:' . $rowColor . ';">';
             $tbl .= '<td style="border:1px solid #B0B8C1;font-size:11px;">' . htmlspecialchars($emp['nombre'] . ' ' . $emp['apellido']) . '</td>';
-            $tbl .= '<td style="border:1px solid #B0B8C1;font-size:11px;">' . htmlspecialchars($emp['id_empleados'] ?? '') . '</td>';
             $tbl .= '<td style="border:1px solid #B0B8C1;font-size:11px;">$ ' . number_format($emp['sueldo_actual'] ?? 0, 0, ',', '.') . '</td>';
-            $tbl .= '<td style="border:1px solid #B0B8C1;font-size:11px;">' . htmlspecialchars($emp['rol_nombre'] ?? '') . '</td>';
             $tbl .= '<td style="border:1px solid #B0B8C1;font-size:11px;">' . htmlspecialchars($emp['todos_los_roles'] ?? '') . '</td>';
             $tbl .= '</tr>';
             $rowNum++;

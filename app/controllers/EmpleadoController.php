@@ -56,10 +56,15 @@ class EmpleadoController extends Controller {
         // Verificar permisos de creación
         \App\Models\RolePermissions::redirectIfNoPermission('empleados', 'create');
         
+        // Obtener salario mínimo vigente desde parametros_generales
+        $paramGeneralesModel = $this->model('ParametrosGenerales');
+        $parametros_generales = $paramGeneralesModel->getAll();
+        $salario_minimo = isset($parametros_generales['smlv']) ? $parametros_generales['smlv'] : 0;
+        
         // Mostrar formulario de registro con roles
         $rolModel = $this->model('Rol');
         $roles = $rolModel->getAll();
-        $this->view('empleado/create', ['roles' => $roles]);
+        $this->view('empleado/create', ['roles' => $roles, 'salario_minimo' => $salario_minimo]);
     }
 
     public function store() {
@@ -91,11 +96,10 @@ class EmpleadoController extends Controller {
             // Determinar el salario a usar
             $salario_final = $salario_manual;
             if (!$salario_final) {
-                // Si no hay salario manual, obtener SMLV vigente de la base de datos
-                require_once __DIR__ . '/../models/ParametrosModel.php';
-                $paramModel = new \ParametrosModel();
-                $parametros = $paramModel->getParametrosVigentes();
-                $salario_final = isset($parametros['smlv']) ? $parametros['smlv'] : 0;
+                // Si no hay salario manual, obtener SMLV vigente de parametros_generales
+                $paramGeneralesModel = $this->model('ParametrosGenerales');
+                $parametros_generales = $paramGeneralesModel->getAll();
+                $salario_final = isset($parametros_generales['smlv']) ? $parametros_generales['smlv'] : 0;
             }
 
             $empleadoModel = $this->model('Empleado');

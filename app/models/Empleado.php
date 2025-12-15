@@ -336,7 +336,14 @@ class Empleado extends Model {
         require_once __DIR__ . '/ParametrosModel.php';
         $paramModel = new ParametrosModel();
         $parametros = $paramModel->getParametrosVigentes();
-        $auxilio_transporte = isset($parametros['auxilio_transporte']) ? floatval($parametros['auxilio_transporte']) : 200000;
+        
+        // Obtener auxilio desde parámetros o usar default
+        if ($parametros && isset($parametros['auxilio_transporte'])) {
+            $auxilio_transporte = floatval($parametros['auxilio_transporte']);
+        } else {
+            $auxilio_transporte = 200000;
+        }
+        
         if ($sueldo_actual <= 2 * $smlv) {
             return $auxilio_transporte;
         }
@@ -355,7 +362,14 @@ class Empleado extends Model {
         require_once __DIR__ . '/ParametrosModel.php';
         $paramModel = new ParametrosModel();
         $parametros = $paramModel->getParametrosVigentes();
-        $auxilio_transporte = isset($parametros['auxilio_transporte']) ? floatval($parametros['auxilio_transporte']) : 200000;
+        
+        // Obtener auxilio desde parámetros o usar default
+        if ($parametros && isset($parametros['auxilio_transporte'])) {
+            $auxilio_transporte = floatval($parametros['auxilio_transporte']);
+        } else {
+            $auxilio_transporte = 200000;
+        }
+        
         if ($sueldo_actual <= 2 * $smlv) {
             return $auxilio_transporte;
         }

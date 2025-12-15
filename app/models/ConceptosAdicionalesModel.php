@@ -34,15 +34,31 @@ class ConceptosAdicionalesModel extends Model {
      */
     public function obtenerTotalConceptosPorEmpleado($empleado_id) {
         try {
+            // Obtener conceptos sin plazo (pago único)
             $query = "SELECT COALESCE(SUM(valor), 0) as total 
                       FROM conceptos_adicionales_prestaciones 
-                      WHERE empleado_id = ? AND activo = TRUE";
+                      WHERE empleado_id = ? AND activo = TRUE AND tiene_plazo = FALSE";
             
             $stmt = $this->db->prepare($query);
             $stmt->execute([$empleado_id]);
-            
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            return floatval($resultado['total']);
+            $totalSinPlazo = floatval($resultado['total']);
+            
+            // Obtener conceptos con plazo (solo el de este período)
+            $query = "SELECT COALESCE(SUM(cap.valor_periodo), 0) as total 
+                      FROM conceptos_adicionales_plazos cap
+                      INNER JOIN conceptos_adicionales_prestaciones capr 
+                        ON cap.concepto_id = capr.id
+                      WHERE capr.empleado_id = ? AND capr.activo = TRUE 
+                      AND cap.estado = 'pendiente'
+                      AND cap.fecha_vencimiento <= LAST_DAY(CURDATE())";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute([$empleado_id]);
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+            $totalConPlazo = floatval($resultado['total']);
+            
+            return $totalSinPlazo + $totalConPlazo;
             
         } catch (\Exception $e) {
             error_log("Error obteniendo total conceptos adicionales: " . $e->getMessage());

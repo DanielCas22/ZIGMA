@@ -119,6 +119,26 @@ class DevengadoModel extends Model {
     /**
      * Calcular el devengado completo de un empleado
      */
+    /**
+     * Obtener el rol de un empleado desde la base de datos
+     */
+    private function getRolEmpleado($idEmpleado) {
+        try {
+            $sql = 'SELECT r.nombre 
+                    FROM user u
+                    INNER JOIN rol_has_user rhu ON u.id_doc = rhu.user_id
+                    INNER JOIN rol r ON rhu.rol_id = r.id_rol
+                    WHERE u.empleado_id = ?
+                    LIMIT 1';
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$idEmpleado]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? $result['nombre'] : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     public function calcularDevengadoCompleto($idEmpleado) {
         // Obtener datos del empleado
         $empleadoModel = new Empleado();
@@ -127,6 +147,9 @@ class DevengadoModel extends Model {
         if (!$empleado) {
             throw new InvalidArgumentException('Empleado no encontrado');
         }
+        
+        // Obtener el rol del empleado desde la BD
+        $rolEmpleado = $this->getRolEmpleado($idEmpleado);
         
         $salarioBasico = floatval($empleado['sueldo_actual'] ?? 0);
         if ($salarioBasico <= 0) {
@@ -156,7 +179,7 @@ class DevengadoModel extends Model {
                 'nombre' => $empleado['nombre'],
                 'apellido' => $empleado['apellido'],
                 'documento' => $empleado['documento'] ?? '',
-                'cargo' => $empleado['cargo'] ?? 'No especificado'
+                'cargo' => $rolEmpleado ?? 'Sin rol asignado'
             ],
             'conceptos' => [
                 'sueldo_basico' => [
@@ -270,6 +293,14 @@ class DevengadoModel extends Model {
         
         $totalEmpleados = count($resultados);
         
+        // Calcular promedios por empleado (considerando solo quien tiene ese concepto)
+        $promedioHorasExtras = $contadores['empleados_con_horas_extras'] > 0 
+            ? $totales['horas_extras'] / $contadores['empleados_con_horas_extras'] 
+            : 0;
+        $promedioAuxilio = $contadores['empleados_con_auxilio'] > 0 
+            ? $totales['auxilio_transporte'] / $contadores['empleados_con_auxilio'] 
+            : 0;
+        
         return [
             'empleados' => $resultados,
             'totales_empresa' => $totales,
@@ -277,9 +308,9 @@ class DevengadoModel extends Model {
             'estadisticas' => $contadores,
             'promedios' => [
                 'sueldo_basico' => $totalEmpleados > 0 ? $totales['sueldo_basico'] / $totalEmpleados : 0,
-                'horas_extras' => $totalEmpleados > 0 ? $totales['horas_extras'] / $totalEmpleados : 0,
+                'horas_extras' => $promedioHorasExtras,
                 'comisiones' => $totalEmpleados > 0 ? $totales['comisiones'] / $totalEmpleados : 0,
-                'auxilio_transporte' => $totalEmpleados > 0 ? $totales['auxilio_transporte'] / $totalEmpleados : 0,
+                'auxilio_transporte' => $promedioAuxilio,
                 'otros' => $totalEmpleados > 0 ? $totales['otros'] / $totalEmpleados : 0,
                 'total_general' => $totalEmpleados > 0 ? $totales['total_general'] / $totalEmpleados : 0
             ],

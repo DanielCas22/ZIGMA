@@ -159,7 +159,7 @@
                         </div>
                         <div class="mb-3 form-section">
                             <label class="form-label">Rol o Cargo</label>
-                            <select name="rol" class="form-select" required id="rolSelect" onchange="actualizarSueldo()" title="Seleccione el rol o cargo del empleado">
+                            <select name="rol" class="form-select" required id="rolSelect" title="Seleccione el rol o cargo del empleado">
                                 <option value="">Seleccione un rol</option>
                                 <?php foreach ((new \App\Models\Rol())->getAll() as $rol): ?>
                                     <?php if (strtolower($rol['nombre']) !== 'admin'): ?>
@@ -174,14 +174,11 @@
                                 <span class="input-group-text">
                                     <i class="fas fa-dollar-sign"></i>
                                 </span>
-                                <input type="number" name="sueldo_actual" id="sueldoInput" class="form-control" placeholder="Ingrese un sueldo" min="1" max="100000000" step="1" title="Sueldo inicial del empleado">
-                                <button type="button" class="btn btn-outline-warning" onclick="autoAsignarSueldo()" title="Auto-asignar según rol">
-                                    <i class="fas fa-magic"></i>
-                                </button>
+                                <input type="number" name="sueldo_actual" id="sueldoInput" class="form-control" placeholder="Ingrese un sueldo" min="1" max="100000000" step="1" value="<?= isset($salario_minimo) && $salario_minimo ? htmlspecialchars($salario_minimo) : '' ?>" title="Sueldo inicial del empleado" readonly>
                             </div>
                             <div class="form-text">
                                 <i class="fas fa-info-circle text-info me-1"></i>
-                                Puede modificar el sueldo manualmente o usar auto-asignación según el rol
+                                Salario mínimo actual: <strong>$<?= isset($salario_minimo) && $salario_minimo ? number_format($salario_minimo, 0) : '0' ?></strong>
                             </div>
                         </div>
                         <div class="mb-3 form-section">
@@ -210,26 +207,13 @@
     </div>
 </div>
 <script>
-// Cargar salarios por rol desde PHP a JS
-var salariosPorRol = <?php echo json_encode((new \App\Models\SalarioPorRol())->getAll()); ?>;
-function autoAsignarSueldo() {
-    var rolSelect = document.getElementById('rolSelect');
-    var sueldoInput = document.getElementById('sueldoInput');
-    var rol = rolSelect.value;
-    var salario = '';
-    salariosPorRol.forEach(function(item) {
-        if(item.rol === rol) salario = item.salario;
-    });
-    if (salario) {
-        sueldoInput.value = salario;
-    }
-}
-function actualizarSueldo() {
-    autoAsignarSueldo();
-}
+// El sueldo mínimo es el que se configura en parámetros, igual para todos los roles
+var salarioMinimoSMLV = <?php echo isset($salario_minimo) ? $salario_minimo : 0; ?>;
+
 document.addEventListener('DOMContentLoaded', function() {
-    actualizarSueldo();
-    document.getElementById('rolSelect').addEventListener('change', actualizarSueldo);
+    // Al cargar, mostrar el SMLV en el campo de sueldo
+    var sueldoInput = document.getElementById('sueldoInput');
+    sueldoInput.value = salarioMinimoSMLV;
 });
 </script>
 </body>
