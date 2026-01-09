@@ -1,0 +1,201 @@
+<?php
+namespace App\Models;
+
+use PDO;
+
+class ParametrosModel extends Model {
+    public function getParametrosLegales() {
+        $sql = "SELECT * FROM parametros_legales ORDER BY año_vigencia DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getRangosFondoSolidaridad() {
+        $sql = "SELECT * FROM rangos_fondo_solidaridad ORDER BY desde_smlv";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getTablaRetencionFuente() {
+        $sql = "SELECT * FROM tabla_retencion_fuente ORDER BY desde_uvt";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getHistorialCambios() {
+        $sql = "SELECT * FROM historial_parametros ORDER BY fecha_cambio DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function actualizarParametrosLegales($smlv, $auxilio, $anio, $usuario_id) {
+        // Validación básica
+        if ($smlv <= 0 || $auxilio < 0 || $anio < 2000) return false;
+        // Si ya existe un registro para ese año, actualiza. Si no, inserta uno nuevo.
+        $sql = "INSERT INTO parametros_legales (smlv, auxilio_transporte, año_vigencia, actualizado_por)
+                VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE smlv=VALUES(smlv), auxilio_transporte=VALUES(auxilio_transporte), actualizado_por=VALUES(actualizado_por), fecha_actualizacion=NOW()";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$smlv, $auxilio, $anio, $usuario_id]);
+        $this->registrarHistorial('Actualizar parámetros legales', $usuario_id, json_encode(['smlv'=>$smlv,'auxilio'=>$auxilio,'anio'=>$anio]));
+        return true;
+    }
+
+    public function actualizarRangosSolidaridad($rangos, $usuario_id) {
+        // Validación de rangos
+        foreach ($rangos as $r) {
+            if ($r['desde_smlv'] < 0 || $r['hasta_smlv'] < $r['desde_smlv'] || $r['porcentaje'] < 0 || $r['porcentaje'] > 100) return false;
+        }
+        // Eliminar y volver a insertar (simplificado)
+        $this->db->exec('DELETE FROM rangos_fondo_solidaridad');
+        $sql = "INSERT INTO rangos_fondo_solidaridad (desde_smlv, hasta_smlv, porcentaje) VALUES (?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        foreach ($rangos as $r) {
+            $stmt->execute([$r['desde_smlv'], $r['hasta_smlv'], $r['porcentaje']]);
+        }
+        $this->registrarHistorial('Actualizar rangos fondo solidaridad', $usuario_id, json_encode($rangos));
+        return true;
+    }
+
+    public function actualizarTablaRetencion($tabla, $usuario_id) {
+        foreach ($tabla as $t) {
+            if ($t['desde_uvt'] < 0 || $t['hasta_uvt'] < $t['desde_uvt'] || $t['porcentaje'] < 0 || $t['porcentaje'] > 100) return false;
+        }
+        $this->db->exec('DELETE FROM tabla_retencion_fuente');
+        $sql = "INSERT INTO tabla_retencion_fuente (desde_uvt, hasta_uvt, porcentaje) VALUES (?, ?, ?)";
+
+        $stmt = $this->db->prepare($sql);
+        foreach ($tabla as $t) {
+            $stmt->execute([$t['desde_uvt'], $t['hasta_uvt'], $t['porcentaje']]);
+        }
+        $this->registrarHistorial('Actualizar tabla retención fuente', $usuario_id, json_encode($tabla));
+        return true;
+    }
+
+    public function registrarHistorial($accion, $usuario_id, $detalle) {
+        $sql = "INSERT INTO historial_parametros (accion, actualizado_por, detalle, fecha_cambio) VALUES (?, ?, ?, NOW())";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$accion, $usuario_id, $detalle]);
+    }
+
+    public function getExportData() {
+        return [
+            'parametros_legales' => $this->getParametrosLegales(),
+            'rangos_fondo_solidaridad' => $this->getRangosFondoSolidaridad(),
+            'tabla_retencion_fuente' => $this->getTablaRetencionFuente(),
+            'historial' => $this->getHistorialCambios()
+        ];
+    }
+    public function getParametrosVigentes() {
+        $sql = "SELECT * FROM parametros_legales ORDER BY año_vigencia DESC LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    // Métodos para actualizar, validar y exportar se agregan después
+
+    // Actualiza solo el auxilio de transporte y su año de vigencia
+    public function actualizarAuxilioTransporte($auxilio, $anio, $usuario_id) {
+        if ($auxilio < 0 || $anio < 2000) return false;
+        
+        // Primero verificar si existe un registro para este año
+        $checkSql = "SELECT id FROM parametros_legales WHERE año_vigencia = ?";
+        $checkStmt = $this->db->prepare($checkSql);
+        $checkStmt->execute([$anio]);
+        $existe = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($existe) {
+            // Actualizar registro existente
+            $sql = "UPDATE parametros_legales SET auxilio_transporte = ?, actualizado_por = ?, fecha_actualizacion = NOW() WHERE año_vigencia = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$auxilio, $usuario_id, $anio]);
+        } else {
+            // Insertar nuevo registro si no existe
+            $sql = "INSERT INTO parametros_legales (smlv, auxilio_transporte, año_vigencia, actualizado_por) VALUES (?, ?, ?, ?)";
+            $stmt = $this->db->prepare($sql);
+            // Obtener SMLV del registro anterior si existe
+            $smlvSql = "SELECT smlv FROM parametros_legales ORDER BY año_vigencia DESC LIMIT 1";
+            $smlvStmt = $this->db->prepare($smlvSql);
+            $smlvStmt->execute();
+            $previo = $smlvStmt->fetch(PDO::FETCH_ASSOC);
+            $smlv = $previo ? $previo['smlv'] : 1300000;
+            $stmt->execute([$smlv, $auxilio, $anio, $usuario_id]);
+        }
+        
+        $this->registrarHistorial('Actualizar auxilio transporte', $usuario_id, json_encode(['auxilio'=>$auxilio,'anio'=>$anio]));
+        return true;
+    }
+    // Actualiza solo el salario mínimo legal vigente para el año dado
+    public function actualizarSalarioMinimo($smlv, $anio, $usuario_id) {
+        if ($smlv <= 0 || $anio < 2000) return false;
+        
+        // Primero verificar si existe un registro para este año
+        $checkSql = "SELECT id FROM parametros_legales WHERE año_vigencia = ?";
+        $checkStmt = $this->db->prepare($checkSql);
+        $checkStmt->execute([$anio]);
+        $existe = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($existe) {
+            // Actualizar registro existente
+            $sql = "UPDATE parametros_legales SET smlv = ?, actualizado_por = ?, fecha_actualizacion = NOW() WHERE año_vigencia = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$smlv, $usuario_id, $anio]);
+        } else {
+            // Insertar nuevo registro si no existe
+            $sql = "INSERT INTO parametros_legales (smlv, auxilio_transporte, año_vigencia, actualizado_por) VALUES (?, ?, ?, ?)";
+            $stmt = $this->db->prepare($sql);
+            // Obtener auxilio del registro anterior si existe
+            $auxSql = "SELECT auxilio_transporte FROM parametros_legales ORDER BY año_vigencia DESC LIMIT 1";
+            $auxStmt = $this->db->prepare($auxSql);
+            $auxStmt->execute();
+            $previo = $auxStmt->fetch(PDO::FETCH_ASSOC);
+            $auxilio = $previo ? $previo['auxilio_transporte'] : 200000;
+            $stmt->execute([$smlv, $auxilio, $anio, $usuario_id]);
+        }
+        
+        $this->registrarHistorial('Actualizar SMLV', $usuario_id, json_encode(['smlv'=>$smlv,'anio'=>$anio]));
+        return true;
+    }
+    public function getAportes() {
+        $sql = "SELECT * FROM parametros_aportes ORDER BY id DESC LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function actualizarAportes($aportes, $usuario_id) {
+        // Validación básica - permitir null o 0 para campos opcionales
+        foreach (['salud_empleador','salud_empleado','pension_empleador','pension_empleado','sena','icbf','caja_compensacion','prestaciones'] as $campo) {
+            if (!isset($aportes[$campo])) {
+                $aportes[$campo] = 0; // Asignar 0 si no está definido
+            }
+            $valor = floatval($aportes[$campo]);
+            if ($valor < 0 || $valor > 100) {
+                return false; // Rechazar si está fuera de rango
+            }
+        }
+        
+        // parafiscales puede ser null o 0 (es el total de SENA + ICBF + CAJA)
+        if (!isset($aportes['parafiscales'])) {
+            $aportes['parafiscales'] = 0;
+        }
+        
+        $sql = "INSERT INTO parametros_aportes (salud_empleador, salud_empleado, pension_empleador, pension_empleado, parafiscales, sena, icbf, caja_compensacion, prestaciones, actualizado_por, fecha_actualizacion)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            floatval($aportes['salud_empleador']),
+            floatval($aportes['salud_empleado']),
+            floatval($aportes['pension_empleador']),
+            floatval($aportes['pension_empleado']),
+            floatval($aportes['parafiscales']),
+            floatval($aportes['sena']),
+            floatval($aportes['icbf']),
+            floatval($aportes['caja_compensacion']),
+            floatval($aportes['prestaciones']),
+            $usuario_id
+        ]);
+        $this->registrarHistorial('Actualizar aportes y parafiscales', $usuario_id, json_encode($aportes));
+        return true;
+    }
+}

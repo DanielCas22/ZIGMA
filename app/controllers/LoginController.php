@@ -1,10 +1,9 @@
 <?php
+namespace App\Controllers;
+require_once __DIR__ . '/Controller.php';
+use App\Controllers\Controller;
+
 class LoginController extends Controller {
-    private function baseUrl() {
-        $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
-        $base = explode('/public', $scriptName)[0];
-        return $base;
-    }
     public function index() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userModel = $this->model('User');
@@ -13,7 +12,9 @@ class LoginController extends Controller {
             $user = $userModel->login($username, $password);
             if ($user) {
                 $_SESSION['user'] = $user;
-                header('Location: ' . $this->baseUrl() . '/public/index.php?url=dashboard');
+                // Log para debug
+                error_log('LOGIN SUCCESS: ' . json_encode($user));
+                header('Location: ' . $this->baseUrl() . '/public/index.php?url=Dashboard');
                 exit;
             } else {
                 $error = 'Usuario o contraseña incorrectos';
@@ -21,11 +22,23 @@ class LoginController extends Controller {
                 return;
             }
         }
-        $this->view('login/index');
+        $this->view('login/index', []);
     }
     public function logout() {
+        session_start();
+        // Eliminar todas las variables de sesión
+        $_SESSION = array();
+        // Si se usa una cookie de sesión, eliminarla
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
         session_destroy();
-        header('Location: ' . $this->baseUrl() . '/public/index.php');
+        // Redirigir siempre a la carpeta ZIGMA en la raíz
+        header('Location: /ZIGMA/index.php');
         exit;
     }
 }
